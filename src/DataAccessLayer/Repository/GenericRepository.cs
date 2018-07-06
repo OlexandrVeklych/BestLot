@@ -13,9 +13,9 @@ namespace DataAccessLayer.Repository
         private DbContext Context;
         private DbSet<T> DbSet;
 
-        public GenericRepository(DbContext Context)
+        public GenericRepository(DbContext context)
         {
-            this.Context = Context;
+            Context = context;
             DbSet = Context.Set<T>();
         }
 
@@ -23,47 +23,38 @@ namespace DataAccessLayer.Repository
         {
             DbSet.RemoveRange(DbSet);
         }
-        public void Delete(int Id)
+        public void Delete(int id)
         {
-            DbSet.Remove(DbSet.Find(Id));
+            DbSet.Remove(DbSet.Find(id));
         }
-        public void Delete(T Item)
+        public void Add(T item)
         {
-            Context.Entry(Item).State = EntityState.Deleted;
+            DbSet.Add(item);
         }
-        public void Add(T Item)
+        public void Modify(int id, T newItem)
         {
-            DbSet.Add(Item);
+            Context.Entry(DbSet.Find(id)).CurrentValues.SetValues(newItem);
         }
-        public void Modify(int Id, T Item)
+        public T Get(int id)
         {
-            Context.Entry(DbSet.Find(Id)).CurrentValues.SetValues(Item);
-        }
-        public T Get(int Id)
-        {
-            return DbSet.Find(Id);
+            return DbSet.Find(id);
         }
 
-        public T GetByPosition(int Position)
+        public IEnumerable<T> GetAll()
         {
-            return DbSet.ToList()[Position];
+            return DbSet;
         }
 
-        public List<T> GetAll()
-        {
-            return DbSet.AsNoTracking().ToList();
-        }
-
-        public List<T> GetAll(params Expression<Func<T, object>>[] includeProperties)
+        public IEnumerable<T> GetAll(params Expression<Func<T, object>>[] includeProperties)
         {
             IQueryable<T> query = DbSet;
-            return includeProperties.Aggregate(query, (current, includeProperty) => current.Include(includeProperty)).ToList();
+            return includeProperties.Aggregate(query, (current, includeProperty) => current.Include(includeProperty));
         }
 
-        public List<T> GetAll(Func<T, bool> predicate, params Expression<Func<T, object>>[] includeProperties)
+        public IQueryable<T> GetAll(Func<T, bool> predicate, params Expression<Func<T, object>>[] includeProperties)
         {
             var query = DbSet.Where(predicate).AsQueryable();
-            return includeProperties.Aggregate(query, (current, includeProperty) => current.Include(includeProperty)).ToList();
+            return includeProperties.Aggregate(query, (current, includeProperty) => current.Include(includeProperty));
         }
 
         private bool disposed = false;
