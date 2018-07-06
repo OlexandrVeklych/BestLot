@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataAccessLayer.Entities
+namespace BusinessLogicLayer.Models
 {
-    public class Lot
+    public class LotModel
     {
         public int Id { get; set; }
         public string Name { get; set; }
@@ -16,8 +16,8 @@ namespace DataAccessLayer.Entities
         public double MinStep { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public List<LotPhoto> LotPhotos { get; set; }
-        public List<Comment> Cooments { get; set; }
+        public List<LotPhotoModel> LotPhotos { get; set; }
+        public List<CommentModel> Cooments { get; set; }
         public bool IsSold { get; set; }
     }
 }
