@@ -15,9 +15,8 @@ namespace DataAccessLayer.Entities
         public double Price { get; set; }
         public double MinStep { get; set; }
         public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
+        public DateTime SellDate { get; set; }
         public List<LotPhoto> LotPhotos { get; set; }
-        public List<Comment> Cooments { get; set; }
-        public bool IsSold { get; set; }
+        public List<LotComment> Cooments { get; set; }
     }
 }

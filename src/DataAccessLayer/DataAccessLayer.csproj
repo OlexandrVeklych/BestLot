@@ -47,8 +47,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Contexts\LotArchiveContext.cs" />
     <Compile Include="Contexts\LotContext.cs" />
-    <Compile Include="Entities\Comment.cs" />
+    <Compile Include="Entities\LotComment.cs" />
     <Compile Include="Entities\Lot.cs" />
     <Compile Include="Entities\LotPhoto.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

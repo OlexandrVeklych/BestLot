@@ -19,28 +19,44 @@ namespace BusinessLogicLayer
             {
                 cfg.CreateMap<Lot, LotModel>();
             }).CreateMapper();
+            lotsSellDate = new Dictionary<int, DateTime>();
+            foreach (LotModel lot in mapper.Map<IEnumerable<Lot>, IEnumerable<LotModel>>(UoW.Lots.GetAll()))
+            {
+                lotsSellDate.Add(lot.Id, lot.SellDate);
+            }
         }
 
         private IUnitOfWork UoW;
         private IMapper mapper;
+        private Dictionary<int, DateTime> lotsSellDate;
 
         public void CheckLots()
         {
-            IEnumerable<LotModel> lots = mapper.Map<IEnumerable<Lot>, IEnumerable<LotModel>>(UoW.Lots.GetAll());
-            foreach (LotModel lot in lots)
+            foreach (var idDatePair in lotsSellDate)
             {
-                if (lot.EndDate.CompareTo(DateTime.Now) <= 0)
+                if (idDatePair.Value.CompareTo(DateTime.Now) <= 0)
                 {
-                    UoW.Lots.Get(lot.Id).IsSold = true;
+                    SellLot(idDatePair.Key);
+                    UoW.LotArchive.Add(UoW.Lots.Get(idDatePair.Key));
+                    UoW.Lots.Delete(idDatePair.Key);
+                    UoW.SaveArchiveChanges();
                     UoW.SaveChanges();
-                    SellLot(lot);
                 }
             }
         }
-        
-        private void SellLot(LotModel lot)
+
+        public void RefreshLots()
         {
-            throw new NotImplementedException();
+            lotsSellDate = new Dictionary<int, DateTime>();
+            foreach (LotModel lot in mapper.Map<IEnumerable<Lot>, IEnumerable<LotModel>>(UoW.Lots.GetAll()))
+            {
+                lotsSellDate.Add(lot.Id, lot.SellDate);
+            }
+        }
+        
+        private void SellLot(int lotId)
+        {
+            throw new NotImplementedException(); //Implement sending Email
         }
     }
 }

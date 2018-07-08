@@ -11,8 +11,12 @@ namespace DataAccessLayer.UnitOfWork
     public interface IUnitOfWork : IDisposable
     {
         IRepository<Lot> Lots { get; }
+        IRepository<Lot> LotArchive { get; }
 
         void SaveChanges();
+        void SaveArchiveChanges();
+
         void RecreateDB();
+        void RecreateArchive();
     }
 }

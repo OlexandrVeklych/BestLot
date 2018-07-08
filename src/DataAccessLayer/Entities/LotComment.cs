@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BusinessLogicLayer.Models
+namespace DataAccessLayer.Entities
 {
-    public class CommentModel
+    public class LotComment
     {
         public int Id { get; set; }
         public string Message { get; set; }

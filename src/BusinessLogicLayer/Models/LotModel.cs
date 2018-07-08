@@ -15,9 +15,8 @@ namespace BusinessLogicLayer.Models
         public double Price { get; set; }
         public double MinStep { get; set; }
         public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
+        public DateTime SellDate { get; set; }
         public List<LotPhotoModel> LotPhotos { get; set; }
-        public List<CommentModel> Cooments { get; set; }
-        public bool IsSold { get; set; }
+        public List<LotCommentModel> Cooments { get; set; }
     }
 }

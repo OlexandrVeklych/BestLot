@@ -47,8 +47,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="LotOperationsController.cs" />
     <Compile Include="LotSalesController.cs" />
-    <Compile Include="Models\CommentModel.cs" />
+    <Compile Include="Models\LotCommentModel.cs" />
     <Compile Include="Models\LotModel.cs" />
     <Compile Include="Models\LotPhotoModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
