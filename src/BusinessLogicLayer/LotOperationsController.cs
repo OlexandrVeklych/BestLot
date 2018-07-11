@@ -81,7 +81,6 @@ namespace BusinessLogicLayer
 
             //UoW.Lots.Delete(lotModel.Id);
             //UoW.Lots.Add(mapper.Map<Lot>(lotModel));
-
             UoW.SaveChanges();
         }
     }
