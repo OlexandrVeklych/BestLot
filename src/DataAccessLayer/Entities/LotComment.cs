@@ -10,7 +10,7 @@ namespace DataAccessLayer.Entities
     {
         public int Id { get; set; }
         public string Message { get; set; }
-        public dynamic User { get; set; } // Change this to User from WebAPI
+        public UserAccountInfo User { get; set; }
         public int Rating { get; set; }
     }
 }

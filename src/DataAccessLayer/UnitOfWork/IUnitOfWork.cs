@@ -13,6 +13,8 @@ namespace DataAccessLayer.UnitOfWork
         IRepository<Lot> Lots { get; }
         IRepository<Lot> LotArchive { get; }
 
+        IRepository<UserAccountInfo> UserAccounts { get; }
+
         void SaveChanges();
         void SaveArchiveChanges();
 

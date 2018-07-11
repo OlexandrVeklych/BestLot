@@ -19,25 +19,30 @@ namespace DataAccessLayer.Repository
             DbSet = Context.Set<T>();
         }
 
-        public void Clear()
-        {
-            DbSet.RemoveRange(DbSet);
-        }
         public void Delete(int id)
         {
             DbSet.Remove(DbSet.Find(id));
         }
+
         public void Add(T item)
         {
             DbSet.Add(item);
         }
+
         public void Modify(int id, T newItem)
         {
             Context.Entry(DbSet.Find(id)).CurrentValues.SetValues(newItem);
         }
+
         public T Get(int id)
         {
             return DbSet.Find(id);
+        }
+
+        public T Get(int id, params Expression<Func<T, object>>[] includeProperties)
+        {
+            IQueryable<T> query = new List<T> {DbSet.Find(id)}.AsQueryable();
+            return includeProperties.Aggregate(query, (current, includeProperty) => current.Include(includeProperty)).First();
         }
 
         public IEnumerable<T> GetAll()
@@ -53,7 +58,7 @@ namespace DataAccessLayer.Repository
 
         public IQueryable<T> GetAll(Func<T, bool> predicate, params Expression<Func<T, object>>[] includeProperties)
         {
-            var query = DbSet.Where(predicate).AsQueryable();
+            IQueryable<T> query = DbSet.Where(predicate).AsQueryable();
             return includeProperties.Aggregate(query, (current, includeProperty) => current.Include(includeProperty));
         }
 

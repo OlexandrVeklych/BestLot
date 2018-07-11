@@ -70,5 +70,19 @@ namespace BusinessLogicLayer
             return mapper.Map<IQueryable<LotModel>>(UoW.Lots.GetAll(mapper.Map<Expression<Func<Lot, object>>>(includeProperties)).Where(mapper.Map<Func<Lot, bool>>(predicate)));
 
         }
+
+        public void PlaceBet(int userId, int lotId, double price)
+        {
+            LotModel lotModel = mapper.Map<LotModel>(UoW.Lots.Get(lotId, lot => lot.LotPhotos, lot => lot.Cooments));
+            lotModel.BuyerUserId = userId;
+            lotModel.Price = price;
+
+            UoW.Lots.Modify(lotId, mapper.Map<Lot>(lotModel));
+
+            //UoW.Lots.Delete(lotModel.Id);
+            //UoW.Lots.Add(mapper.Map<Lot>(lotModel));
+
+            UoW.SaveChanges();
+        }
     }
 }

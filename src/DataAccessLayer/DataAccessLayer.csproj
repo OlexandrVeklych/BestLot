@@ -52,6 +52,7 @@
     <Compile Include="Entities\LotComment.cs" />
     <Compile Include="Entities\Lot.cs" />
     <Compile Include="Entities\LotPhoto.cs" />
+    <Compile Include="Entities\UserAccountInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repository\GenericRepository.cs" />
     <Compile Include="Repository\IRepository.cs" />

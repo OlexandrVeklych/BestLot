@@ -14,6 +14,7 @@ namespace DataAccessLayer.UnitOfWork
         public UnitOfWork(string lotContextConnectionString, string lotArchiveContextConnectionString)
         {
             LotContext = new LotContext(lotContextConnectionString);
+            LotArchiveContext = new LotArchiveContext(lotArchiveContextConnectionString);
         }
 
         private LotContext LotContext;
@@ -21,9 +22,11 @@ namespace DataAccessLayer.UnitOfWork
 
         private IRepository<Lot> _lots;
         private IRepository<Lot> _lotArchive;
+        private IRepository<UserAccountInfo> _userAccounts;
 
         public IRepository<Lot> Lots { get { if (_lots == null) _lots = new GenericRepository<Lot>(LotContext); return _lots; } }
         public IRepository<Lot> LotArchive { get { if (_lotArchive == null) _lotArchive = new GenericRepository<Lot>(LotArchiveContext); return _lotArchive; } }
+        public IRepository<UserAccountInfo> UserAccounts { get { if (_userAccounts == null) _userAccounts = new GenericRepository<UserAccountInfo>(LotContext); return _userAccounts; } }
 
         public void RecreateDB()
         {

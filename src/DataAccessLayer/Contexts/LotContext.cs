@@ -12,5 +12,6 @@ namespace DataAccessLayer.Contexts
     {
         public LotContext(string connectionString) : base(connectionString) { }
         public DbSet<Lot> Lots { get; set; }
+        public DbSet<UserAccountInfo> UserAccounts { get; set; }
     }
 }
