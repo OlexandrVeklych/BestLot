@@ -11,7 +11,7 @@ namespace DataAccessLayer.Entities
         public int Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public dynamic User { get; set; } // Change this to User from WebAPI
+        public dynamic User { get; set; }
         public double StartPrice { get; set; }
         public List<LotPhoto> LotPhotos { get; set; }
         public List<Comment> Cooments { get; set; }
