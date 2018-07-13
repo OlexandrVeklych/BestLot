@@ -10,10 +10,10 @@ namespace DataAccessLayer.UnitOfWork
 {
     public interface IUnitOfWork : IDisposable
     {
-        IRepository<Lot> Lots { get; }
-        IRepository<Lot> LotArchive { get; }
+        IRepository<LotEntity> Lots { get; }
+        IRepository<LotEntity> LotArchive { get; }
 
-        IRepository<UserAccountInfo> UserAccounts { get; }
+        IRepository<UserAccountInfoEntity> UserAccounts { get; }
 
         void SaveChanges();
         void SaveArchiveChanges();

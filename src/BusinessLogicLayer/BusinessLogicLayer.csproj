@@ -49,10 +49,10 @@
   <ItemGroup>
     <Compile Include="LotOperationsController.cs" />
     <Compile Include="LotSalesController.cs" />
-    <Compile Include="Models\LotCommentModel.cs" />
-    <Compile Include="Models\LotModel.cs" />
-    <Compile Include="Models\LotPhotoModel.cs" />
-    <Compile Include="Models\UserAccountInfoModel.cs" />
+    <Compile Include="Models\LotComment.cs" />
+    <Compile Include="Models\Lot.cs" />
+    <Compile Include="Models\LotPhoto.cs" />
+    <Compile Include="Models\UserAccountInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UserAccountOperationsController.cs" />
   </ItemGroup>

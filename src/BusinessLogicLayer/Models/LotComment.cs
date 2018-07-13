@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace BusinessLogicLayer.Models
 {
-    public class LotCommentModel
+    public class LotComment
     {
         public int Id { get; set; }
         public string Message { get; set; }
-        public UserAccountInfoModel User { get; set; }
+        public UserAccountInfo User { get; set; }
         public int Rating { get; set; }
     }
 }

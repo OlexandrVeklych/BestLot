@@ -20,13 +20,13 @@ namespace DataAccessLayer.UnitOfWork
         private LotContext LotContext;
         private LotArchiveContext LotArchiveContext;
 
-        private IRepository<Lot> _lots;
-        private IRepository<Lot> _lotArchive;
-        private IRepository<UserAccountInfo> _userAccounts;
+        private IRepository<LotEntity> _lots;
+        private IRepository<LotEntity> _lotArchive;
+        private IRepository<UserAccountInfoEntity> _userAccounts;
 
-        public IRepository<Lot> Lots { get { if (_lots == null) _lots = new GenericRepository<Lot>(LotContext); return _lots; } }
-        public IRepository<Lot> LotArchive { get { if (_lotArchive == null) _lotArchive = new GenericRepository<Lot>(LotArchiveContext); return _lotArchive; } }
-        public IRepository<UserAccountInfo> UserAccounts { get { if (_userAccounts == null) _userAccounts = new GenericRepository<UserAccountInfo>(LotContext); return _userAccounts; } }
+        public IRepository<LotEntity> Lots { get { if (_lots == null) _lots = new GenericRepository<LotEntity>(LotContext); return _lots; } }
+        public IRepository<LotEntity> LotArchive { get { if (_lotArchive == null) _lotArchive = new GenericRepository<LotEntity>(LotArchiveContext); return _lotArchive; } }
+        public IRepository<UserAccountInfoEntity> UserAccounts { get { if (_userAccounts == null) _userAccounts = new GenericRepository<UserAccountInfoEntity>(LotContext); return _userAccounts; } }
 
         public void RecreateDB()
         {

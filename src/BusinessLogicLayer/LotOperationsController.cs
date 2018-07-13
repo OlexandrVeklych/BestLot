@@ -18,29 +18,29 @@ namespace BusinessLogicLayer
             UoW = unitOfWork;
             mapper = new MapperConfiguration(cfg =>
             {
-                cfg.CreateMap<Lot, LotModel>();
-                cfg.CreateMap<LotModel, Lot>();
-                cfg.CreateMap<LotComment, LotCommentModel>();
-                cfg.CreateMap<LotCommentModel, LotComment>();
-                cfg.CreateMap<LotPhoto, LotPhotoModel>();
-                cfg.CreateMap<LotPhotoModel, LotPhoto>();
-                cfg.CreateMap<Expression<Func<LotModel, object>>, Expression<Func<Lot, object>>>();
-                cfg.CreateMap<Func<LotModel, bool>, Func<Lot, bool>>();
+                cfg.CreateMap<LotEntity, Lot>();
+                cfg.CreateMap<Lot, LotEntity>();
+                cfg.CreateMap<LotCommentEntity, LotComment>();
+                cfg.CreateMap<LotComment, LotCommentEntity>();
+                cfg.CreateMap<LotPhotoEntity, LotPhoto>();
+                cfg.CreateMap<LotPhoto, LotPhotoEntity>();
+                cfg.CreateMap<Expression<Func<Lot, object>>, Expression<Func<LotEntity, object>>>();
+                cfg.CreateMap<Func<Lot, bool>, Func<LotEntity, bool>>();
             }).CreateMapper();
         }
 
         private IUnitOfWork UoW;
         private IMapper mapper;
 
-        public void AddLot(LotModel lot)
+        public void AddLot(Lot lot)
         {
-            UoW.Lots.Add(mapper.Map<Lot>(lot));
+            UoW.Lots.Add(mapper.Map<LotEntity>(lot));
             UoW.SaveChanges();
         }
 
-        public void ChangeLot(int lotId, LotModel newLot)
+        public void ChangeLot(int lotId, Lot newLot)
         {
-            UoW.Lots.Modify(lotId, mapper.Map<Lot>(newLot));
+            UoW.Lots.Modify(lotId, mapper.Map<LotEntity>(newLot));
             UoW.SaveChanges();
         }
 
@@ -50,34 +50,34 @@ namespace BusinessLogicLayer
             UoW.SaveChanges();
         }
 
-        public LotModel GetLot(int lotId)
+        public Lot GetLot(int lotId)
         {
-            return mapper.Map<LotModel>(UoW.Lots.Get(lotId));
+            return mapper.Map<Lot>(UoW.Lots.Get(lotId));
         }
 
-        public IEnumerable<LotModel> GetAllLots()
+        public IEnumerable<Lot> GetAllLots()
         {
-            return mapper.Map<IEnumerable<LotModel>>(UoW.Lots.GetAll());
+            return mapper.Map<IEnumerable<Lot>>(UoW.Lots.GetAll());
         }
 
-        public IEnumerable<LotModel> GetAllLots(params Expression<Func<LotModel, object>>[] includeProperties)
+        public IEnumerable<Lot> GetAllLots(params Expression<Func<Lot, object>>[] includeProperties)
         {
-            return mapper.Map<IEnumerable<LotModel>>(UoW.Lots.GetAll(mapper.Map<Expression<Func<Lot, object>>>(includeProperties)));
+            return mapper.Map<IEnumerable<Lot>>(UoW.Lots.GetAll(mapper.Map<Expression<Func<LotEntity, object>>>(includeProperties)));
         }
 
-        public IQueryable<LotModel> GetAllLots(Func<LotModel, bool> predicate, params Expression<Func<LotModel, object>>[] includeProperties)
+        public IQueryable<Lot> GetAllLots(Func<Lot, bool> predicate, params Expression<Func<Lot, object>>[] includeProperties)
         {
-            return mapper.Map<IQueryable<LotModel>>(UoW.Lots.GetAll(mapper.Map<Expression<Func<Lot, object>>>(includeProperties)).Where(mapper.Map<Func<Lot, bool>>(predicate)));
+            return mapper.Map<IQueryable<Lot>>(UoW.Lots.GetAll(mapper.Map<Expression<Func<LotEntity, object>>>(includeProperties)).Where(mapper.Map<Func<LotEntity, bool>>(predicate)));
 
         }
 
         public void PlaceBet(int userId, int lotId, double price)
         {
-            LotModel lotModel = mapper.Map<LotModel>(UoW.Lots.Get(lotId, lot => lot.LotPhotos, lot => lot.Cooments));
+            Lot lotModel = mapper.Map<Lot>(UoW.Lots.Get(lotId, lot => lot.LotPhotos, lot => lot.Cooments));
             lotModel.BuyerUserId = userId;
             lotModel.Price = price;
 
-            UoW.Lots.Modify(lotId, mapper.Map<Lot>(lotModel));
+            UoW.Lots.Modify(lotId, mapper.Map<LotEntity>(lotModel));
 
             //UoW.Lots.Delete(lotModel.Id);
             //UoW.Lots.Add(mapper.Map<Lot>(lotModel));

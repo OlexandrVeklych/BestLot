@@ -19,8 +19,8 @@ namespace BusinessLogicLayer
             UoW = unitOfWork;
             mapper = new MapperConfiguration(cfg =>
             {
-                cfg.CreateMap<Lot, LotModel>();
-                cfg.CreateMap<UserAccountInfo, UserAccountInfoModel>();
+                cfg.CreateMap<LotEntity, Lot>();
+                cfg.CreateMap<UserAccountInfoEntity, UserAccountInfo>();
             }).CreateMapper();
             timer = new Timer(refreshTimeSecs);
             timer.AutoReset = true;
@@ -53,7 +53,7 @@ namespace BusinessLogicLayer
         public void RefreshLots()
         {
             lotsSellDate = new Dictionary<int, DateTime>();
-            foreach (LotModel lot in mapper.Map<IEnumerable<Lot>, IEnumerable<LotModel>>(UoW.Lots.GetAll()))
+            foreach (Lot lot in mapper.Map<IEnumerable<LotEntity>, IEnumerable<Lot>>(UoW.Lots.GetAll()))
             {
                 lotsSellDate.Add(lot.Id, lot.SellDate);
             }
@@ -61,9 +61,9 @@ namespace BusinessLogicLayer
         
         private void SellLot(int lotId)
         {
-            LotModel lotForSale = mapper.Map<LotModel>(UoW.Lots.Get(lotId));
-            UserAccountInfoModel sellerUser = mapper.Map<UserAccountInfoModel>(UoW.UserAccounts.Get(lotForSale.SellerUserId));
-            UserAccountInfoModel buyerUser = mapper.Map<UserAccountInfoModel>(UoW.UserAccounts.Get(lotForSale.BuyerUserId));
+            Lot lotForSale = mapper.Map<Lot>(UoW.Lots.Get(lotId));
+            UserAccountInfo sellerUser = mapper.Map<UserAccountInfo>(UoW.UserAccounts.Get(lotForSale.SellerUserId));
+            UserAccountInfo buyerUser = mapper.Map<UserAccountInfo>(UoW.UserAccounts.Get(lotForSale.BuyerUserId));
 
             SmtpClient client = new SmtpClient
             {

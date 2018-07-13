@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BusinessLogicLayer.Models
+namespace DataAccessLayer.Entities
 {
-    public class LotPhotoModel
+    public class LotPhotoEntity
     {
         public int Id { get; set; }
         public byte[] Photo { get; set; }

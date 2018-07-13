@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace DataAccessLayer.Entities
 {
-    public class LotComment
+    public class LotCommentEntity
     {
         public int Id { get; set; }
         public string Message { get; set; }
-        public UserAccountInfo User { get; set; }
+        public UserAccountInfoEntity User { get; set; }
         public int Rating { get; set; }
     }
 }

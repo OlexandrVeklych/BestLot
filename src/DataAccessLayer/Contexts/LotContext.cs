@@ -11,7 +11,7 @@ namespace DataAccessLayer.Contexts
     public class LotContext : DbContext
     {
         public LotContext(string connectionString) : base(connectionString) { }
-        public DbSet<Lot> Lots { get; set; }
-        public DbSet<UserAccountInfo> UserAccounts { get; set; }
+        public DbSet<LotEntity> Lots { get; set; }
+        public DbSet<UserAccountInfoEntity> UserAccounts { get; set; }
     }
 }

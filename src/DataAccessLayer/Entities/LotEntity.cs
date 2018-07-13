@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DataAccessLayer.Entities
 {
-    public class Lot
+    public class LotEntity
     {
         public int Id { get; set; }
         public string Name { get; set; }
@@ -17,7 +17,7 @@ namespace DataAccessLayer.Entities
         public double MinStep { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime SellDate { get; set; }
-        public List<LotPhoto> LotPhotos { get; set; }
-        public List<LotComment> Cooments { get; set; }
+        public List<LotPhotoEntity> LotPhotos { get; set; }
+        public List<LotCommentEntity> Cooments { get; set; }
     }
 }

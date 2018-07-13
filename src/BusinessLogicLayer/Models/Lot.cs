@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BusinessLogicLayer.Models
 {
-    public class LotModel
+    public class Lot
     {
         public int Id { get; set; }
         public string Name { get; set; }
@@ -17,7 +17,7 @@ namespace BusinessLogicLayer.Models
         public double MinStep { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime SellDate { get; set; }
-        public List<LotPhotoModel> LotPhotos { get; set; }
-        public List<LotCommentModel> Cooments { get; set; }
+        public List<LotPhoto> LotPhotos { get; set; }
+        public List<LotComment> Cooments { get; set; }
     }
 }

@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BusinessLogicLayer.Models
+namespace DataAccessLayer.Entities
 {
-    public class UserAccountInfoModel
+    public class UserAccountInfoEntity
     {
         public int Id { get; set; }
         public string Email { get; set; }

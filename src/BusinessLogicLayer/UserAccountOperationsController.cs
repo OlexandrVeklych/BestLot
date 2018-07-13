@@ -17,17 +17,17 @@ namespace BusinessLogicLayer
             UoW = unitOfWork;
             mapper = new MapperConfiguration(cfg =>
             {
-                cfg.CreateMap<UserAccountInfo, UserAccountInfoModel>();
-                cfg.CreateMap<UserAccountInfoModel, UserAccountInfo>();
+                cfg.CreateMap<UserAccountInfoEntity, UserAccountInfo>();
+                cfg.CreateMap<UserAccountInfo, UserAccountInfoEntity>();
             }).CreateMapper();
         }
 
         private IUnitOfWork UoW;
         private IMapper mapper;
 
-        public void AddUserAccount(UserAccountInfoModel userAccount)
+        public void AddUserAccount(UserAccountInfo userAccount)
         {
-            UoW.UserAccounts.Add(mapper.Map<UserAccountInfo>(userAccount));
+            UoW.UserAccounts.Add(mapper.Map<UserAccountInfoEntity>(userAccount));
             UoW.SaveChanges();
         }
 
