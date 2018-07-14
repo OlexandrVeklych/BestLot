@@ -18,6 +18,6 @@ namespace BusinessLogicLayer.Models
         public DateTime StartDate { get; set; }
         public DateTime SellDate { get; set; }
         public List<LotPhoto> LotPhotos { get; set; }
-        public List<LotComment> Cooments { get; set; }
+        public List<LotComment> Comments { get; set; }
     }
 }

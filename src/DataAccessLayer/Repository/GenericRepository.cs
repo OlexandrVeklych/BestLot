@@ -31,7 +31,8 @@ namespace DataAccessLayer.Repository
 
         public void Modify(int id, T newItem)
         {
-            Context.Entry(DbSet.Find(id)).CurrentValues.SetValues(newItem);
+            Context.Entry(DbSet.Find(id)).State = EntityState.Detached;
+            Context.Entry(newItem).State = EntityState.Modified;
         }
 
         public T Get(int id)
@@ -45,12 +46,12 @@ namespace DataAccessLayer.Repository
             return includeProperties.Aggregate(query, (current, includeProperty) => current.Include(includeProperty)).First();
         }
 
-        public IEnumerable<T> GetAll()
+        public IQueryable<T> GetAll()
         {
-            return DbSet;
+            return DbSet.AsQueryable();
         }
 
-        public IEnumerable<T> GetAll(params Expression<Func<T, object>>[] includeProperties)
+        public IQueryable<T> GetAll(params Expression<Func<T, object>>[] includeProperties)
         {
             IQueryable<T> query = DbSet;
             return includeProperties.Aggregate(query, (current, includeProperty) => current.Include(includeProperty));

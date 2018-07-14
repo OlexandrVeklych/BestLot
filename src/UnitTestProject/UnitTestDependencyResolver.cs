@@ -7,18 +7,11 @@ using DataAccessLayer.UnitOfWork;
 
 namespace UnitTestProject
 {
-    public static class UnitTestDependencyResolver
+    public class UnitTestDependencyResolver
     {
-        private static IUnitOfWork unitOfWork;
-
-        static UnitTestDependencyResolver()
-        {
-            unitOfWork = new UnitOfWork("UnitTestLotContext", "UnitTestLotArchiveContext");
-        }
-
         public static IUnitOfWork Resolve()
         {
-            return unitOfWork;
+            return new UnitOfWork("UnitTestLotContext", "UnitTestLotArchiveContext"); ;
         }
     }
 }

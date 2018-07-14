@@ -12,5 +12,7 @@ namespace BusinessLogicLayer.Models
         public string Message { get; set; }
         public UserAccountInfo User { get; set; }
         public int Rating { get; set; }
+        public int LotId { get; set; }
+        public Lot Lot { get; set; }
     }
 }

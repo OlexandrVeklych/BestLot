@@ -11,5 +11,7 @@ namespace BusinessLogicLayer.Models
         public int Id { get; set; }
         public byte[] Photo { get; set; }
         public string Description { get; set; }
+        public int LotId { get; set; }
+        public Lot Lot { get; set; }
     }
 }

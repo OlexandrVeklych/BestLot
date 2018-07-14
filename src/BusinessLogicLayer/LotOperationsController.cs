@@ -8,6 +8,7 @@ using DataAccessLayer.Entities;
 using BusinessLogicLayer.Models;
 using AutoMapper;
 using System.Linq.Expressions;
+using AutoMapper.QueryableExtensions;
 
 namespace BusinessLogicLayer
 {
@@ -24,8 +25,11 @@ namespace BusinessLogicLayer
                 cfg.CreateMap<LotComment, LotCommentEntity>();
                 cfg.CreateMap<LotPhotoEntity, LotPhoto>();
                 cfg.CreateMap<LotPhoto, LotPhotoEntity>();
-                cfg.CreateMap<Expression<Func<Lot, object>>, Expression<Func<LotEntity, object>>>();
+                cfg.CreateMap<UserAccountInfo, UserAccountInfoEntity>();
+                cfg.CreateMap<UserAccountInfoEntity, UserAccountInfo>();
+                cfg.CreateMap<Expression<Func<Lot, object>>[], Expression<Func<LotEntity, object>>[]>();
                 cfg.CreateMap<Func<Lot, bool>, Func<LotEntity, bool>>();
+                cfg.CreateMap<Func<Lot, object>, Func<LotEntity, object>>();
             }).CreateMapper();
         }
 
@@ -41,7 +45,10 @@ namespace BusinessLogicLayer
         public void ChangeLot(int lotId, Lot newLot)
         {
             UoW.Lots.Modify(lotId, mapper.Map<LotEntity>(newLot));
-            UoW.SaveChanges();
+            //UoW.Lots.Delete(lotId);
+            //UoW.SaveChanges();
+            //UoW.Lots.Modify(newLot.Id, mapper.Map<LotEntity>(newLot));
+            //UoW.SaveChanges();
         }
 
         public void DeleteLot(int lotId)
@@ -55,32 +62,36 @@ namespace BusinessLogicLayer
             return mapper.Map<Lot>(UoW.Lots.Get(lotId));
         }
 
-        public IEnumerable<Lot> GetAllLots()
+        public Lot GetLot(int lotId, params Expression<Func<Lot, object>>[] includeProperties)
         {
-            return mapper.Map<IEnumerable<Lot>>(UoW.Lots.GetAll());
+            return mapper.Map<Lot>(UoW.Lots.Get(lotId, mapper.Map<Expression<Func<LotEntity, object>>[]>(includeProperties)));
         }
 
-        public IEnumerable<Lot> GetAllLots(params Expression<Func<Lot, object>>[] includeProperties)
+        public IQueryable<Lot> GetAllLots()
         {
-            return mapper.Map<IEnumerable<Lot>>(UoW.Lots.GetAll(mapper.Map<Expression<Func<LotEntity, object>>>(includeProperties)));
+            return UoW.Lots.GetAll().ProjectTo<Lot>(mapper.ConfigurationProvider);
+        }
+
+        public IQueryable<Lot> GetAllLots(params Expression<Func<Lot, object>>[] includeProperties)
+        {
+            return UoW.Lots.GetAll(mapper.Map<Expression<Func<LotEntity, object>>[]>(includeProperties)).ProjectTo<Lot>(mapper.ConfigurationProvider);
         }
 
         public IQueryable<Lot> GetAllLots(Func<Lot, bool> predicate, params Expression<Func<Lot, object>>[] includeProperties)
         {
-            return mapper.Map<IQueryable<Lot>>(UoW.Lots.GetAll(mapper.Map<Expression<Func<LotEntity, object>>>(includeProperties)).Where(mapper.Map<Func<LotEntity, bool>>(predicate)));
-
+            return GetAllLots(includeProperties).AsQueryable().Where(predicate).AsQueryable();
         }
 
         public void PlaceBet(int userId, int lotId, double price)
         {
-            Lot lotModel = mapper.Map<Lot>(UoW.Lots.Get(lotId, lot => lot.LotPhotos, lot => lot.Cooments));
+            Lot lotModel = mapper.Map<Lot>(UoW.Lots.Get(lotId, lot => lot.LotPhotos, lot => lot.Comments));
             lotModel.BuyerUserId = userId;
             lotModel.Price = price;
 
             UoW.Lots.Modify(lotId, mapper.Map<LotEntity>(lotModel));
 
             //UoW.Lots.Delete(lotModel.Id);
-            //UoW.Lots.Add(mapper.Map<Lot>(lotModel));
+            //UoW.Lots.Add(mapper.Map<LotEntity>(lotModel));
             UoW.SaveChanges();
         }
     }

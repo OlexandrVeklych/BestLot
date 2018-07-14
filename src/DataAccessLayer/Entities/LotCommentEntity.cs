@@ -12,5 +12,7 @@ namespace DataAccessLayer.Entities
         public string Message { get; set; }
         public UserAccountInfoEntity User { get; set; }
         public int Rating { get; set; }
+        public int LotId { get; set; }
+        public LotEntity Lot { get; set; }
     }
 }
