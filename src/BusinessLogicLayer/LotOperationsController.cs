@@ -19,13 +19,19 @@ namespace BusinessLogicLayer
             UoW = unitOfWork;
             mapper = new MapperConfiguration(cfg =>
             {
-                cfg.CreateMap<LotEntity, Lot>();
+                //MaxDepth(1) - to map User inside Lot without his Lots
+                //Lot.User.Name - ok
+                //Lot.User.Lots[n] - null reference
+                cfg.CreateMap<LotEntity, Lot>().MaxDepth(1);
                 cfg.CreateMap<Lot, LotEntity>();
-                cfg.CreateMap<LotCommentEntity, LotComment>();
+                //MaxDepth(1) - to map User inside Comment without his Lots
+                //LotCommand.User.Name - ok
+                //LotCommand.User.Lots[n] - null reference
+                cfg.CreateMap<LotCommentEntity, LotComment>().MaxDepth(1);
                 cfg.CreateMap<LotComment, LotCommentEntity>();
                 cfg.CreateMap<LotPhotoEntity, LotPhoto>();
                 cfg.CreateMap<LotPhoto, LotPhotoEntity>();
-                cfg.CreateMap<UserAccountInfo, UserAccountInfoEntity>();
+                cfg.CreateMap<UserAccountInfo, UserAccountInfoEntity>().MaxDepth(1);
                 cfg.CreateMap<UserAccountInfoEntity, UserAccountInfo>();
                 cfg.CreateMap<Expression<Func<Lot, object>>[], Expression<Func<LotEntity, object>>[]>();
                 cfg.CreateMap<Func<Lot, bool>, Func<LotEntity, bool>>();
@@ -44,7 +50,11 @@ namespace BusinessLogicLayer
 
         public void ChangeLot(int lotId, Lot newLot)
         {
-            UoW.Lots.Modify(lotId, mapper.Map<LotEntity>(newLot));
+            if (UoW.Lots.Get(lotId) == null)
+                throw new ArgumentException("Lot id is incorrect");
+            mapper.Map<Lot, LotEntity>(newLot, UoW.Lots.Get(lotId));
+            UoW.SaveChanges();
+            //UoW.Lots.Modify(lotId, mapper.Map<LotEntity>(newLot));
             //UoW.Lots.Delete(lotId);
             //UoW.SaveChanges();
             //UoW.Lots.Modify(newLot.Id, mapper.Map<LotEntity>(newLot));
@@ -53,17 +63,23 @@ namespace BusinessLogicLayer
 
         public void DeleteLot(int lotId)
         {
+            if (UoW.Lots.Get(lotId) == null)
+                throw new ArgumentException("Lot id is incorrect");
             UoW.Lots.Delete(lotId);
             UoW.SaveChanges();
         }
 
         public Lot GetLot(int lotId)
         {
+            if (UoW.Lots.Get(lotId) == null)
+                throw new ArgumentException("Lot id is incorrect");
             return mapper.Map<Lot>(UoW.Lots.Get(lotId));
         }
 
         public Lot GetLot(int lotId, params Expression<Func<Lot, object>>[] includeProperties)
         {
+            if (UoW.Lots.Get(lotId) == null)
+                throw new ArgumentException("Lot id is incorrect");
             return mapper.Map<Lot>(UoW.Lots.Get(lotId, mapper.Map<Expression<Func<LotEntity, object>>[]>(includeProperties)));
         }
 
@@ -82,14 +98,19 @@ namespace BusinessLogicLayer
             return GetAllLots(includeProperties).AsQueryable().Where(predicate).AsQueryable();
         }
 
-        public void PlaceBet(int userId, int lotId, double price)
+        public void PlaceBet(int buyerUserId, int lotId, double price)
         {
-            Lot lotModel = mapper.Map<Lot>(UoW.Lots.Get(lotId, lot => lot.LotPhotos, lot => lot.Comments));
-            lotModel.BuyerUserId = userId;
+            if (UoW.UserAccounts.Get(buyerUserId) == null)
+                throw new ArgumentException("User id is incorrect");
+            if (UoW.Lots.Get(lotId) == null)
+                throw new ArgumentException("Lot id is incorrect");
+            LotEntity lotModel = UoW.Lots.Get(lotId, lot => lot.LotPhotos, lot => lot.Comments, lot => lot.SellerUser/*,lot => lot.BuyerUser*/);
+            lotModel.BuyerUserId = buyerUserId;
             lotModel.Price = price;
 
             UoW.Lots.Modify(lotId, mapper.Map<LotEntity>(lotModel));
 
+            //mapper.Map<LotEntity, LotEntity>(lotModel, UoW.Lots.Get(lotModel.Id));
             //UoW.Lots.Delete(lotModel.Id);
             //UoW.Lots.Add(mapper.Map<LotEntity>(lotModel));
             UoW.SaveChanges();

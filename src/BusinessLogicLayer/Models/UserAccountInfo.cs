@@ -13,5 +13,7 @@ namespace BusinessLogicLayer.Models
         public string Name { get; set; }
         public string Surname { get; set; }
         public string TelephoneNumber { get; set; }
+        public List<Lot> Lots { get; set; }
+        public List<LotComment> LotComments { get; set; }
     }
 }

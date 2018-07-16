@@ -7,18 +7,11 @@ using DataAccessLayer.UnitOfWork;
 
 namespace BusinessLogicLayer
 {
-    public static class UnitOfWorkDependencyResolver
+    public class UnitOfWorkDependencyResolver
     {
-        private static IUnitOfWork unitOfWork;
-
-        static UnitOfWorkDependencyResolver()
-        {
-            unitOfWork = new UnitOfWork("LotContext", "LotArchiveContext");
-        }
-
         public static IUnitOfWork Resolve()
         {
-            return unitOfWork;
+            return new UnitOfWork("LotContext", "LotArchiveContext");
         }
     }
 }

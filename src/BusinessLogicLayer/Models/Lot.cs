@@ -12,6 +12,7 @@ namespace BusinessLogicLayer.Models
         public string Name { get; set; }
         public string Description { get; set; }
         public int SellerUserId { get; set; }
+        public UserAccountInfo SellerUser { get; set; }
         public int BuyerUserId { get; set; }
         public double Price { get; set; }
         public double MinStep { get; set; }
