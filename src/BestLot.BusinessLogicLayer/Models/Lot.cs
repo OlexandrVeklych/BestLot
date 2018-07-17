@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -20,5 +21,48 @@ namespace BusinessLogicLayer.Models
         public DateTime SellDate { get; set; }
         public List<LotPhoto> LotPhotos { get; set; }
         public List<LotComment> Comments { get; set; }
+
+        public void AddComment(LotComment lotComment)
+        {
+            Comments.Add(lotComment);
+        }
+
+        public void Sell(UserAccountInfo buyerUser)
+        {
+            if (buyerUser != null)
+            {
+                SmtpClient client = new SmtpClient
+                {
+                    Port = 25,
+                    DeliveryMethod = SmtpDeliveryMethod.Network,
+                    UseDefaultCredentials = false,
+                    Host = "smtp.gmail.com"
+                };
+
+
+                MailMessage buyerMail = new MailMessage("OlexandrVeklych@gmail.com", buyerUser.Email)
+                {
+                    Subject = "BestLot.com",
+                    Body = "Dear " + buyerUser.Name + " " + buyerUser.Surname + "," +
+                    "Your bet was highest and now you can buy lot \"" + Name + "\"" +
+                    "Please, contact seller on his email or telephone" +
+                    "Email: " + SellerUser.Email +
+                    "Telephone: " + SellerUser.TelephoneNumber
+                };
+                client.Send(buyerMail);
+
+
+                MailMessage sellerMail = new MailMessage("OlexandrVeklych@gmail.com", SellerUser.Email)
+                {
+                    Subject = "BestLot.com",
+                    Body = "Dear " + SellerUser.Name + " " + SellerUser.Surname + "," +
+                    "Your lot \"" + Name + "\" was sold to " + buyerUser.Name + " " + buyerUser.Surname +
+                    "Please, contact buyer on his email or telephone" +
+                    "Email: " + buyerUser.Email +
+                    "Telephone: " + buyerUser.TelephoneNumber
+                };
+                client.Send(sellerMail);
+            }
+        }
     }
 }
