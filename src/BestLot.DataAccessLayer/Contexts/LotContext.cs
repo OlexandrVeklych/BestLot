@@ -21,6 +21,7 @@ namespace DataAccessLayer.Contexts
                 .WithRequired(comment => comment.Lot)
                 .HasForeignKey(comment => comment.LotId)
                 .WillCascadeOnDelete();
+
             modelBuilder.Entity<LotEntity>()
                 .HasMany(lot => lot.LotPhotos)
                 .WithRequired(photo => photo.Lot)
@@ -38,16 +39,6 @@ namespace DataAccessLayer.Contexts
                .WithRequired(comment => comment.User)
                .HasForeignKey(comment => comment.UserId)
                .WillCascadeOnDelete(false);
-
-            //modelBuilder.Entity<LotEntity>()
-            //    .HasOptional(lot => lot.BuyerUser)
-            //    .WithMany(user => user.Lots)
-            //    .HasForeignKey(lot => lot.BuyerUserId);
-            //
-            //modelBuilder.Entity<LotEntity>()
-            //    .HasRequired(lot => lot.SellerUser)
-            //    .WithMany(user => user.Lots)
-            //    .HasForeignKey(lot => lot.SellerUserId);
 
             base.OnModelCreating(modelBuilder);
         }

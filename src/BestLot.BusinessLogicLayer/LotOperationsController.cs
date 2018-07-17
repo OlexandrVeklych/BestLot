@@ -25,8 +25,8 @@ namespace BusinessLogicLayer
                 cfg.CreateMap<LotEntity, Lot>().MaxDepth(1);
                 cfg.CreateMap<Lot, LotEntity>();
                 //MaxDepth(1) - to map User inside Comment without his Lots
-                //LotCommand.User.Name - ok
-                //LotCommand.User.Lots[n] - null reference
+                //LotComment.User.Name - ok
+                //LotComment.User.Lots[n] - null reference
                 cfg.CreateMap<LotCommentEntity, LotComment>().MaxDepth(1);
                 cfg.CreateMap<LotComment, LotCommentEntity>();
                 cfg.CreateMap<LotPhotoEntity, LotPhoto>();
@@ -54,11 +54,6 @@ namespace BusinessLogicLayer
                 throw new ArgumentException("Lot id is incorrect");
             mapper.Map<Lot, LotEntity>(newLot, UoW.Lots.Get(lotId));
             UoW.SaveChanges();
-            //UoW.Lots.Modify(lotId, mapper.Map<LotEntity>(newLot));
-            //UoW.Lots.Delete(lotId);
-            //UoW.SaveChanges();
-            //UoW.Lots.Modify(newLot.Id, mapper.Map<LotEntity>(newLot));
-            //UoW.SaveChanges();
         }
 
         public void DeleteLot(int lotId)
@@ -109,10 +104,6 @@ namespace BusinessLogicLayer
             lotModel.Price = price;
 
             UoW.Lots.Modify(lotId, mapper.Map<LotEntity>(lotModel));
-
-            //mapper.Map<LotEntity, LotEntity>(lotModel, UoW.Lots.Get(lotModel.Id));
-            //UoW.Lots.Delete(lotModel.Id);
-            //UoW.Lots.Add(mapper.Map<LotEntity>(lotModel));
             UoW.SaveChanges();
         }
     }

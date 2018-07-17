@@ -58,7 +58,7 @@ namespace BusinessLogicLayer
                 lotsSellDate.Add(lot.Id, lot.SellDate);
             }
         }
-        
+
         private void SellLot(int lotId)
         {
             Lot lotForSale = mapper.Map<Lot>(UoW.Lots.Get(lotId));
@@ -99,12 +99,10 @@ namespace BusinessLogicLayer
                 };
                 client.Send(sellerMail);
             }
-                UoW.LotArchive.Add(UoW.Lots.Get(lotId));
-                UoW.Lots.Delete(lotId);
-                UoW.SaveArchiveChanges();
-                UoW.SaveChanges();
-            
-            // throw new NotImplementedException(); //Implement sending Email
+            UoW.LotArchive.Add(UoW.Lots.Get(lotId));
+            UoW.Lots.Delete(lotId);
+            UoW.SaveArchiveChanges();
+            UoW.SaveChanges();
         }
     }
 }

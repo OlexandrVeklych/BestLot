@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DataAccessLayer.UnitOfWork;
 
-namespace UnitTestProject
+namespace UnitTests
 {
     public class UnitTestDependencyResolver
     {

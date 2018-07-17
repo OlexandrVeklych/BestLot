@@ -9,8 +9,8 @@
     <ProjectGuid>{721566BC-8F02-4050-BDFD-80F34C220F18}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>UnitTestProject</RootNamespace>
-    <AssemblyName>UnitTestProject</AssemblyName>
+    <RootNamespace>UnitTests</RootNamespace>
+    <AssemblyName>BestLot.UnitTests</AssemblyName>
     <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
@@ -78,13 +78,13 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\BusinessLogicLayer\BusinessLogicLayer.csproj">
+    <ProjectReference Include="..\BestLot.BusinessLogicLayer\BestLot.BusinessLogicLayer.csproj">
       <Project>{727d9d44-1fa4-43bf-8d10-9faad956ffeb}</Project>
-      <Name>BusinessLogicLayer</Name>
+      <Name>BestLot.BusinessLogicLayer</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DataAccessLayer\DataAccessLayer.csproj">
+    <ProjectReference Include="..\BestLot.DataAccessLayer\BestLot.DataAccessLayer.csproj">
       <Project>{c67a1d63-36fb-48e2-889c-737363df1eee}</Project>
-      <Name>DataAccessLayer</Name>
+      <Name>BestLot.DataAccessLayer</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

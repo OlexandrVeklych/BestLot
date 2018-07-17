@@ -7,7 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace UnitTestProject
+namespace UnitTests
 {
     [TestFixture]
     public class LotOperationsControllerTests
@@ -94,7 +94,6 @@ namespace UnitTestProject
         {
             var lot1 = new Lot { SellerUserId = 1, SellDate = DateTime.Now, StartDate = DateTime.Now, Comments = new List<LotComment> { new LotComment { LotId = 1, UserId = 1, Message = "Message1" } } };
             var lot2 = new Lot { SellerUserId = 1, SellDate = DateTime.Now, StartDate = DateTime.Now, Comments = new List<LotComment> { new LotComment { LotId = 1, UserId = 1, Message = "Message2" } } };
-
             lotOperationsController.AddLot(lot1);
             lotOperationsController.AddLot(lot2);
 
@@ -110,8 +109,9 @@ namespace UnitTestProject
             var lot = new LotEntity { SellerUserId = 1, SellDate = DateTime.Now, StartDate = DateTime.Now, Name = "Name1" };
             unitOfWork.Lots.Add(lot);
             unitOfWork.SaveChanges();
-            var modifiedLot = new LotEntity { SellerUserId = 1, SellDate = DateTime.Now, StartDate = DateTime.Now, Id = 1, Name = "Name2" };
 
+            var modifiedLot = unitOfWork.Lots.Get(1, l => l.Comments, l => l.LotPhotos, l => l.SellerUser);
+            modifiedLot.Name = "Name2";
             unitOfWork.Lots.Modify(1, modifiedLot);
             unitOfWork.SaveChanges();
 
@@ -124,8 +124,9 @@ namespace UnitTestProject
         {
             var lot = new Lot { SellerUserId = 1, SellDate = DateTime.Now, StartDate = DateTime.Now, Name = "Name1" };
             lotOperationsController.AddLot(lot);
-            var modifiedLot = new Lot { SellerUserId = 1, SellDate = DateTime.Now, StartDate = DateTime.Now, Id = 1, Name = "Name2" };
 
+            var modifiedLot = lotOperationsController.GetLot(1, l => l.Comments, l => l.LotPhotos, l => l.SellerUser);
+            modifiedLot.Name = "Name2";
             lotOperationsController.ChangeLot(1, modifiedLot);
 
             var resultLot = lotOperationsController.GetLot(1);
@@ -139,11 +140,11 @@ namespace UnitTestProject
             var lot = new LotEntity { SellerUserId = 1, SellDate = DateTime.Now, StartDate = DateTime.Now, Name = "Name1" };
             unitOfWork.Lots.Add(lot);
             unitOfWork.SaveChanges();
-            var lotComment = new LotCommentEntity { Message = "Message1" };
-            lotComment.LotId = 1;
-            lotComment.UserId = 1;
-            var modifiedLot = new LotEntity { SellerUserId = 1, SellDate = DateTime.Now, StartDate = DateTime.Now, Id = 1, Name = "Name2", Comments = new List<LotCommentEntity> { lotComment } };
 
+            var lotComment = new LotCommentEntity { Message = "Message1", LotId = 1, UserId = 1 };
+            var modifiedLot = unitOfWork.Lots.Get(1, l => l.Comments, l => l.LotPhotos, l => l.SellerUser);
+            modifiedLot.Comments = new List<LotCommentEntity> { lotComment }; //List wasn`t initialized before
+            modifiedLot.Name = "Name2";
             unitOfWork.Lots.Modify(1, modifiedLot);
             unitOfWork.SaveChanges();
 
@@ -160,12 +161,10 @@ namespace UnitTestProject
             var lot = new Lot { SellerUserId = 1, SellDate = DateTime.Now, StartDate = DateTime.Now, Name = "Name1" };
             lotOperationsController.AddLot(lot);
 
-
-            var lotComment = new LotComment { Message = "Message1" };
-            lotComment.LotId = 1;
-            lotComment.UserId = 1;
-            var modifiedLot = new Lot { SellerUserId = 1, SellDate = DateTime.Now, StartDate = DateTime.Now, Id = 1, Name = "Name2", Comments = new List<LotComment> { lotComment } };
-           
+            var lotComment = new LotComment { Message = "Message1", LotId = 1, UserId = 1 };
+            var modifiedLot = lotOperationsController.GetLot(1, l => l.Comments, l => l.LotPhotos, l => l.SellerUser);
+            modifiedLot.Comments.Add(lotComment); //List was initialized because of Automapper
+            modifiedLot.Name = "Name2";          
             lotOperationsController.ChangeLot(1, modifiedLot);
 
             var resultLot = lotOperationsController.GetLot(1, l => l.Comments);
@@ -191,16 +190,15 @@ namespace UnitTestProject
         {
             var lot = new Lot { SellerUser = new UserAccountInfo { Name = "Seller" }, SellDate = DateTime.Now, StartDate = DateTime.Now, Name = "Name1" };
             lotOperationsController.AddLot(lot);
-            unitOfWork.UserAccounts.Add(new UserAccountInfoEntity { Name = "Buyer" });
-            unitOfWork.SaveChanges();
 
             lotOperationsController.PlaceBet(1, 1, 15);
 
             Assert.AreEqual(1, unitOfWork.Lots.GetAll().Count());
-            Assert.AreEqual(3, unitOfWork.UserAccounts.GetAll().Count());
+            Assert.AreEqual(2, unitOfWork.UserAccounts.GetAll().Count());
             Assert.AreEqual(15, unitOfWork.Lots.Get(1).Price);
             Assert.AreEqual(1, unitOfWork.Lots.Get(1).BuyerUserId);
-        } //Write tests with exceptions (Wrong id ...)
+            Assert.AreEqual("DefaultUser", unitOfWork.UserAccounts.Get(1).Name);
+        }
 
         [Test]
         public void LeaveComment()
@@ -210,10 +208,10 @@ namespace UnitTestProject
             unitOfWork.UserAccounts.Add(new UserAccountInfoEntity { Name = "Commenter" });
             unitOfWork.SaveChanges();
 
+            var lotComment = new LotComment { Message = "Comment1", UserId = 3, LotId = 1 };
             var modifiedLot = lotOperationsController.GetLot(1, l => l.Comments);
-            modifiedLot.Comments.Add(new LotComment { Message = "Comment1", UserId = 3, LotId = 1 });
+            modifiedLot.Comments.Add(lotComment); 
             lotOperationsController.ChangeLot(modifiedLot.Id, modifiedLot);
-
 
             Assert.AreEqual(1, unitOfWork.Lots.GetAll().Count());
             Assert.AreEqual(3, unitOfWork.UserAccounts.GetAll().Count());

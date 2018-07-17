@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27703.2026
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAccessLayer", "DataAccessLayer\DataAccessLayer.csproj", "{C67A1D63-36FB-48E2-889C-737363DF1EEE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BestLot.DataAccessLayer", "BestLot.DataAccessLayer\BestLot.DataAccessLayer.csproj", "{C67A1D63-36FB-48E2-889C-737363DF1EEE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BusinessLogicLayer", "BusinessLogicLayer\BusinessLogicLayer.csproj", "{727D9D44-1FA4-43BF-8D10-9FAAD956FFEB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BestLot.BusinessLogicLayer", "BestLot.BusinessLogicLayer\BestLot.BusinessLogicLayer.csproj", "{727D9D44-1FA4-43BF-8D10-9FAAD956FFEB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestProject", "UnitTestProject\UnitTestProject.csproj", "{721566BC-8F02-4050-BDFD-80F34C220F18}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BestLot.UnitTests", "BestLot.UnitTests\BestLot.UnitTests.csproj", "{721566BC-8F02-4050-BDFD-80F34C220F18}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

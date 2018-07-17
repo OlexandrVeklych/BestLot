@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("BusinessLogicLayer")]
+[assembly: AssemblyTitle("BestLot.DataAccessLayer")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("BusinessLogicLayer")]
+[assembly: AssemblyProduct("BestLot.DataAccessLayer")]
 [assembly: AssemblyCopyright("Copyright ©  2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("727d9d44-1fa4-43bf-8d10-9faad956ffeb")]
+[assembly: Guid("c67a1d63-36fb-48e2-889c-737363df1eee")]
 
 // Version information for an assembly consists of the following four values:
 //
