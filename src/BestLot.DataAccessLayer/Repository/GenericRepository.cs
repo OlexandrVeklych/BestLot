@@ -31,8 +31,10 @@ namespace DataAccessLayer.Repository
 
         public void Modify(int id, T newItem)
         {
-            Context.Entry(DbSet.Find(id)).State = EntityState.Detached;
-            Context.Entry(newItem).State = EntityState.Modified;
+            Context.Entry(DbSet.Find(id)).CurrentValues.SetValues(newItem);
+
+            //Context.Entry(DbSet.Find(id)).State = EntityState.Detached;
+            Context.Entry(DbSet.Find(id)).State = EntityState.Modified;
         }
 
         public T Get(int id)

@@ -23,10 +23,12 @@ namespace DataAccessLayer.UnitOfWork
         private IRepository<LotEntity> _lots;
         private IRepository<LotEntity> _lotArchive;
         private IRepository<UserAccountInfoEntity> _userAccounts;
+        private IRepository<LotCommentEntity> _lotComments;
 
         public IRepository<LotEntity> Lots { get { if (_lots == null) _lots = new GenericRepository<LotEntity>(LotContext); return _lots; } }
         public IRepository<LotEntity> LotArchive { get { if (_lotArchive == null) _lotArchive = new GenericRepository<LotEntity>(LotArchiveContext); return _lotArchive; } }
         public IRepository<UserAccountInfoEntity> UserAccounts { get { if (_userAccounts == null) _userAccounts = new GenericRepository<UserAccountInfoEntity>(LotContext); return _userAccounts; } }
+        public IRepository<LotCommentEntity> LotComments { get { if (_lotComments == null) _lotComments = new GenericRepository<LotCommentEntity>(LotContext); return _lotComments; } }
 
         public void RecreateDB()
         {
@@ -43,6 +45,14 @@ namespace DataAccessLayer.UnitOfWork
         public void SaveChanges()
         {
             LotContext.SaveChanges();
+            //try
+            //{
+            //    LotContext.SaveChanges();
+            //}
+            //catch(System.Data.Entity.Infrastructure.DbUpdateException)
+            //{
+            //    throw new ArgumentException("Wrong id");
+            //}
         }
 
         public void SaveArchiveChanges()

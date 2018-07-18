@@ -12,6 +12,7 @@ namespace DataAccessLayer.UnitOfWork
     {
         IRepository<LotEntity> Lots { get; }
         IRepository<LotEntity> LotArchive { get; }
+        IRepository<LotCommentEntity> LotComments { get; }
 
         IRepository<UserAccountInfoEntity> UserAccounts { get; }
 

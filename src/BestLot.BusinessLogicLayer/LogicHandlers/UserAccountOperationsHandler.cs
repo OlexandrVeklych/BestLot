@@ -48,6 +48,12 @@ namespace BusinessLogicLayer.LogicHandlers
             UoW.SaveChanges();
         }
 
+        public void ChangeUserAccount(int userId, UserAccountInfo newUserAccount)
+        {
+            mapper.Map<UserAccountInfo, UserAccountInfoEntity>(newUserAccount, UoW.UserAccounts.Get(userId));
+            UoW.SaveChanges();
+        }
+
         public void DeleteUserAccount(int userAccountId)
         {
             UoW.UserAccounts.Delete(userAccountId);
