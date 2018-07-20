@@ -14,29 +14,35 @@ namespace BusinessLogicLayer.LogicHandlers
 {
     public class LotSalesHandler
     {
-        public LotSalesHandler(IUnitOfWork unitOfWork, double refreshTimeSecs)
+        public LotSalesHandler(IUnitOfWork unitOfWork, double refreshTimeMillisecs)
         {
             UoW = unitOfWork;
             mapper = new MapperConfiguration(cfg =>
             {
                 cfg.CreateMap<LotEntity, Lot>();
+                cfg.CreateMap<LotEntity, ArchiveLotEntity>();
                 cfg.CreateMap<UserAccountInfoEntity, UserAccountInfo>();
             }).CreateMapper();
-            timer = new Timer(refreshTimeSecs);
+            lotsSellDate = new Dictionary<int, DateTime>();
+            timer = new Timer(refreshTimeMillisecs);
             timer.AutoReset = true;
-            timer.Elapsed += new ElapsedEventHandler(CheckLots);          
+            timer.Elapsed += CheckLots;
         }
 
         private Timer timer;
         private IUnitOfWork UoW;
         private IMapper mapper;
-        private Dictionary<int, DateTime> lotsSellDate;
+        public Dictionary<int, DateTime> lotsSellDate;
 
+        public void Stop()
+        {
+            timer.Stop();
+            timer.EndInit();
+        }
 
         public void Run()
         {
             RefreshLots();
-
             timer.Start();
         }
 
@@ -47,13 +53,13 @@ namespace BusinessLogicLayer.LogicHandlers
                 if (idDatePair.Value.CompareTo(DateTime.Now) <= 0)
                     SellLot(idDatePair.Key);
             }
-            Run();
+            RefreshLots();
         }
 
         public void RefreshLots()
         {
-            lotsSellDate = new Dictionary<int, DateTime>();
-            foreach (Lot lot in mapper.Map<IEnumerable<LotEntity>, IEnumerable<Lot>>(UoW.Lots.GetAll()))
+            lotsSellDate.Clear();
+            foreach (Lot lot in mapper.Map<IEnumerable<Lot>>(UoW.Lots.GetAll()))
             {
                 lotsSellDate.Add(lot.Id, lot.SellDate);
             }
@@ -61,12 +67,12 @@ namespace BusinessLogicLayer.LogicHandlers
 
         private void SellLot(int lotId)
         {
-            Lot lotForSale = mapper.Map<Lot>(UoW.Lots.Get(lotId, l => l.SellerUser));
-            UserAccountInfo buyerUser = mapper.Map<UserAccountInfo>(UoW.UserAccounts.Get(lotForSale.BuyerUserId));
+            //Lot lotForSale = mapper.Map<Lot>(UoW.Lots.Get(lotId, l => l.SellerUser));
+            //UserAccountInfo buyerUser = mapper.Map<UserAccountInfo>(UoW.UserAccounts.Get(lotForSale.BuyerUserId));
+            //
+            //lotForSale.Sell(buyerUser);
 
-            lotForSale.Sell(buyerUser);
-
-            UoW.LotArchive.Add(UoW.Lots.Get(lotId));
+            UoW.LotArchive.Add(mapper.Map<ArchiveLotEntity>(UoW.Lots.Get(lotId)));
             UoW.Lots.Delete(lotId);
             UoW.SaveArchiveChanges();
             UoW.SaveChanges();

@@ -11,7 +11,7 @@ namespace DataAccessLayer.UnitOfWork
     public interface IUnitOfWork : IDisposable
     {
         IRepository<LotEntity> Lots { get; }
-        IRepository<LotEntity> LotArchive { get; }
+        IRepository<ArchiveLotEntity> LotArchive { get; }
         IRepository<LotCommentEntity> LotComments { get; }
 
         IRepository<UserAccountInfoEntity> UserAccounts { get; }

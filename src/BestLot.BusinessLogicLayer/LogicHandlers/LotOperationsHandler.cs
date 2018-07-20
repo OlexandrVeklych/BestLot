@@ -44,29 +44,31 @@ namespace BusinessLogicLayer.LogicHandlers
 
         public void AddLot(Lot lot)
         {
+            if (UoW.UserAccounts.Get(lot.SellerUserId) == null)
+                throw new ArgumentException("Seller user id is incorrect");
             lot.StartDate = DateTime.Now;
             UoW.Lots.Add(mapper.Map<LotEntity>(lot));
             UoW.SaveChanges();
         }
 
-        public void ChangeLot(Lot newLot)
+        public void ChangeLot(int id, Lot newLot)
         {
-            if (UoW.Lots.Get(newLot.Id) == null)
+            if (UoW.Lots.Get(id) == null)
                 throw new ArgumentException("Lot id is incorrect");
-            Lot currentLot = mapper.Map<Lot>(UoW.Lots.Get(newLot.Id));
+            Lot currentLot = mapper.Map<Lot>(UoW.Lots.Get(id));
             if (currentLot.Id != newLot.Id
                 || (currentLot.BuyerUserId != 0 && currentLot.Price != newLot.Price)
                 || currentLot.SellerUserId != newLot.SellerUserId
                 || currentLot.BuyerUserId != newLot.BuyerUserId)
-                throw new ArgumentException("No permition to change these properties");
+                throw new ArgumentException("No permission to change these properties");
             UoW.Lots.Modify(newLot.Id, mapper.Map<LotEntity>(newLot));
             UoW.SaveChanges();
         }
 
         //id of newLot is correct, don`t check it again
-        private void ChangeLot(int Id, Lot newLot)
+        private void ChangeLot(Lot newLot)
         {
-            UoW.Lots.Modify(Id, mapper.Map<LotEntity>(newLot));
+            UoW.Lots.Modify(newLot.Id, mapper.Map<LotEntity>(newLot));
             UoW.SaveChanges();
         }
 
@@ -120,7 +122,7 @@ namespace BusinessLogicLayer.LogicHandlers
             lot.Price = price;
 
             //private ChangeLot, without checking LotId
-            ChangeLot(lot.Id, lot);
+            ChangeLot(lot);
         }
 
         public void AddComment(LotComment lotComment)
@@ -133,7 +135,7 @@ namespace BusinessLogicLayer.LogicHandlers
             lot.AddComment(lotComment);
             UoW.LotComments.Add(mapper.Map<LotCommentEntity>(lotComment));
             //private ChangeLot, without checking LotId
-            ChangeLot(lot.Id, lot);
+            ChangeLot(lot);
         }
     }
 }

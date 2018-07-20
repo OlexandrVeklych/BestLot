@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DataAccessLayer.UnitOfWork;
 using DataAccessLayer.Entities;
@@ -9,6 +9,7 @@ using BusinessLogicLayer.Models;
 using AutoMapper;
 using System.Linq.Expressions;
 using AutoMapper.QueryableExtensions;
+using System.Net.Mail;
 
 namespace BusinessLogicLayer.LogicHandlers
 {
@@ -44,34 +45,70 @@ namespace BusinessLogicLayer.LogicHandlers
 
         public void AddUserAccount(UserAccountInfo userAccount)
         {
+            ValidateUser(userAccount);
             UoW.UserAccounts.Add(mapper.Map<UserAccountInfoEntity>(userAccount));
             UoW.SaveChanges();
         }
 
-        public void ChangeUserAccount(int userId, UserAccountInfo newUserAccount)
+        public void ChangeUserAccount(int id, UserAccountInfo newUserAccount)
         {
-            mapper.Map<UserAccountInfo, UserAccountInfoEntity>(newUserAccount, UoW.UserAccounts.Get(userId));
+            if (UoW.UserAccounts.Get(id) == null)
+                throw new ArgumentException("User id is incorrect");
+            UserAccountInfo currentUser = mapper.Map<UserAccountInfo>(UoW.UserAccounts.Get(id));
+            if (currentUser.Id != newUserAccount.Id)
+                throw new ArgumentException("No permission to change these properties");
+            ValidateUser(newUserAccount);
+            UoW.UserAccounts.Modify(id, mapper.Map<UserAccountInfoEntity>(newUserAccount));
             UoW.SaveChanges();
+        }
+
+        private void ValidateUser(UserAccountInfo userAccount)
+        {
+            if (userAccount.TelephoneNumber != null)
+            {
+                if (!Regex.IsMatch(userAccount.TelephoneNumber, @"^\+380[0-9]{9}$"))
+                    throw new ArgumentException("Incorrect telephone number format");
+                var userAccountsTelephones = UoW.UserAccounts.GetAll().Select(user => user.TelephoneNumber);
+                if (userAccountsTelephones.Contains(userAccount.TelephoneNumber))
+                    throw new ArgumentException("Telephone number is already occupied");
+            }
+
+            if (userAccount.Email != null)
+            {
+                try
+                {
+                    MailAddress temp = new MailAddress(userAccount.Email);
+                }
+                catch(FormatException)
+                {
+                    throw new ArgumentException("Incorrect email format");
+                }
+                var userAccountsEmails = UoW.UserAccounts.GetAll().Select(user => user.Email);
+                if (userAccountsEmails.Contains(userAccount.Email))
+                    throw new ArgumentException("Email is already occupied");
+            }
         }
 
         public void DeleteUserAccount(int userAccountId)
         {
+            if (UoW.UserAccounts.Get(userAccountId) == null)
+                throw new ArgumentException("UserAccount id is incorrect");
             UoW.UserAccounts.Delete(userAccountId);
             UoW.SaveChanges();
         }
 
-        public UserAccountInfo GetUserAccount(int userId)
+        public UserAccountInfo GetUserAccount(int userAccountId)
         {
-            if (UoW.UserAccounts.Get(userId) == null)
+            if (UoW.UserAccounts.Get(userAccountId) == null)
                 throw new ArgumentException("UserAccount id is incorrect");
-            return mapper.Map<UserAccountInfo>(UoW.UserAccounts.Get(userId));
+            return mapper.Map<UserAccountInfo>(UoW.UserAccounts.Get(userAccountId));
         }
 
-        public UserAccountInfo GetUserAccount(int userId, params Expression<Func<UserAccountInfo, object>>[] includeProperties)
+        public UserAccountInfo GetUserAccount(int userAccountId, params Expression<Func<UserAccountInfo, object>>[] includeProperties)
         {
-            if (UoW.UserAccounts.Get(userId) == null)
+            if (UoW.UserAccounts.Get(userAccountId) == null)
                 throw new ArgumentException("UserAccount id is incorrect");
-            return mapper.Map<UserAccountInfo>(UoW.UserAccounts.Get(userId, mapper.Map<Expression<Func<UserAccountInfoEntity, object>>[]>(includeProperties)));
+            return mapper.Map<UserAccountInfo>(UoW.UserAccounts.Get(userAccountId, mapper.Map<Expression<Func<UserAccountInfoEntity, object>>[]>(includeProperties)));
         }
 
         public IQueryable<UserAccountInfo> GetAllUserAccounts()

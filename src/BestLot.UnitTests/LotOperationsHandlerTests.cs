@@ -1,16 +1,15 @@
-﻿using BusinessLogicLayer.LogicHandlers;
-using BusinessLogicLayer.Models;
-using DataAccessLayer.Entities;
-using DataAccessLayer.UnitOfWork;
-using NUnit.Framework;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using BusinessLogicLayer.LogicHandlers;
+using BusinessLogicLayer.Models;
+using DataAccessLayer.UnitOfWork;
+using NUnit.Framework;
 
 namespace UnitTests
 {
     [TestFixture]
-    public class LotOperationsControllerTests
+    public class LotOperationsHandlerTests
     {
         private LotOperationsHandler lotOperationsHandler;
         private UserAccountOperationsHandler userAccountOperationsHandler;
@@ -42,6 +41,14 @@ namespace UnitTests
         }
 
         [Test]
+        public void AddLot_InvalidInput_ThrowsArgumentException()
+        {
+            var lot = new Lot { SellerUserId = 2, SellDate = DateTime.Now, StartDate = DateTime.Now };
+
+            Assert.Throws<ArgumentException>(() => lotOperationsHandler.AddLot(lot));
+        }
+
+        [Test]
         public void GetLotWithoutInclude_GetWithId2_ReturnsCorrectElem()
         {
             var lot1 = new Lot { SellerUserId = 1, Name = "Name1", SellDate = DateTime.Now, StartDate = DateTime.Now };
@@ -57,8 +64,8 @@ namespace UnitTests
         [Test]
         public void GetLotWithInclude_GetWithId2_ReturnsCorrectElem()
         {
-            var lot1 = new Lot { SellerUserId = 1, Name = "Name1", SellDate = DateTime.Now, StartDate = DateTime.Now, Comments = new List<LotComment> { new LotComment { LotId = 1, UserId = 1, Message = "Message1" } } };
-            var lot2 = new Lot { SellerUserId = 1, Name = "Name2", SellDate = DateTime.Now, StartDate = DateTime.Now, Comments = new List<LotComment> { new LotComment { LotId = 1, UserId = 1, Message = "Message2" } } };
+            var lot1 = new Lot { SellerUserId = 1, Name = "Name1", SellDate = DateTime.Now, Comments = new List<LotComment> { new LotComment { LotId = 1, UserId = 1, Message = "Message1" } } };
+            var lot2 = new Lot { SellerUserId = 1, Name = "Name2", SellDate = DateTime.Now, Comments = new List<LotComment> { new LotComment { LotId = 1, UserId = 1, Message = "Message2" } } };
             lotOperationsHandler.AddLot(lot1);
             lotOperationsHandler.AddLot(lot2);
 
@@ -72,7 +79,7 @@ namespace UnitTests
         [Test]
         public void GetLot_InvalidId_ThrowsArgumentException()
         {
-            var lot1 = new Lot { SellerUserId = 1, Name = "Name1", SellDate = DateTime.Now, StartDate = DateTime.Now, Comments = new List<LotComment> { new LotComment { LotId = 1, UserId = 1, Message = "Message1" } } };
+            var lot1 = new Lot { SellerUserId = 1, Name = "Name1", SellDate = DateTime.Now, Comments = new List<LotComment> { new LotComment { LotId = 1, UserId = 1, Message = "Message1" } } };
             lotOperationsHandler.AddLot(lot1);
 
             Assert.Throws<ArgumentException>(() => lotOperationsHandler.GetLot(2));
@@ -82,48 +89,49 @@ namespace UnitTests
         public void GetAllLots_DBContains1Elem_CountReturns1Elem()
         {
             var lot = new Lot { SellerUserId = 1, SellDate = DateTime.Now, StartDate = DateTime.Now };
-
             lotOperationsHandler.AddLot(lot);
 
-            Assert.AreEqual(1, lotOperationsHandler.GetAllLots().Count());
+            var resultLots = lotOperationsHandler.GetAllLots();
+
+            Assert.AreEqual(1, resultLots.Count());
         }
 
         [Test]
         public void GetAllLots_WithInclude_ReturnsObjectWithInnerProperties()
         {
-            var lot = new Lot { SellerUserId = 1, SellDate = DateTime.Now, StartDate = DateTime.Now, Comments = new List<LotComment> { new LotComment { LotId = 1, UserId = 1, Message = "Message1" } } };
+            var lot = new Lot { SellerUserId = 1, SellDate = DateTime.Now, Comments = new List<LotComment> { new LotComment { LotId = 1, UserId = 1, Message = "Message1" } } };
             lotOperationsHandler.AddLot(lot);
 
-            var resultLot = lotOperationsHandler.GetAllLots(l => l.Comments).First();
+            var resultLots = lotOperationsHandler.GetAllLots(l => l.Comments);
 
-            Assert.AreEqual("Message1", resultLot.Comments[0].Message);
+            Assert.AreEqual("Message1", resultLots.ToList()[0].Comments[0].Message);
         }
 
         [Test]
         public void GetAllLots_WithIncludeAndFilter_ReturnsFilteredObjectWithInnerProperties()
         {
-            var lot1 = new Lot { SellerUserId = 1, SellDate = DateTime.Now, StartDate = DateTime.Now, Comments = new List<LotComment> { new LotComment { LotId = 1, UserId = 1, Message = "Message1" } } };
-            var lot2 = new Lot { SellerUserId = 1, SellDate = DateTime.Now, StartDate = DateTime.Now, Comments = new List<LotComment> { new LotComment { LotId = 1, UserId = 1, Message = "Message2" } } };
+            var lot1 = new Lot { SellerUserId = 1, SellDate = DateTime.Now, Comments = new List<LotComment> { new LotComment { LotId = 1, UserId = 1, Message = "Message1" } } };
+            var lot2 = new Lot { SellerUserId = 1, SellDate = DateTime.Now, Comments = new List<LotComment> { new LotComment { LotId = 1, UserId = 1, Message = "Message2" } } };
             lotOperationsHandler.AddLot(lot1);
             lotOperationsHandler.AddLot(lot2);
 
-            var resultLots = lotOperationsHandler.GetAllLots(l => l.Comments[0].Message == "Message2", l => l.Comments);
+            var resultLots = lotOperationsHandler.GetAllLots(l => l.Comments).Where(l => l.Comments.Where(c => c.Message == "Message2").Count() > 0);
 
             Assert.AreEqual(1, resultLots.Count());
             Assert.AreEqual("Message2", resultLots.ToList()[0].Comments[0].Message);
         }
 
         [Test]
-        public void ModifyLotWithMaping_ChangedNameAndComments_NameChangedCommentsNotChanged()
+        public void ChangeLot_ChangedNameAndComments_NameChangedCommentsNotChanged()
         {
-            var lot = new Lot { SellerUserId = 1, SellDate = DateTime.Now, StartDate = DateTime.Now, Name = "Name1", Comments = new List<LotComment> { new LotComment { Message = "Message1", LotId = 1, UserId = 1 } } };
+            var lot = new Lot { SellerUserId = 1, SellDate = DateTime.Now, Name = "Name1", Comments = new List<LotComment> { new LotComment { Message = "Message1", LotId = 1, UserId = 1 } } };
             lotOperationsHandler.AddLot(lot);
 
             var lotComment = new LotComment { Message = "Message2", LotId = 1, UserId = 1 };
             var modifiedLot = lotOperationsHandler.GetLot(1, l => l.Comments, l => l.LotPhotos, l => l.SellerUser);
             modifiedLot.Comments.Add(lotComment); //List was initialized because of Automapper
             modifiedLot.Name = "Name2";          
-            lotOperationsHandler.ChangeLot(modifiedLot);
+            lotOperationsHandler.ChangeLot(1, modifiedLot);
 
             var resultLot = lotOperationsHandler.GetLot(1, l => l.Comments);
             Assert.AreEqual(1, lotOperationsHandler.GetAllLots().Count());
@@ -133,29 +141,29 @@ namespace UnitTests
         }
 
         [Test]
-        public void ModifyLot_InvalidLot_ThrowsArgumentException()
+        public void ChangeLot_InvalidLot_ThrowsArgumentException()
         {
-            var lot = new Lot { SellerUserId = 1, SellDate = DateTime.Now, StartDate = DateTime.Now, Name = "Name1" };
+            var lot = new Lot { SellerUserId = 1, SellDate = DateTime.Now, Name = "Name1" };
             lotOperationsHandler.AddLot(lot);
 
             var modifiedLot = lotOperationsHandler.GetLot(1, l => l.Comments, l => l.LotPhotos, l => l.SellerUser);
             modifiedLot.Id = 2;
 
-            Assert.Throws<ArgumentException>(() => lotOperationsHandler.ChangeLot(modifiedLot));
+            Assert.Throws<ArgumentException>(() => lotOperationsHandler.ChangeLot(1, modifiedLot));
 
             modifiedLot.Id = 1;
             modifiedLot.SellerUserId = 2;
-            Assert.Throws<ArgumentException>(() => lotOperationsHandler.ChangeLot(modifiedLot));
+            Assert.Throws<ArgumentException>(() => lotOperationsHandler.ChangeLot(1, modifiedLot));
 
             modifiedLot.SellerUserId = 1;
             modifiedLot.BuyerUserId = 1;
-            Assert.Throws<ArgumentException>(() => lotOperationsHandler.ChangeLot(modifiedLot));
+            Assert.Throws<ArgumentException>(() => lotOperationsHandler.ChangeLot(1, modifiedLot));
         }
 
         [Test]
         public void DeleteLot_ValidId_DeletesInDB()
         {
-            var lot = new Lot { SellerUserId = 1, SellDate = DateTime.Now, StartDate = DateTime.Now, Name = "Name1" };
+            var lot = new Lot { SellerUserId = 1, SellDate = DateTime.Now, Name = "Name1" };
             lotOperationsHandler.AddLot(lot);
 
             lotOperationsHandler.DeleteLot(1);
@@ -166,7 +174,7 @@ namespace UnitTests
         [Test]
         public void DeleteLot_InvalidId_ThrowsArgumentException()
         {
-            var lot = new Lot { SellerUserId = 1, SellDate = DateTime.Now, StartDate = DateTime.Now, Name = "Name1" };
+            var lot = new Lot { SellerUserId = 1, SellDate = DateTime.Now, Name = "Name1" };
             lotOperationsHandler.AddLot(lot);
 
             Assert.Throws<ArgumentException>(() => lotOperationsHandler.DeleteLot(2));
@@ -175,14 +183,13 @@ namespace UnitTests
         [Test]
         public void PlaceBet_ValidInput_ChangesPriceAndBuyerUserId()
         {
-            var lot = new Lot { SellerUser = new UserAccountInfo { Name = "Seller" }, SellDate = DateTime.Now, StartDate = DateTime.Now, Name = "Name1" };
+            var lot = new Lot { SellerUserId = 1, SellDate = DateTime.Now, Name = "Name1" };
             lotOperationsHandler.AddLot(lot);
 
             lotOperationsHandler.PlaceBet(1, 1, 15);
 
             var resultLot = lotOperationsHandler.GetLot(1);
             Assert.AreEqual(1, lotOperationsHandler.GetAllLots().Count());
-            Assert.AreEqual(2, userAccountOperationsHandler.GetAllUserAccounts().Count());
             Assert.AreEqual(15, resultLot.Price);
             Assert.AreEqual(1, resultLot.BuyerUserId);
             Assert.AreEqual("DefaultUser", userAccountOperationsHandler.GetUserAccount(1).Name);
@@ -191,7 +198,7 @@ namespace UnitTests
         [Test]
         public void PlaceBet_InvalidInput_ThrowsArgumentException()
         {
-            var lot = new Lot { SellerUser = new UserAccountInfo { Name = "Seller" }, SellDate = DateTime.Now, StartDate = DateTime.Now, Name = "Name1" };
+            var lot = new Lot { SellerUserId = 1, SellDate = DateTime.Now, Name = "Name1" };
             lotOperationsHandler.AddLot(lot);
 
             Assert.Throws<ArgumentException>(() => lotOperationsHandler.PlaceBet(3, 1, 15));
@@ -201,7 +208,7 @@ namespace UnitTests
         [Test]
         public void AddComment_ValidInput_AddsComment()
         {
-            var lot = new Lot { SellerUserId = 1, SellDate = DateTime.Now, StartDate = DateTime.Now, Name = "Name1" };
+            var lot = new Lot { SellerUserId = 1, SellDate = DateTime.Now, Name = "Name1" };
             lotOperationsHandler.AddLot(lot);
             userAccountOperationsHandler.AddUserAccount(new UserAccountInfo { Name = "Commenter" });
 
@@ -227,7 +234,7 @@ namespace UnitTests
         [Test]
         public void AddComment_InvalidInput_ThrowsArgumentException()
         {
-            var lot = new Lot { SellerUserId = 1, SellDate = DateTime.Now, StartDate = DateTime.Now, Name = "Name1" };
+            var lot = new Lot { SellerUserId = 1, SellDate = DateTime.Now, Name = "Name1" };
             lotOperationsHandler.AddLot(lot);
             userAccountOperationsHandler.AddUserAccount(new UserAccountInfo { Name = "Commenter" });
             var invalidUserIdComment = new LotComment { Message = "Comment1", UserId = 3, LotId = 1 };

@@ -21,12 +21,12 @@ namespace DataAccessLayer.UnitOfWork
         private LotArchiveContext LotArchiveContext;
 
         private IRepository<LotEntity> _lots;
-        private IRepository<LotEntity> _lotArchive;
+        private IRepository<ArchiveLotEntity> _lotArchive;
         private IRepository<UserAccountInfoEntity> _userAccounts;
         private IRepository<LotCommentEntity> _lotComments;
 
         public IRepository<LotEntity> Lots { get { if (_lots == null) _lots = new GenericRepository<LotEntity>(LotContext); return _lots; } }
-        public IRepository<LotEntity> LotArchive { get { if (_lotArchive == null) _lotArchive = new GenericRepository<LotEntity>(LotArchiveContext); return _lotArchive; } }
+        public IRepository<ArchiveLotEntity> LotArchive { get { if (_lotArchive == null) _lotArchive = new GenericRepository<ArchiveLotEntity>(LotArchiveContext); return _lotArchive; } }
         public IRepository<UserAccountInfoEntity> UserAccounts { get { if (_userAccounts == null) _userAccounts = new GenericRepository<UserAccountInfoEntity>(LotContext); return _userAccounts; } }
         public IRepository<LotCommentEntity> LotComments { get { if (_lotComments == null) _lotComments = new GenericRepository<LotCommentEntity>(LotContext); return _lotComments; } }
 

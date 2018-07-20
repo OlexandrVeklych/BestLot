@@ -11,6 +11,6 @@ namespace DataAccessLayer.Contexts
     public class LotArchiveContext : DbContext
     {
         public LotArchiveContext(string connectionString) : base(connectionString) { }
-        public DbSet<LotEntity> SoldLots { get; set; }
+        public DbSet<ArchiveLotEntity> SoldLots { get; set; }
     }
 }

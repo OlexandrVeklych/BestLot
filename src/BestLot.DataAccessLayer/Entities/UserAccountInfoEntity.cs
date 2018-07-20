@@ -13,7 +13,7 @@ namespace DataAccessLayer.Entities
         public string Name { get; set; }
         public string Surname { get; set; }
         public string TelephoneNumber { get; set; }
-        public List<LotEntity> Lots { get; set; }
-        public List<LotCommentEntity> LotComments { get; set; }
+        public ICollection<LotEntity> Lots { get; set; }
+        public ICollection<LotCommentEntity> LotComments { get; set; }
     }
 }

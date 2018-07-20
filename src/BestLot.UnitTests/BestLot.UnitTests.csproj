@@ -67,11 +67,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="LotOperationsControllerTests.cs" />
-    <Compile Include="LotSalesControllerTests.cs" />
+    <Compile Include="LotOperationsHandlerTests.cs" />
+    <Compile Include="LotSalesHandlerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UnitTestDependencyResolver.cs" />
-    <Compile Include="UserAccountOperationsControllerTests.cs" />
+    <Compile Include="UserAccountOperationsHandlerTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
