@@ -10,14 +10,16 @@ namespace UnitTests
 {
     public class UserAccountOperationsHandlerTests
     {
-        private UserAccountOperationsHandler userAccountOperationsHandler;
+        private IUserAccountOperationsHandler userAccountOperationsHandler;
+        private ILotOperationsHandler lotOperationsHandler;
         private IUnitOfWork unitOfWork;
 
         [SetUp]
         public void SetUp()
         {
-            unitOfWork = UnitTestDependencyResolver.Resolve();
-            userAccountOperationsHandler = new UserAccountOperationsHandler(unitOfWork);
+            unitOfWork = UnitTestDependencyResolver.ResolveUnitOfWork();
+            lotOperationsHandler = UnitTestDependencyResolver.ResloveLotOperationsHandler(unitOfWork);
+            userAccountOperationsHandler = UnitTestDependencyResolver.ResloveUserAccountOperationsHandler(unitOfWork);
         }
 
         [TearDown]
@@ -77,7 +79,6 @@ namespace UnitTests
         [Test]
         public void DeleteUserAccount_ValidId_DeletesWithCommentsAndLots()
         {
-            var lotOperationsHandler = new LotOperationsHandler(unitOfWork);
             var user = new UserAccountInfo { Name = "User1" };
             var comment1 = new LotComment { Message = "Message1", UserId = 1, LotId = 1 };
             var comment2 = new LotComment { Message = "Message2", UserId = 1, LotId = 1 };
@@ -91,7 +92,7 @@ namespace UnitTests
 
             Assert.AreEqual(0, userAccountOperationsHandler.GetAllUserAccounts().Count());
             //Lot was deleted together with user, so lot with Id = 1 doesn`t exist
-            Assert.Throws<ArgumentException>(() => lotOperationsHandler.GetLot(1, l=> lot.Comments));
+            Assert.Throws<ArgumentException>(() => lotOperationsHandler.GetLot(1, l=> lot.LotComments));
         }
 
         [Test]
@@ -145,10 +146,9 @@ namespace UnitTests
         [Test]
         public void GetAllUserAccounts_WithInclude_ReturnsObjectWithInnerProperties()
         {
-            var lotOperationsHandler = new LotOperationsHandler(unitOfWork);
             var user = new UserAccountInfo { Name = "User1" };
             userAccountOperationsHandler.AddUserAccount(user);
-            var lot = new Lot { SellerUserId = 1, SellDate = DateTime.Now, Comments = new List<LotComment> { new LotComment { Message = "Message1", LotId = 1, UserId = 1 } } };
+            var lot = new Lot { SellerUserId = 1, SellDate = DateTime.Now, LotComments = new List<LotComment> { new LotComment { Message = "Message1", LotId = 1, UserId = 1 } } };
             lotOperationsHandler.AddLot(lot);
 
             var resultUsers = userAccountOperationsHandler.GetAllUserAccounts(u => u.LotComments);
@@ -159,12 +159,11 @@ namespace UnitTests
         [Test]
         public void GetAllUserAccounts_WithIncludeAndFilter_ReturnsFilteredObjectWithInnerProperties()
         {
-            var lotOperationsHandler = new LotOperationsHandler(unitOfWork);
             var user = new UserAccountInfo { Name = "User1" };
             userAccountOperationsHandler.AddUserAccount(user);
             var user2 = new UserAccountInfo { Name = "User2" };
             userAccountOperationsHandler.AddUserAccount(user2);
-            var lot = new Lot { SellerUserId = 1, SellDate = DateTime.Now, Comments = new List<LotComment> { new LotComment { Message = "Message1", LotId = 1, UserId = 1 } } };
+            var lot = new Lot { SellerUserId = 1, SellDate = DateTime.Now, LotComments = new List<LotComment> { new LotComment { Message = "Message1", LotId = 1, UserId = 1 } } };
             lotOperationsHandler.AddLot(lot);
             lotOperationsHandler.AddComment(new LotComment { Message = "Message2", LotId = 1, UserId = 2 });
 

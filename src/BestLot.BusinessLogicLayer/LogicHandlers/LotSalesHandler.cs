@@ -12,9 +12,9 @@ using AutoMapper;
 
 namespace BusinessLogicLayer.LogicHandlers
 {
-    public class LotSalesHandler
+    public class LotSalesHandler : ILotSalesHandler
     {
-        public LotSalesHandler(IUnitOfWork unitOfWork, double refreshTimeMillisecs)
+        public LotSalesHandler(IUnitOfWork unitOfWork, double refreshTimeMillisecs, double checkTimeMillisecs)
         {
             UoW = unitOfWork;
             mapper = new MapperConfiguration(cfg =>
@@ -24,39 +24,44 @@ namespace BusinessLogicLayer.LogicHandlers
                 cfg.CreateMap<UserAccountInfoEntity, UserAccountInfo>();
             }).CreateMapper();
             lotsSellDate = new Dictionary<int, DateTime>();
-            timer = new Timer(refreshTimeMillisecs);
-            timer.AutoReset = true;
-            timer.Elapsed += CheckLots;
+            refreshTimer = new Timer(refreshTimeMillisecs);
+            refreshTimer.AutoReset = true;
+            refreshTimer.Elapsed += RefreshLots;
+            checkTimer = new Timer(checkTimeMillisecs);
+            checkTimer.AutoReset = true;
+            checkTimer.Elapsed += CheckLots;
         }
 
-        private Timer timer;
+        private Timer refreshTimer;
+        private Timer checkTimer;
         private IUnitOfWork UoW;
         private IMapper mapper;
-        public Dictionary<int, DateTime> lotsSellDate;
+        public Dictionary<int, DateTime> lotsSellDate { get; private set; }
 
-        public void Stop()
+        public void StopSalesHandler()
         {
-            timer.Stop();
-            timer.EndInit();
+            refreshTimer.Stop();
+            refreshTimer.EndInit();
+            checkTimer.Stop();
+            checkTimer.EndInit();
         }
 
-        public void Run()
+        public void RunSalesHandler()
         {
-            RefreshLots();
-            timer.Start();
+            refreshTimer.Start();
+            checkTimer.Start();
         }
 
-        public void CheckLots(object sender, ElapsedEventArgs e)
+        private void CheckLots(object sender, ElapsedEventArgs e)
         {
             foreach (var idDatePair in lotsSellDate)
             {
                 if (idDatePair.Value.CompareTo(DateTime.Now) <= 0)
                     SellLot(idDatePair.Key);
             }
-            RefreshLots();
         }
 
-        public void RefreshLots()
+        private void RefreshLots(object sender, ElapsedEventArgs e)
         {
             lotsSellDate.Clear();
             foreach (Lot lot in mapper.Map<IEnumerable<Lot>>(UoW.Lots.GetAll()))
@@ -71,6 +76,8 @@ namespace BusinessLogicLayer.LogicHandlers
             //UserAccountInfo buyerUser = mapper.Map<UserAccountInfo>(UoW.UserAccounts.Get(lotForSale.BuyerUserId));
             //
             //lotForSale.Sell(buyerUser);
+
+            lotsSellDate.Remove(lotId);
 
             UoW.LotArchive.Add(mapper.Map<ArchiveLotEntity>(UoW.Lots.Get(lotId)));
             UoW.Lots.Delete(lotId);

@@ -47,7 +47,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="UnitOfWorkDependencyResolver.cs" />
+    <Compile Include="LogicHandlers\ILotOperationsHandler.cs" />
+    <Compile Include="LogicHandlers\ILotSalesHandler.cs" />
+    <Compile Include="LogicHandlers\IUserAccountOperationsHandler.cs" />
+    <Compile Include="LogicDependencyResolver.cs" />
     <Compile Include="LogicHandlers\LotOperationsHandler.cs" />
     <Compile Include="LogicHandlers\LotSalesHandler.cs" />
     <Compile Include="Models\LotComment.cs" />

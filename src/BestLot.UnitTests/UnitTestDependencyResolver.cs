@@ -4,14 +4,30 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DataAccessLayer.UnitOfWork;
+using BusinessLogicLayer.LogicHandlers;
 
 namespace UnitTests
 {
     public class UnitTestDependencyResolver
     {
-        public static IUnitOfWork Resolve()
+        public static IUnitOfWork ResolveUnitOfWork()
         {
             return new UnitOfWork("UnitTestLotContext", "UnitTestLotArchiveContext"); ;
+        }
+
+        public static ILotSalesHandler ResolveLotSalesHandler(IUnitOfWork unitOfWork, double refreshTimeMillisecs, double checkTimeMillisecs)
+        {
+            return new LotSalesHandler(unitOfWork, refreshTimeMillisecs, checkTimeMillisecs);
+        }
+
+        public static ILotOperationsHandler ResloveLotOperationsHandler(IUnitOfWork unitOfWork)
+        {
+            return new LotOperationsHandler(unitOfWork);
+        }
+
+        public static IUserAccountOperationsHandler ResloveUserAccountOperationsHandler(IUnitOfWork unitOfWork)
+        {
+            return new UserAccountOperationsHandler(unitOfWork);
         }
     }
 }

@@ -59,12 +59,6 @@ namespace DataAccessLayer.Repository
             return includeProperties.Aggregate(query, (current, includeProperty) => current.Include(includeProperty));
         }
 
-        public IQueryable<T> GetAll(Func<T, bool> predicate, params Expression<Func<T, object>>[] includeProperties)
-        {
-            IQueryable<T> query = DbSet.Where(predicate).AsQueryable();
-            return includeProperties.Aggregate(query, (current, includeProperty) => current.Include(includeProperty));
-        }
-
         private bool disposed = false;
 
         protected virtual void Dispose(bool disposing)

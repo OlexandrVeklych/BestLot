@@ -17,7 +17,7 @@ namespace DataAccessLayer.Contexts
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             modelBuilder.Entity<LotEntity>()
-                .HasMany(lot => lot.Comments)
+                .HasMany(lot => lot.LotComments)
                 .WithRequired(comment => comment.Lot)
                 .HasForeignKey(comment => comment.LotId)
                 .WillCascadeOnDelete();

@@ -20,11 +20,11 @@ namespace BusinessLogicLayer.Models
         public DateTime StartDate { get; set; }
         public DateTime SellDate { get; set; }
         public List<LotPhoto> LotPhotos { get; set; }
-        public List<LotComment> Comments { get; set; }
+        public List<LotComment> LotComments { get; set; }
 
         public void AddComment(LotComment lotComment)
         {
-            Comments.Add(lotComment);
+            LotComments.Add(lotComment);
         }
 
         public void Sell(UserAccountInfo buyerUser)

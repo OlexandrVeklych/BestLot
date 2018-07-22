@@ -16,6 +16,5 @@ namespace DataAccessLayer.Repository
         T Get(int id, params Expression<Func<T, object>>[] includeProperties);
         IQueryable<T> GetAll();
         IQueryable<T> GetAll(params Expression<Func<T, object>>[] includeProperties);
-        IQueryable<T> GetAll(Func<T, bool> predicate, params Expression<Func<T, object>>[] includeProperties);
     }
 }

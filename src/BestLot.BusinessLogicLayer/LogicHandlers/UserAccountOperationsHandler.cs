@@ -13,7 +13,7 @@ using System.Net.Mail;
 
 namespace BusinessLogicLayer.LogicHandlers
 {
-    public class UserAccountOperationsHandler
+    public class UserAccountOperationsHandler : IUserAccountOperationsHandler
     {
         public UserAccountOperationsHandler(IUnitOfWork unitOfWork)
         {
@@ -119,11 +119,6 @@ namespace BusinessLogicLayer.LogicHandlers
         public IQueryable<UserAccountInfo> GetAllUserAccounts(params Expression<Func<UserAccountInfo, object>>[] includeProperties)
         {
             return UoW.UserAccounts.GetAll(mapper.Map<Expression<Func<UserAccountInfoEntity, object>>[]>(includeProperties)).ProjectTo<UserAccountInfo>(mapper.ConfigurationProvider);
-        }
-
-        public IQueryable<UserAccountInfo> GetAllUserAccounts(Func<UserAccountInfo, bool> predicate, params Expression<Func<UserAccountInfo, object>>[] includeProperties)
-        {
-            return UoW.UserAccounts.GetAll(mapper.Map<Func<UserAccountInfoEntity, bool>>(predicate), mapper.Map<Expression<Func<UserAccountInfoEntity, object>>[]>(includeProperties)).ProjectTo<UserAccountInfo>(mapper.ConfigurationProvider);
         }
     }
 }

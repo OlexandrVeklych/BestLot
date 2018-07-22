@@ -21,6 +21,6 @@ namespace DataAccessLayer.Entities
         public DateTime StartDate { get; set; }
         public DateTime SellDate { get; set; }
         public ICollection<LotPhotoEntity> LotPhotos { get; set; }
-        public ICollection<LotCommentEntity> Comments { get; set; }
+        public ICollection<LotCommentEntity> LotComments { get; set; }
     }
 }
