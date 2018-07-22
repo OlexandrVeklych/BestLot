@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BestLot.BusinessLogicLayer"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BestLot.UnitTests", "BestLot.UnitTests\BestLot.UnitTests.csproj", "{721566BC-8F02-4050-BDFD-80F34C220F18}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BestLot.WebAPI", "BestLot.WebAPI\BestLot.WebAPI.csproj", "{27A8787B-61F1-40C6-8455-55C1FA5A7169}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{721566BC-8F02-4050-BDFD-80F34C220F18}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{721566BC-8F02-4050-BDFD-80F34C220F18}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{721566BC-8F02-4050-BDFD-80F34C220F18}.Release|Any CPU.Build.0 = Release|Any CPU
+		{27A8787B-61F1-40C6-8455-55C1FA5A7169}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{27A8787B-61F1-40C6-8455-55C1FA5A7169}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{27A8787B-61F1-40C6-8455-55C1FA5A7169}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{27A8787B-61F1-40C6-8455-55C1FA5A7169}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
