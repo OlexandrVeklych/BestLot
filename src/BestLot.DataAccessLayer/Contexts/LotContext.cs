@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Data.Entity;
-using DataAccessLayer.Entities;
+using BestLot.DataAccessLayer.Entities;
 
-namespace DataAccessLayer.Contexts
+namespace BestLot.DataAccessLayer.Contexts
 {
     public class LotContext : DbContext
     {

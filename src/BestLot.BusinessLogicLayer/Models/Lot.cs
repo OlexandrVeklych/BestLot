@@ -5,7 +5,7 @@ using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BusinessLogicLayer.Models
+namespace BestLot.BusinessLogicLayer.Models
 {
     public class Lot
     {

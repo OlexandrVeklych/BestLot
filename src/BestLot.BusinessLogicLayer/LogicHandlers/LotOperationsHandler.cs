@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DataAccessLayer.UnitOfWork;
-using DataAccessLayer.Entities;
-using BusinessLogicLayer.Models;
+using BestLot.DataAccessLayer.UnitOfWork;
+using BestLot.DataAccessLayer.Entities;
+using BestLot.BusinessLogicLayer.Models;
 using AutoMapper;
 using System.Linq.Expressions;
 using AutoMapper.QueryableExtensions;
 
-namespace BusinessLogicLayer.LogicHandlers
+namespace BestLot.BusinessLogicLayer.LogicHandlers
 {
     public class LotOperationsHandler : ILotOperationsHandler
     {
@@ -52,7 +52,7 @@ namespace BusinessLogicLayer.LogicHandlers
         public void ChangeLot(int id, Lot newLot)
         {
             if (UoW.Lots.Get(id) == null)
-                throw new ArgumentException("Lot id is incorrect");
+                AddLot(newLot);
             Lot currentLot = mapper.Map<Lot>(UoW.Lots.Get(id));
             if (currentLot.Id != newLot.Id
                 || (currentLot.BuyerUserId != 0 && currentLot.Price != newLot.Price)

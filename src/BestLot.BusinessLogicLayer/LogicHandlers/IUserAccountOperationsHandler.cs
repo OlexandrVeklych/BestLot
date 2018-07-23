@@ -4,9 +4,9 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
-using BusinessLogicLayer.Models;
+using BestLot.BusinessLogicLayer.Models;
 
-namespace BusinessLogicLayer.LogicHandlers
+namespace BestLot.BusinessLogicLayer.LogicHandlers
 {
     public interface IUserAccountOperationsHandler
     {

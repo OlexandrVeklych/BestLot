@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DataAccessLayer.Repository;
-using DataAccessLayer.Entities;
+using BestLot.DataAccessLayer.Repository;
+using BestLot.DataAccessLayer.Entities;
 
-namespace DataAccessLayer.UnitOfWork
+namespace BestLot.DataAccessLayer.UnitOfWork
 {
     public interface IUnitOfWork : IDisposable
     {

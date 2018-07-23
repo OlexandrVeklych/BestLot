@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using DataAccessLayer.UnitOfWork;
-using DataAccessLayer.Entities;
-using BusinessLogicLayer.Models;
+using BestLot.DataAccessLayer.UnitOfWork;
+using BestLot.DataAccessLayer.Entities;
+using BestLot.BusinessLogicLayer.Models;
 using AutoMapper;
 using System.Linq.Expressions;
 using AutoMapper.QueryableExtensions;
 using System.Net.Mail;
 
-namespace BusinessLogicLayer.LogicHandlers
+namespace BestLot.BusinessLogicLayer.LogicHandlers
 {
     public class UserAccountOperationsHandler : IUserAccountOperationsHandler
     {

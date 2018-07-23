@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DataAccessLayer.Entities;
-using DataAccessLayer.Repository;
-using DataAccessLayer.Contexts;
+using BestLot.DataAccessLayer.Entities;
+using BestLot.DataAccessLayer.Repository;
+using BestLot.DataAccessLayer.Contexts;
 
-namespace DataAccessLayer.UnitOfWork
+namespace BestLot.DataAccessLayer.UnitOfWork
 {
     public class UnitOfWork : IUnitOfWork
     {

@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using BusinessLogicLayer.LogicHandlers;
-using BusinessLogicLayer.Models;
-using DataAccessLayer.UnitOfWork;
+using BestLot.BusinessLogicLayer.LogicHandlers;
+using BestLot.BusinessLogicLayer.Models;
+using BestLot.DataAccessLayer.UnitOfWork;
 using NUnit.Framework;
 
-namespace UnitTests
+namespace BestLot.UnitTests
 {
     public class UserAccountOperationsHandlerTests
     {

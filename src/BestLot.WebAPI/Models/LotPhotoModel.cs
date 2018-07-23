@@ -4,14 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BestLot.BusinessLogicLayer.Models
+namespace BestLot.WebAPI.Models
 {
-    public class LotPhoto
+    public class LotPhotoModel
     {
         public int Id { get; set; }
         public byte[] Photo { get; set; }
         public string Description { get; set; }
         public int LotId { get; set; }
-        public Lot Lot { get; set; }
+        public LotModel Lot { get; set; }
     }
 }

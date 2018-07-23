@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Data.Entity;
 using System.Linq.Expressions;
 
-namespace DataAccessLayer.Repository
+namespace BestLot.DataAccessLayer.Repository
 {
     public class GenericRepository<T> : IRepository<T> where T : class
     {

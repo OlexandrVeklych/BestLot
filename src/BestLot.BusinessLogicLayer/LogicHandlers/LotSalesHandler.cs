@@ -5,12 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net.Mail;
 using System.Timers;
-using DataAccessLayer.UnitOfWork;
-using DataAccessLayer.Entities;
-using BusinessLogicLayer.Models;
+using BestLot.DataAccessLayer.UnitOfWork;
+using BestLot.DataAccessLayer.Entities;
+using BestLot.BusinessLogicLayer.Models;
 using AutoMapper;
 
-namespace BusinessLogicLayer.LogicHandlers
+namespace BestLot.BusinessLogicLayer.LogicHandlers
 {
     public class LotSalesHandler : ILotSalesHandler
     {

@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataAccessLayer.Repository
+namespace BestLot.DataAccessLayer.Repository
 {
     public interface IRepository<T> : IDisposable
     {

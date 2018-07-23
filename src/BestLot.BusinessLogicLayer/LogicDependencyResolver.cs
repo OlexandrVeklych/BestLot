@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BusinessLogicLayer.LogicHandlers;
-using DataAccessLayer.UnitOfWork;
+using BestLot.BusinessLogicLayer.LogicHandlers;
+using BestLot.DataAccessLayer.UnitOfWork;
 
-namespace BusinessLogicLayer
+namespace BestLot.BusinessLogicLayer
 {
     public class LogicDependencyResolver
     {
