@@ -32,7 +32,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
                 cfg.CreateMap<LotComment, LotCommentEntity>();
                 cfg.CreateMap<LotPhotoEntity, LotPhoto>();
                 cfg.CreateMap<LotPhoto, LotPhotoEntity>();
-                cfg.CreateMap<UserAccountInfo, UserAccountInfoEntity>().MaxDepth(1);
+                cfg.CreateMap<UserAccountInfo, UserAccountInfoEntity>();
                 cfg.CreateMap<UserAccountInfoEntity, UserAccountInfo>();
                 cfg.CreateMap<Expression<Func<Lot, object>>[], Expression<Func<LotEntity, object>>[]>();
                 cfg.CreateMap<Func<Lot, bool>, Func<LotEntity, bool>>();
@@ -52,11 +52,11 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
 
         public void ChangeUserAccount(string id, UserAccountInfo newUserAccount)
         {
-            if (UoW.UserAccounts.Get(id) == null)
-                throw new ArgumentException("User id is incorrect");
             UserAccountInfo currentUser = mapper.Map<UserAccountInfo>(UoW.UserAccounts.Get(id));
+            if (currentUser == null)
+                throw new ArgumentException("User email is incorrect");
             if (currentUser.Email != newUserAccount.Email)
-                throw new ArgumentException("No permission to change these properties");
+                throw new ArgumentException("No permission to change Email");
             ValidateUser(newUserAccount, false);
             UoW.UserAccounts.Modify(id, mapper.Map<UserAccountInfoEntity>(newUserAccount));
             UoW.SaveChanges();
@@ -73,8 +73,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
                 if (userAccountsTelephones.Contains(userAccount.TelephoneNumber))
                     throw new ArgumentException("Telephone number is already occupied");
             }
-
-            if (userAccount.Email != null)
+            if (newUser)
             {
                 try
                 {
@@ -84,8 +83,8 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
                 {
                     throw new ArgumentException("Incorrect email format");
                 }
-                var userAccountsEmails = UoW.UserAccounts.GetAll().Select(user => user.Email);
-                if (userAccountsEmails.Contains(userAccount.Email) && newUser)
+                var userAccountsEmails = GetAllUserAccounts().Select(user => user.Email);
+                if (userAccountsEmails.Contains(userAccount.Email))
                     throw new ArgumentException("Email is already occupied");
             }
         }
@@ -100,16 +99,18 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
 
         public UserAccountInfo GetUserAccount(string userAccountId)
         {
-            if (UoW.UserAccounts.Get(userAccountId) == null)
+            UserAccountInfo userAccountInfo = mapper.Map<UserAccountInfo>(UoW.UserAccounts.Get(userAccountId));
+            if (userAccountInfo == null)
                 throw new ArgumentException("UserAccount id is incorrect");
-            return mapper.Map<UserAccountInfo>(UoW.UserAccounts.Get(userAccountId));
+            return userAccountInfo;
         }
 
         public UserAccountInfo GetUserAccount(string userAccountId, params Expression<Func<UserAccountInfo, object>>[] includeProperties)
         {
-            if (UoW.UserAccounts.Get(userAccountId) == null)
+            UserAccountInfo userAccountInfo = mapper.Map<UserAccountInfo>(UoW.UserAccounts.Get(userAccountId, mapper.Map<Expression<Func<UserAccountInfoEntity, object>>[]>(includeProperties)));
+            if (userAccountInfo == null)
                 throw new ArgumentException("UserAccount id is incorrect");
-            return mapper.Map<UserAccountInfo>(UoW.UserAccounts.Get(userAccountId, mapper.Map<Expression<Func<UserAccountInfoEntity, object>>[]>(includeProperties)));
+            return userAccountInfo;
         }
 
         public IQueryable<UserAccountInfo> GetAllUserAccounts()

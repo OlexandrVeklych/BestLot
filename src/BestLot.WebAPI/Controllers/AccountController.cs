@@ -16,6 +16,7 @@ using Microsoft.Owin.Security.OAuth;
 using BestLot.WebAPI.Models;
 using BestLot.WebAPI.Providers;
 using BestLot.WebAPI.Results;
+using BestLot.BusinessLogicLayer;
 
 namespace BestLot.WebAPI.Controllers
 {
@@ -328,12 +329,24 @@ namespace BestLot.WebAPI.Controllers
                 return BadRequest(ModelState);
             }
 
+            var userAccountOperationsHandler = LogicDependencyResolver.ResloveUserAccountOperationsHandler();
+
+            try
+            {
+                userAccountOperationsHandler.AddUserAccount(new BusinessLogicLayer.Models.UserAccountInfo { Email = model.Email, Name = model.Name, Surname = model.Surname, TelephoneNumber = model.TelephoneNumber });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
             var user = new ApplicationUser() { UserName = model.Email, Email = model.Email };
 
             IdentityResult result = await UserManager.CreateAsync(user, model.Password);
 
             if (!result.Succeeded)
             {
+                userAccountOperationsHandler.DeleteUserAccount(model.Email);
                 return GetErrorResult(result);
             }
 

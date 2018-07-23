@@ -53,14 +53,17 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         {
             if (UoW.Lots.Get(id) == null)
                 AddLot(newLot);
-            Lot currentLot = mapper.Map<Lot>(UoW.Lots.Get(id));
-            if (currentLot.Id != newLot.Id
-                || (currentLot.BuyerUserId != null && currentLot.Price != newLot.Price)
-                || currentLot.SellerUserId != newLot.SellerUserId
-                || currentLot.BuyerUserId != newLot.BuyerUserId)
-                throw new ArgumentException("No permission to change these properties");
-            UoW.Lots.Modify(newLot.Id, mapper.Map<LotEntity>(newLot));
-            UoW.SaveChanges();
+            else
+            {
+                Lot currentLot = mapper.Map<Lot>(UoW.Lots.Get(id));
+                if (currentLot.Id != newLot.Id
+                    || (currentLot.BuyerUserId != null && currentLot.Price != newLot.Price)
+                    || currentLot.SellerUserId != newLot.SellerUserId
+                    || currentLot.BuyerUserId != newLot.BuyerUserId)
+                    throw new ArgumentException("No permission to change these properties");
+                UoW.Lots.Modify(newLot.Id, mapper.Map<LotEntity>(newLot));
+                UoW.SaveChanges();
+            }
         }
 
         //id of newLot is correct, don`t check it again
@@ -80,16 +83,18 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
 
         public Lot GetLot(int lotId)
         {
-            if (UoW.Lots.Get(lotId) == null)
+            Lot lot = mapper.Map<Lot>(UoW.Lots.Get(lotId));
+            if (lot == null)
                 throw new ArgumentException("Lot id is incorrect");
-            return mapper.Map<Lot>(UoW.Lots.Get(lotId));
+            return lot;
         }
 
         public Lot GetLot(int lotId, params Expression<Func<Lot, object>>[] includeProperties)
         {
-            if (UoW.Lots.Get(lotId) == null)
+            Lot lot = mapper.Map<Lot>(UoW.Lots.Get(lotId, mapper.Map<Expression<Func<LotEntity, object>>[]>(includeProperties)));
+            if (lot == null)
                 throw new ArgumentException("Lot id is incorrect");
-            return mapper.Map<Lot>(UoW.Lots.Get(lotId, mapper.Map<Expression<Func<LotEntity, object>>[]>(includeProperties)));
+            return lot;
         }
 
         public IQueryable<Lot> GetAllLots()
@@ -106,9 +111,9 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         {
             if (UoW.UserAccounts.Get(buyerUserId) == null)
                 throw new ArgumentException("User id is incorrect");
-            if (UoW.Lots.Get(lotId) == null)
-                throw new ArgumentException("Lot id is incorrect");
             Lot lot = mapper.Map<Lot>(UoW.Lots.Get(lotId, l => l.LotPhotos, l => l.LotComments, l => l.SellerUser));
+            if (lot == null)
+                throw new ArgumentException("Lot id is incorrect");
             if (price < lot.Price + lot.MinStep)
                 throw new ArgumentException("Your bet can be " + (lot.Price + lot.MinStep) + " or higher");
             lot.BuyerUserId = buyerUserId;
@@ -122,9 +127,9 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         {
             if (UoW.UserAccounts.Get(lotComment.UserId) == null)
                 throw new ArgumentException("User id is incorrect");
-            if (UoW.Lots.Get(lotComment.LotId) == null)
-                throw new ArgumentException("Lot id is incorrect");
             Lot lot = mapper.Map<Lot>(UoW.Lots.Get(lotComment.LotId, l => l.LotPhotos, l => l.LotComments, l => l.SellerUser));
+            if (lot == null)
+                throw new ArgumentException("Lot id is incorrect");
             lot.AddComment(lotComment);
             UoW.LotComments.Add(mapper.Map<LotCommentEntity>(lotComment));
             //private ChangeLot, without checking LotId

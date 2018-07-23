@@ -18,9 +18,9 @@ namespace BestLot.WebAPI.Controllers
         {
             mapper = new MapperConfiguration(cfg =>
             {
-                cfg.CreateMap<LotModel, Lot>().MaxDepth(1);
+                cfg.CreateMap<LotModel, Lot>();
                 cfg.CreateMap<Lot, LotModel>();
-                cfg.CreateMap<LotCommentModel, LotComment>().MaxDepth(1);
+                cfg.CreateMap<LotCommentModel, LotComment>();
                 cfg.CreateMap<LotComment, LotCommentModel>();
                 cfg.CreateMap<LotPhotoModel, LotPhoto>();
                 cfg.CreateMap<LotPhoto, LotPhotoModel>();
@@ -40,22 +40,9 @@ namespace BestLot.WebAPI.Controllers
         // GET api/<controller>/5
         public IHttpActionResult Get(int id)
         {
-            return Ok(mapper.Map<LotModel>(lotOperationsHandler.GetLot(id, lot => lot.LotComments, lot => lot.LotPhotos, lot => lot.SellerUser)));
-        }
-
-        // POST api/<controller>
-        public void Post([FromBody]LotModel value)
-        {
-            lotOperationsHandler.AddLot(mapper.Map<Lot>(value));
-        }
-
-        // PUT api/<controller>/5
-        public IHttpActionResult Put(int id, [FromBody]LotModel value)
-        {
             try
             {
-                lotOperationsHandler.ChangeLot(id, mapper.Map<Lot>(value));
-                return Ok();
+                return Ok(mapper.Map<LotModel>(lotOperationsHandler.GetLot(id, lot => lot.LotComments, lot => lot.LotPhotos, lot => lot.SellerUser)));
             }
             catch(ArgumentException ex)
             {
@@ -63,18 +50,51 @@ namespace BestLot.WebAPI.Controllers
             }
         }
 
-        // DELETE api/<controller>/5
-        public IHttpActionResult Delete(int id)
+        // POST api/<controller>
+        public IHttpActionResult Post([FromBody]LotModel value)
         {
+            value.SellerUserId = User.Identity.Name;
             try
             {
-                lotOperationsHandler.DeleteLot(id);
-                return Ok();
+                lotOperationsHandler.AddLot(mapper.Map<Lot>(value));
+            }
+            catch(ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            return Ok();
+        }
+
+        // PUT api/<controller>/5
+        public IHttpActionResult Put(int id, [FromBody]LotModel value)
+        {
+            if (value.SellerUserId != User.Identity.Name)
+                return BadRequest("Not allowed");
+            try
+            {
+                lotOperationsHandler.ChangeLot(id, mapper.Map<Lot>(value));
             }
             catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
             }
+            return Ok();
+        }
+
+        // DELETE api/<controller>/5
+        public IHttpActionResult Delete(int id)
+        {
+            if (lotOperationsHandler.GetLot(id).SellerUserId != User.Identity.Name)
+                return BadRequest("Not Allowed");
+            try
+            {
+                lotOperationsHandler.DeleteLot(id);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            return Ok();
         }
     }
 }

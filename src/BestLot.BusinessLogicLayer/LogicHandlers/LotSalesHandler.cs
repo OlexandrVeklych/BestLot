@@ -12,7 +12,7 @@ using AutoMapper;
 
 namespace BestLot.BusinessLogicLayer.LogicHandlers
 {
-    public class LotSalesHandler : ILotSalesHandler
+    public class LotSalesHandler : ILotSalesHandler, IDisposable
     {
         public LotSalesHandler(IUnitOfWork unitOfWork, double refreshTimeMillisecs, double checkTimeMillisecs)
         {
@@ -83,6 +83,26 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             UoW.Lots.Delete(lotId);
             UoW.SaveArchiveChanges();
             UoW.SaveChanges();
+        }
+
+        private bool disposed = false;
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    StopSalesHandler();
+                }
+            }
+            disposed = true;
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }
