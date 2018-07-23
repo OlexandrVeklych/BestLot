@@ -11,7 +11,7 @@ namespace BestLot.BusinessLogicLayer.Models
         public int Id { get; set; }
         public byte[] Photo { get; set; }
         public string Description { get; set; }
-        public int LotId { get; set; }
+        public string LotId { get; set; }
         public Lot Lot { get; set; }
     }
 }

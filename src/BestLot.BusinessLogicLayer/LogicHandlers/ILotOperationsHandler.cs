@@ -17,7 +17,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         Lot GetLot(int lotId, params Expression<Func<Lot, object>>[] includeProperties);
         IQueryable<Lot> GetAllLots();
         IQueryable<Lot> GetAllLots(params Expression<Func<Lot, object>>[] includeProperties);
-        void PlaceBet(int buyerUserId, int lotId, double price);
+        void PlaceBet(string buyerUserId, int lotId, double price);
         void AddComment(LotComment lotComment);
     }
 }

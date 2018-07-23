@@ -8,7 +8,7 @@ namespace BestLot.DataAccessLayer.Entities
 {
     public class UserAccountInfoEntity
     {
-        public int Id { get; set; }
+        //Key
         public string Email { get; set; }
         public string Name { get; set; }
         public string Surname { get; set; }

@@ -35,7 +35,7 @@ namespace BestLot.UnitTests
 
             userAccountOperationsHandler.AddUserAccount(user);
 
-            var resultUser = userAccountOperationsHandler.GetUserAccount(1);
+            var resultUser = userAccountOperationsHandler.GetUserAccount("veklich99@mail.ru");
             Assert.AreEqual(1, userAccountOperationsHandler.GetAllUserAccounts().Count());
             Assert.AreEqual("User1", resultUser.Name);
         }
@@ -51,7 +51,7 @@ namespace BestLot.UnitTests
         [Test]
         public void AddUserAccount_InvalidTelephoneNumberFormat_ThrowsArgumentException()
         {
-            var user = new UserAccountInfo { Name = "User1", TelephoneNumber = "+388" };
+            var user = new UserAccountInfo { Name = "User1", TelephoneNumber = "+388", Email = "veklich99@mail.ru" };
 
             Assert.Throws<ArgumentException>(() => userAccountOperationsHandler.AddUserAccount(user));
         }
@@ -69,9 +69,9 @@ namespace BestLot.UnitTests
         [Test]
         public void AddUserAccount_RepeatedTelephoneNumber_ThrowsArgumentException()
         {
-            var user = new UserAccountInfo { Name = "User1", TelephoneNumber = "+380678522221" };
+            var user = new UserAccountInfo { Name = "User1", TelephoneNumber = "+380678522221", Email = "veklich99@mail.ru" };
             userAccountOperationsHandler.AddUserAccount(user);
-            var user2 = new UserAccountInfo { Name = "User1", TelephoneNumber = "+380678522221" };
+            var user2 = new UserAccountInfo { Name = "User1", TelephoneNumber = "+380678522221", Email = "veklich99@mail.ru" };
 
             Assert.Throws<ArgumentException>(() => userAccountOperationsHandler.AddUserAccount(user2));
         }
@@ -79,16 +79,16 @@ namespace BestLot.UnitTests
         [Test]
         public void DeleteUserAccount_ValidId_DeletesWithCommentsAndLots()
         {
-            var user = new UserAccountInfo { Name = "User1" };
-            var comment1 = new LotComment { Message = "Message1", UserId = 1, LotId = 1 };
-            var comment2 = new LotComment { Message = "Message2", UserId = 1, LotId = 1 };
-            var lot = new Lot { SellerUserId = 1, StartDate = DateTime.Now, SellDate = DateTime.Now, };
+            var user = new UserAccountInfo { Name = "User1", Email = "veklich99@mail.ru" };
+            var comment1 = new LotComment { Message = "Message1", UserId = "veklich99@mail.ru", LotId = 1 };
+            var comment2 = new LotComment { Message = "Message2", UserId = "veklich99@mail.ru", LotId = 1 };
+            var lot = new Lot { SellerUserId = "veklich99@mail.ru", StartDate = DateTime.Now, SellDate = DateTime.Now, };
             userAccountOperationsHandler.AddUserAccount(user);
             lotOperationsHandler.AddLot(lot);
             lotOperationsHandler.AddComment(comment1);
             lotOperationsHandler.AddComment(comment2);
 
-            userAccountOperationsHandler.DeleteUserAccount(1);
+            userAccountOperationsHandler.DeleteUserAccount("veklich99@mail.ru");
 
             Assert.AreEqual(0, userAccountOperationsHandler.GetAllUserAccounts().Count());
             //Lot was deleted together with user, so lot with Id = 1 doesn`t exist
@@ -98,24 +98,24 @@ namespace BestLot.UnitTests
         [Test]
         public void DeleteUserAccount_InvalidId_ThrowsArgumentException()
         {
-            var user = new UserAccountInfo { Name = "User1" };
+            var user = new UserAccountInfo { Name = "User1", Email = "veklich99@mail.ru" };
             userAccountOperationsHandler.AddUserAccount(user);
 
-            Assert.Throws<ArgumentException>(() => userAccountOperationsHandler.DeleteUserAccount(2));
+            Assert.Throws<ArgumentException>(() => userAccountOperationsHandler.DeleteUserAccount("veklich99@gmail.com"));
         }
 
         [Test]
         public void ChangeUserAccount_ChangedNameAndComments_NameChangedCommentsNotChanged()
         {
-            var user = new UserAccountInfo { Name = "User1" };
+            var user = new UserAccountInfo { Name = "User1", Email = "veklich99@mail.ru" };
             userAccountOperationsHandler.AddUserAccount(user);
 
-            var changedUser = userAccountOperationsHandler.GetUserAccount(1);
-            changedUser.LotComments = new List<LotComment> { new LotComment { Message = "Message1", LotId = 1, UserId = 1 } };
+            var changedUser = userAccountOperationsHandler.GetUserAccount("veklich99@mail.ru");
+            changedUser.LotComments = new List<LotComment> { new LotComment { Message = "Message1", LotId = 1, UserId = "veklich99@mail.ru" } };
             changedUser.Name = "User2";
-            userAccountOperationsHandler.ChangeUserAccount(1, changedUser);
+            userAccountOperationsHandler.ChangeUserAccount("veklich99@mail.ru", changedUser);
 
-            var resultUser = userAccountOperationsHandler.GetUserAccount(1, u => u.LotComments, u => u.Lots);
+            var resultUser = userAccountOperationsHandler.GetUserAccount("veklich99@mail.ru", u => u.LotComments, u => u.Lots);
             Assert.AreEqual("User2", resultUser.Name);
             Assert.AreEqual(0, resultUser.LotComments.Count());
         }
@@ -123,19 +123,19 @@ namespace BestLot.UnitTests
         [Test]
         public void ChangeUserAccount_InvalidUser_ThrowsArgumentException()
         {
-            var user = new UserAccountInfo { Name = "User1" };
+            var user = new UserAccountInfo { Name = "User1", Email = "veklich99@mail.ru" };
             userAccountOperationsHandler.AddUserAccount(user);
 
-            var changedUser = userAccountOperationsHandler.GetUserAccount(1);
+            var changedUser = userAccountOperationsHandler.GetUserAccount("veklich99@mail.ru");
             changedUser.Name = "User2";
 
-            Assert.Throws<ArgumentException>(() => userAccountOperationsHandler.ChangeUserAccount(2, changedUser));
+            Assert.Throws<ArgumentException>(() => userAccountOperationsHandler.ChangeUserAccount("veklich99@gmail.com", changedUser));
         }
 
         [Test]
         public void GetAllLots_DBContains1Elem_CountReturns1Elem()
         {
-            var user = new UserAccountInfo { Name = "User1" };
+            var user = new UserAccountInfo { Name = "User1", Email = "veklich99@mail.ru" };
             userAccountOperationsHandler.AddUserAccount(user);
 
             var resultUsers = userAccountOperationsHandler.GetAllUserAccounts();
@@ -146,9 +146,9 @@ namespace BestLot.UnitTests
         [Test]
         public void GetAllUserAccounts_WithInclude_ReturnsObjectWithInnerProperties()
         {
-            var user = new UserAccountInfo { Name = "User1" };
+            var user = new UserAccountInfo { Name = "User1", Email = "veklich99@mail.ru" };
             userAccountOperationsHandler.AddUserAccount(user);
-            var lot = new Lot { SellerUserId = 1, SellDate = DateTime.Now, LotComments = new List<LotComment> { new LotComment { Message = "Message1", LotId = 1, UserId = 1 } } };
+            var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now, LotComments = new List<LotComment> { new LotComment { Message = "Message1", LotId = 1, UserId = "veklich99@mail.ru" } } };
             lotOperationsHandler.AddLot(lot);
 
             var resultUsers = userAccountOperationsHandler.GetAllUserAccounts(u => u.LotComments);
@@ -159,13 +159,13 @@ namespace BestLot.UnitTests
         [Test]
         public void GetAllUserAccounts_WithIncludeAndFilter_ReturnsFilteredObjectWithInnerProperties()
         {
-            var user = new UserAccountInfo { Name = "User1" };
+            var user = new UserAccountInfo { Name = "User1", Email = "veklich99@mail.ru" };
             userAccountOperationsHandler.AddUserAccount(user);
-            var user2 = new UserAccountInfo { Name = "User2" };
+            var user2 = new UserAccountInfo { Name = "User2", Email = "veklich99@gmail.com" };
             userAccountOperationsHandler.AddUserAccount(user2);
-            var lot = new Lot { SellerUserId = 1, SellDate = DateTime.Now, LotComments = new List<LotComment> { new LotComment { Message = "Message1", LotId = 1, UserId = 1 } } };
+            var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now, LotComments = new List<LotComment> { new LotComment { Message = "Message1", LotId = 1, UserId = "veklich99@mail.ru" } } };
             lotOperationsHandler.AddLot(lot);
-            lotOperationsHandler.AddComment(new LotComment { Message = "Message2", LotId = 1, UserId = 2 });
+            lotOperationsHandler.AddComment(new LotComment { Message = "Message2", LotId = 1, UserId = "veklich99@gmail.com" });
 
             var resultUsers = userAccountOperationsHandler.GetAllUserAccounts(u => u.LotComments).Where(u => u.LotComments.Where(c => c.Message == "Message2").Count() > 0);
 

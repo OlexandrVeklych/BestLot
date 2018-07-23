@@ -29,6 +29,11 @@ namespace BestLot.DataAccessLayer.Contexts
                 .WillCascadeOnDelete();
 
             modelBuilder.Entity<UserAccountInfoEntity>()
+                .HasKey(user => user.Email)
+                .Property(user => user.Email)
+                .HasDatabaseGeneratedOption(System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedOption.None);
+
+            modelBuilder.Entity<UserAccountInfoEntity>()
                 .HasMany(user => user.Lots)
                 .WithRequired(lot => lot.SellerUser)
                 .HasForeignKey(lot => lot.SellerUserId)

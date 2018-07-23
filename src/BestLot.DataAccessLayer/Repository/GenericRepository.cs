@@ -24,6 +24,11 @@ namespace BestLot.DataAccessLayer.Repository
             DbSet.Remove(DbSet.Find(id));
         }
 
+        public void Delete(string email)
+        {
+            DbSet.Remove(DbSet.Find(email));
+        }
+
         public void Add(T item)
         {
             DbSet.Add(item);
@@ -32,8 +37,12 @@ namespace BestLot.DataAccessLayer.Repository
         public void Modify(int id, T newItem)
         {
             Context.Entry(DbSet.Find(id)).CurrentValues.SetValues(newItem);
+            Context.Entry(DbSet.Find(id)).State = EntityState.Modified;
+        }
 
-            //Context.Entry(DbSet.Find(id)).State = EntityState.Detached;
+        public void Modify(string id, T newItem)
+        {
+            Context.Entry(DbSet.Find(id)).CurrentValues.SetValues(newItem);
             Context.Entry(DbSet.Find(id)).State = EntityState.Modified;
         }
 
@@ -42,9 +51,20 @@ namespace BestLot.DataAccessLayer.Repository
             return DbSet.Find(id);
         }
 
+        public T Get(string email)
+        {
+            return DbSet.Find(email);
+        }
+
         public T Get(int id, params Expression<Func<T, object>>[] includeProperties)
         {
             IQueryable<T> query = new List<T> {DbSet.Find(id)}.AsQueryable();
+            return includeProperties.Aggregate(query, (current, includeProperty) => current.Include(includeProperty)).First();
+        }
+
+        public T Get(string email, params Expression<Func<T, object>>[] includeProperties)
+        {
+            IQueryable<T> query = new List<T> { DbSet.Find(email) }.AsQueryable();
             return includeProperties.Aggregate(query, (current, includeProperty) => current.Include(includeProperty)).First();
         }
 

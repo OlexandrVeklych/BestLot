@@ -50,19 +50,20 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             UoW.SaveChanges();
         }
 
-        public void ChangeUserAccount(int id, UserAccountInfo newUserAccount)
+        public void ChangeUserAccount(string id, UserAccountInfo newUserAccount)
         {
             if (UoW.UserAccounts.Get(id) == null)
                 throw new ArgumentException("User id is incorrect");
             UserAccountInfo currentUser = mapper.Map<UserAccountInfo>(UoW.UserAccounts.Get(id));
-            if (currentUser.Id != newUserAccount.Id)
+            if (currentUser.Email != newUserAccount.Email)
                 throw new ArgumentException("No permission to change these properties");
-            ValidateUser(newUserAccount);
+            ValidateUser(newUserAccount, false);
             UoW.UserAccounts.Modify(id, mapper.Map<UserAccountInfoEntity>(newUserAccount));
             UoW.SaveChanges();
         }
 
-        private void ValidateUser(UserAccountInfo userAccount)
+        //oldEmail
+        private void ValidateUser(UserAccountInfo userAccount, bool newUser = true)
         {
             if (userAccount.TelephoneNumber != null)
             {
@@ -84,12 +85,12 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
                     throw new ArgumentException("Incorrect email format");
                 }
                 var userAccountsEmails = UoW.UserAccounts.GetAll().Select(user => user.Email);
-                if (userAccountsEmails.Contains(userAccount.Email))
+                if (userAccountsEmails.Contains(userAccount.Email) && newUser)
                     throw new ArgumentException("Email is already occupied");
             }
         }
 
-        public void DeleteUserAccount(int userAccountId)
+        public void DeleteUserAccount(string userAccountId)
         {
             if (UoW.UserAccounts.Get(userAccountId) == null)
                 throw new ArgumentException("UserAccount id is incorrect");
@@ -97,14 +98,14 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             UoW.SaveChanges();
         }
 
-        public UserAccountInfo GetUserAccount(int userAccountId)
+        public UserAccountInfo GetUserAccount(string userAccountId)
         {
             if (UoW.UserAccounts.Get(userAccountId) == null)
                 throw new ArgumentException("UserAccount id is incorrect");
             return mapper.Map<UserAccountInfo>(UoW.UserAccounts.Get(userAccountId));
         }
 
-        public UserAccountInfo GetUserAccount(int userAccountId, params Expression<Func<UserAccountInfo, object>>[] includeProperties)
+        public UserAccountInfo GetUserAccount(string userAccountId, params Expression<Func<UserAccountInfo, object>>[] includeProperties)
         {
             if (UoW.UserAccounts.Get(userAccountId) == null)
                 throw new ArgumentException("UserAccount id is incorrect");

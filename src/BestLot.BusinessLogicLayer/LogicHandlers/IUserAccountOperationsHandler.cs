@@ -11,10 +11,10 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
     public interface IUserAccountOperationsHandler
     {
         void AddUserAccount(UserAccountInfo userAccount);
-        void ChangeUserAccount(int id, UserAccountInfo newUserAccount);
-        void DeleteUserAccount(int userAccountId);
-        UserAccountInfo GetUserAccount(int userAccountId);
-        UserAccountInfo GetUserAccount(int userAccountId, params Expression<Func<UserAccountInfo, object>>[] includeProperties);
+        void ChangeUserAccount(string id, UserAccountInfo newUserAccount);
+        void DeleteUserAccount(string userAccountId);
+        UserAccountInfo GetUserAccount(string userAccountId);
+        UserAccountInfo GetUserAccount(string userAccountId, params Expression<Func<UserAccountInfo, object>>[] includeProperties);
         IQueryable<UserAccountInfo> GetAllUserAccounts();
         IQueryable<UserAccountInfo> GetAllUserAccounts(params Expression<Func<UserAccountInfo, object>>[] includeProperties);
     }

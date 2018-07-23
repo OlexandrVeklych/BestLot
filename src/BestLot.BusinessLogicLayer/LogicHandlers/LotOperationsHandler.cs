@@ -55,7 +55,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
                 AddLot(newLot);
             Lot currentLot = mapper.Map<Lot>(UoW.Lots.Get(id));
             if (currentLot.Id != newLot.Id
-                || (currentLot.BuyerUserId != 0 && currentLot.Price != newLot.Price)
+                || (currentLot.BuyerUserId != null && currentLot.Price != newLot.Price)
                 || currentLot.SellerUserId != newLot.SellerUserId
                 || currentLot.BuyerUserId != newLot.BuyerUserId)
                 throw new ArgumentException("No permission to change these properties");
@@ -102,7 +102,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             return UoW.Lots.GetAll(mapper.Map<Expression<Func<LotEntity, object>>[]>(includeProperties)).ProjectTo<Lot>(mapper.ConfigurationProvider);
         }
 
-        public void PlaceBet(int buyerUserId, int lotId, double price)
+        public void PlaceBet(string buyerUserId, int lotId, double price)
         {
             if (UoW.UserAccounts.Get(buyerUserId) == null)
                 throw new ArgumentException("User id is incorrect");
