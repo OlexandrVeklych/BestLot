@@ -35,6 +35,7 @@ namespace BestLot.WebAPI.Models
     public class RegisterBindingModel
     {
         [Required]
+        [DataType(DataType.EmailAddress)]
         [Display(Name = "Email")]
         public string Email { get; set; }
 
@@ -49,8 +50,15 @@ namespace BestLot.WebAPI.Models
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; }
 
+        [Required]
+        [DataType(DataType.Text)]
         public string Name { get; set; }
+
+        [DataType(DataType.Text)]
         public string Surname { get; set; }
+
+        [Required]
+        [DataType(DataType.PhoneNumber)]
         public string TelephoneNumber { get; set; }
     }
 

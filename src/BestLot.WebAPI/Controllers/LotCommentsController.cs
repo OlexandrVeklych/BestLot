@@ -68,27 +68,19 @@ namespace BestLot.WebAPI.Controllers
         [Route("api/lots/{lotId}/comments")]
         public IHttpActionResult Post([FromUri]int lotId, [FromBody]LotCommentModel value)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            value.UserId = User.Identity.Name;
             value.LotId = lotId;
             try
             {
                 lotOperationsHandler.AddComment(mapper.Map<LotComment>(value));
-                return Ok();
             }
             catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
             }
-        }
-
-        // PUT api/<controller>/5
-        public void Put(int id, [FromBody]string value)
-        {
-
-        }
-
-        // DELETE api/<controller>/5
-        public void Delete(int id)
-        {
+            return Created();
         }
     }
 }

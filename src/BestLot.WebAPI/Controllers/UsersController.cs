@@ -28,9 +28,11 @@ namespace BestLot.WebAPI.Controllers
                 cfg.CreateMap<UserAccountInfoModel, UserAccountInfo>();
             }).CreateMapper();
             userAccountOperationsHandler = LogicDependencyResolver.ResloveUserAccountOperationsHandler();
+            lotOperationsHandler = LogicDependencyResolver.ResloveLotOperationsHandler();
         }
 
         private readonly IUserAccountOperationsHandler userAccountOperationsHandler;
+        private readonly ILotOperationsHandler lotOperationsHandler;
         private readonly IMapper mapper;
         // GET api/<controller>
         public IHttpActionResult Get()
@@ -39,6 +41,31 @@ namespace BestLot.WebAPI.Controllers
         }
 
         // GET api/<controller>/5
+        [Route("api/lots/{id}/selleruser")]
+        [Route("api/lots/{id}/buyeruser")]
+        public IHttpActionResult Get(int id)
+        {
+            if (Request.RequestUri.OriginalString.Contains("buyeruser"))
+                try
+                {
+                    return Ok(mapper.Map<UserAccountInfoModel>(userAccountOperationsHandler.GetUserAccount(lotOperationsHandler.GetLot(id).BuyerUserId)));
+                }
+                catch (ArgumentException ex)
+                {
+                    return BadRequest(ex.Message);
+                }
+            try
+            {
+                return Ok(mapper.Map<UserAccountInfoModel>(lotOperationsHandler.GetLot(id).SellerUser));
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        // GET api/<controller>/5
+        [Route("api/users/{email}")]
         public IHttpActionResult Get(string email)
         {
             try
@@ -52,14 +79,18 @@ namespace BestLot.WebAPI.Controllers
         }
 
         // POST api/<controller>
+        [Route("api/users/{email}")]
         public IHttpActionResult Post([FromBody]string value)
         {
-            return BadRequest("User registration to add user");
+            return BadRequest("Use registration to add user");
         }
 
         // PUT api/<controller>/5
+        [Route("api/users/{email}")]
         public IHttpActionResult Put(string email, [FromBody]UserAccountInfoModel value)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
             try
             {
                 userAccountOperationsHandler.ChangeUserAccount(email, mapper.Map<UserAccountInfo>(value));
@@ -69,11 +100,6 @@ namespace BestLot.WebAPI.Controllers
             {
                 return BadRequest(ex.Message);
             }
-        }
-
-        // DELETE api/<controller>/5
-        public void Delete(int id)
-        {
         }
     }
 }

@@ -45,6 +45,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             if (UoW.UserAccounts.Get(lot.SellerUserId) == null)
                 throw new ArgumentException("Seller user id is incorrect");
             lot.StartDate = DateTime.Now;
+            lot.BuyerUserId = null;
             UoW.Lots.Add(mapper.Map<LotEntity>(lot));
             UoW.SaveChanges();
         }
