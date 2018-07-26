@@ -9,6 +9,9 @@ using BestLot.BusinessLogicLayer.Models;
 using BestLot.BusinessLogicLayer;
 using BestLot.WebAPI.Models;
 using AutoMapper;
+using System.IO;
+using System.Web;
+using System.Drawing;
 
 namespace BestLot.WebAPI.Controllers
 {
@@ -101,6 +104,7 @@ namespace BestLot.WebAPI.Controllers
             value.SellerUserId = User.Identity.Name;
             try
             {
+                SavePhotos(value);
                 lotOperationsHandler.AddLot(mapper.Map<Lot>(value));
             }
             catch(ArgumentException ex)
@@ -108,6 +112,32 @@ namespace BestLot.WebAPI.Controllers
                 return BadRequest(ex.Message);
             }
             return Ok();
+        }
+
+        private void SavePhotos(LotModel lot)
+        {
+            if (HttpContext.Current.Request.Files.Count == 0)
+                return;
+            string currentDirectory = AppDomain.CurrentDomain.GetData("DataDirectory").ToString() + "\\LotPhotos\\" + lot.SellerUserId;
+            for (int i = 0; i < HttpContext.Current.Request.Files.Count; i++)
+            {
+                byte[] fileData = null;
+                using (var binaryReader = new BinaryReader(HttpContext.Current.Request.Files[0].InputStream))
+                {
+                    fileData = binaryReader.ReadBytes(HttpContext.Current.Request.Files[0].ContentLength);
+                }
+
+                Image photo;
+
+                using (var ms = new MemoryStream(fileData))
+                {
+                    photo = Image.FromStream(ms);
+                }
+                string path = currentDirectory + "\\" + lot.Name + "_" + DateTime.Now.ToFileTime() + "_" + i + ".jpeg";
+                photo.Save(path, System.Drawing.Imaging.ImageFormat.Jpeg);
+
+                lot.LotPhotos[0].Path = path;
+            }
         }
 
         // PUT api/<controller>/5
