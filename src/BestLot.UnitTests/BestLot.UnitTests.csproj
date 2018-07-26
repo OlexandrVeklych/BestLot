@@ -67,10 +67,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="LotOperationsHandlerAsyncTests.cs" />
     <Compile Include="LotOperationsHandlerTests.cs" />
     <Compile Include="LotSalesHandlerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UnitTestDependencyResolver.cs" />
+    <Compile Include="UserAccountOperationsHandlerAsyncTests.cs" />
     <Compile Include="UserAccountOperationsHandlerTests.cs" />
   </ItemGroup>
   <ItemGroup>

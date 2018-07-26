@@ -35,26 +35,28 @@ namespace BestLot.DataAccessLayer.Repository
             Context.Entry(DbSet.Find(id)).State = EntityState.Modified;
         }
 
-        public T Get(object id)
-        {
-            return DbSet.Find(id);
-        }
-
         public T Get(object id, params Expression<Func<T, object>>[] includeProperties)
         {
             IQueryable<T> query = new List<T> {DbSet.Find(id)}.AsQueryable();
             return includeProperties.Aggregate(query, (current, includeProperty) => current.Include(includeProperty)).First();
         }
 
-        public IQueryable<T> GetAll()
+        public async Task<T> GetAsync(object id, params Expression<Func<T, object>>[] includeProperties)
         {
-            return DbSet.AsQueryable();
+            IQueryable<T> query = new List<T> { DbSet.Find(id) }.AsQueryable();
+            return await Task.FromResult(includeProperties.Aggregate(query, (current, includeProperty) => current.Include(includeProperty)).First());
         }
 
         public IQueryable<T> GetAll(params Expression<Func<T, object>>[] includeProperties)
         {
             IQueryable<T> query = DbSet;
             return includeProperties.Aggregate(query, (current, includeProperty) => current.Include(includeProperty));
+        }
+
+        public async Task<IQueryable<T>> GetAllAsync(params Expression<Func<T, object>>[] includeProperties)
+        {
+            IQueryable<T> query = DbSet;
+            return await Task.FromResult(includeProperties.Aggregate(query, (current, includeProperty) => current.Include(includeProperty)));
         }
 
         private bool disposed = false;

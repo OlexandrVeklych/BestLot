@@ -11,11 +11,14 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
     public interface IUserAccountOperationsHandler
     {
         void AddUserAccount(UserAccountInfo userAccount);
+        Task AddUserAccountAsync(UserAccountInfo userAccount);
         void ChangeUserAccount(string id, UserAccountInfo newUserAccount);
+        Task ChangeUserAccountAsync(string id, UserAccountInfo newUserAccount);
         void DeleteUserAccount(string userAccountId);
-        UserAccountInfo GetUserAccount(string userAccountId);
+        Task DeleteUserAccountAsync(string userAccountId);
         UserAccountInfo GetUserAccount(string userAccountId, params Expression<Func<UserAccountInfo, object>>[] includeProperties);
-        IQueryable<UserAccountInfo> GetAllUserAccounts();
+        Task<UserAccountInfo> GetUserAccountAsync(string userAccountId, params Expression<Func<UserAccountInfo, object>>[] includeProperties);
         IQueryable<UserAccountInfo> GetAllUserAccounts(params Expression<Func<UserAccountInfo, object>>[] includeProperties);
+        Task<IQueryable<UserAccountInfo>> GetAllUserAccountsAsync(params Expression<Func<UserAccountInfo, object>>[] includeProperties);
     }
 }

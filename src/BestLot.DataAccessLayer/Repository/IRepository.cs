@@ -12,9 +12,9 @@ namespace BestLot.DataAccessLayer.Repository
         void Delete(object id);
         void Add(T item);
         void Modify(object id, T newItem);
-        T Get(object id);
         T Get(object id, params Expression<Func<T, object>>[] includeProperties);
-        IQueryable<T> GetAll();
+        Task<T> GetAsync(object id, params Expression<Func<T, object>>[] includeProperties);
         IQueryable<T> GetAll(params Expression<Func<T, object>>[] includeProperties);
+        Task<IQueryable<T>> GetAllAsync(params Expression<Func<T, object>>[] includeProperties);
     }
 }

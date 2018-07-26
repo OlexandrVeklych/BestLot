@@ -17,9 +17,11 @@ namespace BestLot.DataAccessLayer.UnitOfWork
         IRepository<UserAccountInfoEntity> UserAccounts { get; }
 
         void SaveChanges();
+        Task SaveChangesAsync();
         void SaveArchiveChanges();
 
         void RecreateDB();
+        Task RecreateDBAsync();
         void RecreateArchive();
     }
 }

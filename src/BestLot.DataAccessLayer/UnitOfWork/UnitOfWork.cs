@@ -36,6 +36,12 @@ namespace BestLot.DataAccessLayer.UnitOfWork
             LotContext.Database.Create();
         }
 
+        public async Task RecreateDBAsync()
+        {
+            await new Task(() => LotContext.Database.Delete());
+            await new Task(() => LotContext.Database.Create());
+        }
+
         public void RecreateArchive()
         {
             LotArchiveContext.Database.Delete();
@@ -45,6 +51,11 @@ namespace BestLot.DataAccessLayer.UnitOfWork
         public void SaveChanges()
         {
             LotContext.SaveChanges();
+        }
+
+        public async Task SaveChangesAsync()
+        {
+            await Task.FromResult(LotContext.SaveChanges());
         }
 
         public void SaveArchiveChanges()
