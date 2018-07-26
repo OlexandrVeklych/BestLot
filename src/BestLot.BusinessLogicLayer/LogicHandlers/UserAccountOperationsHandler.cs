@@ -62,7 +62,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             UoW.SaveChanges();
         }
 
-        //oldEmail
+        //if !newUser, don`t check email
         private void ValidateUser(UserAccountInfo userAccount, bool newUser = true)
         {
             if (userAccount.TelephoneNumber != null)

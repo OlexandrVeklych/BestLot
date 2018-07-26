@@ -28,17 +28,32 @@ namespace BestLot.WebAPI.Controllers
                 cfg.CreateMap<LotPhoto, LotPhotoModel>();
             }).CreateMapper();
             lotOperationsHandler = LogicDependencyResolver.ResloveLotOperationsHandler();
+            userAccountOperationsHandler = LogicDependencyResolver.ResloveUserAccountOperationsHandler();
         }
 
         private readonly ILotOperationsHandler lotOperationsHandler;
+        private readonly IUserAccountOperationsHandler userAccountOperationsHandler;
         private readonly IMapper mapper;
         // GET api/<controller>
         [Route("api/lots/{lotId}/comments")]
-        public IHttpActionResult Get(int lotId)
+        public IHttpActionResult Get(int lotId, int page, int amount)
         {
             try
             {
-                return Ok(mapper.Map<LotModel>(lotOperationsHandler.GetLot(lotId, lot => lot.LotComments)).LotComments);
+                return Ok(mapper.Map<IEnumerable<LotCommentModel>>(lotOperationsHandler.GetLot(lotId, lot => lot.LotComments).LotComments.Skip((page - 1) * amount).Take(amount)));
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Route("api/users/{email}/comments")]
+        public IHttpActionResult Get(string email, int page, int amount)
+        {
+            try
+            {
+                return Ok(mapper.Map<IEnumerable<LotCommentModel>>(userAccountOperationsHandler.GetUserAccount(email, user => user.LotComments).LotComments.Skip((page - 1) * amount).Take(amount)));
             }
             catch (ArgumentException ex)
             {
@@ -52,7 +67,7 @@ namespace BestLot.WebAPI.Controllers
         {
             try
             {
-                return Ok(mapper.Map<LotModel>(lotOperationsHandler.GetLot(lotId, lot => lot.LotComments)).LotComments[commentNumber]);
+                return Ok(mapper.Map<LotCommentModel>(lotOperationsHandler.GetLot(lotId, lot => lot.LotComments).LotComments[commentNumber]));
             }
             catch(IndexOutOfRangeException)
             {
@@ -80,7 +95,7 @@ namespace BestLot.WebAPI.Controllers
             {
                 return BadRequest(ex.Message);
             }
-            return Created();
+            return Ok();
         }
     }
 }

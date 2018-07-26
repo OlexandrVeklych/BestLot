@@ -13,6 +13,7 @@ namespace BestLot.DataAccessLayer.Entities
         public int Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
+        public string Category { get; set; }
         public string SellerUserId { get; set; }
         public UserAccountInfoEntity SellerUser { get; set; }
         public string BuyerUserId { get; set; }

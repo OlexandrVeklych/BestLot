@@ -18,6 +18,10 @@ namespace BestLot.WebAPI.Models
         [DataType(DataType.Text)]
         public string Description { get; set; }
 
+        [Required]
+        [DataType(DataType.Text)]
+        public string Category { get; set; }
+
         public string SellerUserId { get; set; }
         public UserAccountInfoModel SellerUser { get; set; }
         public string BuyerUserId { get; set; }

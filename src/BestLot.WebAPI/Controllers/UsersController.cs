@@ -34,10 +34,11 @@ namespace BestLot.WebAPI.Controllers
         private readonly IUserAccountOperationsHandler userAccountOperationsHandler;
         private readonly ILotOperationsHandler lotOperationsHandler;
         private readonly IMapper mapper;
+
         // GET api/<controller>
-        public IHttpActionResult Get()
+        public IHttpActionResult Get(int page, int amount)
         {
-            return Ok(mapper.Map<UserAccountInfoModel>(userAccountOperationsHandler.GetAllUserAccounts(user => user.LotComments, user => user.Lots)));
+            return Ok(mapper.Map<IEnumerable<UserAccountInfoModel>>(userAccountOperationsHandler.GetAllUserAccounts(user => user.LotComments, user => user.Lots).Skip((page - 1) * amount).Take(amount)));
         }
 
         // GET api/<controller>/5
@@ -56,7 +57,7 @@ namespace BestLot.WebAPI.Controllers
                 }
             try
             {
-                return Ok(mapper.Map<UserAccountInfoModel>(lotOperationsHandler.GetLot(id).SellerUser));
+                return Ok(mapper.Map<UserAccountInfoModel>(lotOperationsHandler.GetLot(id, lot => lot.SellerUser).SellerUser));
             }
             catch (ArgumentException ex)
             {
@@ -91,6 +92,8 @@ namespace BestLot.WebAPI.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+            if (value.Email != User.Identity.Name)
+                return BadRequest("Not allowed");
             try
             {
                 userAccountOperationsHandler.ChangeUserAccount(email, mapper.Map<UserAccountInfo>(value));

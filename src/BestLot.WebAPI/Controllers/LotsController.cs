@@ -37,18 +37,27 @@ namespace BestLot.WebAPI.Controllers
 
         // GET api/<controller>
         [AllowAnonymous]
-        public IHttpActionResult Get()
+        public IHttpActionResult Get(int page, int amount)
         {
-            return Ok(mapper.Map<IEnumerable<LotModel>>(lotOperationsHandler.GetAllLots(lot => lot.LotComments, lot => lot.LotPhotos, lot => lot.SellerUser)));
+            return Ok(mapper.Map<IEnumerable<LotModel>>(lotOperationsHandler.GetAllLots(lot => lot.LotComments, lot => lot.LotPhotos, lot => lot.SellerUser).Skip((page - 1) * amount).Take(amount)));
         }
 
         [AllowAnonymous]
         [Route("api/users/{email}/lots")]
-        public IHttpActionResult Get(string email)
+        public IHttpActionResult Get(string email, int page, int amount, string name = null, string category = null, double minPrice = 0, double maxPrice = 0)
         {
+            Func<LotModel, bool> predicate = null;
+            if (name != null)
+                predicate += lot => lot.Name == name;
+            if (category != null)
+                predicate += lot => lot.Category == category;
+            if (minPrice != 0)
+                predicate += lot => lot.Price > minPrice;
+            if (maxPrice != 0)
+                predicate += lot => lot.Price < maxPrice;
             try
             {
-                return Ok(mapper.Map<IEnumerable<LotModel>>(userAccountOperationsHandler.GetUserAccount(email, user => user.Lots).Lots));
+                return Ok(mapper.Map<IEnumerable<LotModel>>(userAccountOperationsHandler.GetUserAccount(email, user => user.Lots).Lots.Where(mapper.Map<Func<Lot, bool>>(predicate)).Skip((page - 1) * amount).Take(amount)));
             }
             catch(ArgumentException ex)
             {
@@ -57,16 +66,18 @@ namespace BestLot.WebAPI.Controllers
         }
 
         [AllowAnonymous]
-        public IHttpActionResult Get(string name = null, double minPrice = 0, double maxPrice = 0)
+        public IHttpActionResult Get(int page, int amount, string name = null, string category = null, double minPrice = 0, double maxPrice = 0)
         {
             Func<LotModel, bool> predicate = null;
             if (name != null)
                 predicate += lot => lot.Name == name;
+            if (category != null)
+                predicate += lot => lot.Category == category;
             if (minPrice != 0)
                 predicate += lot => lot.Price > minPrice;
             if (maxPrice != 0)
                 predicate += lot => lot.Price < maxPrice;
-            return Ok(mapper.Map<IQueryable<LotModel>>(lotOperationsHandler.GetAllLots(lot => lot.LotComments, lot => lot.LotPhotos, lot => lot.SellerUser)).Where(predicate));
+            return Ok(mapper.Map<IEnumerable<LotModel>>(lotOperationsHandler.GetAllLots(lot => lot.LotComments, lot => lot.LotPhotos, lot => lot.SellerUser).Where(mapper.Map<Func<Lot, bool>>(predicate)).Skip((page - 1) * amount).Take(amount)));
         }
         // GET api/<controller>/5
         [AllowAnonymous]
@@ -96,7 +107,7 @@ namespace BestLot.WebAPI.Controllers
             {
                 return BadRequest(ex.Message);
             }
-            return Created();
+            return Ok();
         }
 
         // PUT api/<controller>/5

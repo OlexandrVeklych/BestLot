@@ -45,14 +45,6 @@ namespace BestLot.DataAccessLayer.UnitOfWork
         public void SaveChanges()
         {
             LotContext.SaveChanges();
-            //try
-            //{
-            //    LotContext.SaveChanges();
-            //}
-            //catch(System.Data.Entity.Infrastructure.DbUpdateException)
-            //{
-            //    throw new ArgumentException("Wrong id");
-            //}
         }
 
         public void SaveArchiveChanges()
