@@ -344,6 +344,23 @@ namespace BestLot.WebAPI.Controllers
 
             IdentityResult result = await UserManager.CreateAsync(user, model.Password);
 
+            using (var context = new ApplicationDbContext())
+            {
+                var roleStore = new RoleStore<IdentityRole>(context);
+                var roleManager = new RoleManager<IdentityRole>(roleStore);
+
+                if (roleManager.FindByName(model.Role) == null)
+                    return BadRequest("Incorrect role");
+            }
+            try
+            {
+                await UserManager.AddToRoleAsync(user.Id, model.Role);
+            }
+
+            catch (Exception ex)
+            {
+                return (BadRequest(ex.StackTrace));
+            }
             if (!result.Succeeded)
             {
                 userAccountOperationsHandler.DeleteUserAccount(model.Email);

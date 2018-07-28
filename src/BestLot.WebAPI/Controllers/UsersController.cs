@@ -35,6 +35,7 @@ namespace BestLot.WebAPI.Controllers
         private readonly ILotOperationsHandler lotOperationsHandler;
         private readonly IMapper mapper;
 
+        [Authorize(Roles = "Admin")]
         // GET api/<controller>
         public IHttpActionResult Get(int page, int amount)
         {
@@ -97,6 +98,23 @@ namespace BestLot.WebAPI.Controllers
             try
             {
                 userAccountOperationsHandler.ChangeUserAccount(email, mapper.Map<UserAccountInfo>(value));
+                return Ok();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        // DELETE api/<controller>/5
+        [Route("api/users/{email}")]
+        public IHttpActionResult Delete(string email)
+        {
+            if (!User.IsInRole("Admin") && User.Identity.Name != email)
+                return BadRequest("Not allowed");
+            try
+            {
+                userAccountOperationsHandler.DeleteUserAccount(email);
                 return Ok();
             }
             catch (ArgumentException ex)

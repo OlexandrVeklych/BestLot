@@ -60,6 +60,10 @@ namespace BestLot.WebAPI.Models
         [Required]
         [DataType(DataType.PhoneNumber)]
         public string TelephoneNumber { get; set; }
+
+        [Required]
+        [DataType(DataType.Text)]
+        public string Role { get; set; }
     }
 
     public class RegisterExternalBindingModel

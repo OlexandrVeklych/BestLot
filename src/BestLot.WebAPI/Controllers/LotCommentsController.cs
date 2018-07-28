@@ -17,7 +17,6 @@ namespace BestLot.WebAPI.Controllers
     {
         public LotCommentsController()
         {
-            User.Identity.GetUserId();
             mapper = new MapperConfiguration(cfg =>
             {
                 cfg.CreateMap<LotModel, Lot>().MaxDepth(1);
@@ -48,6 +47,7 @@ namespace BestLot.WebAPI.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [Route("api/users/{email}/comments")]
         public IHttpActionResult Get(string email, int page, int amount)
         {
