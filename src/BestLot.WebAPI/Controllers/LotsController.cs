@@ -12,6 +12,7 @@ using AutoMapper;
 using System.IO;
 using System.Web;
 using System.Drawing;
+using AutoMapper.QueryableExtensions;
 
 namespace BestLot.WebAPI.Controllers
 {
@@ -39,11 +40,11 @@ namespace BestLot.WebAPI.Controllers
         private readonly IMapper mapper;
 
         // GET api/<controller>
-        [AllowAnonymous]
-        public IHttpActionResult Get(int page, int amount)
-        {
-            return Ok(mapper.Map<IEnumerable<LotModel>>(lotOperationsHandler.GetAllLots(lot => lot.LotComments, lot => lot.LotPhotos, lot => lot.SellerUser).Skip((page - 1) * amount).Take(amount)));
-        }
+        //[AllowAnonymous]
+        //public IHttpActionResult Get(int page, int amount)
+        //{
+        //    return Ok(lotOperationsHandler.GetAllLots(lot => lot.LotComments, lot => lot.LotPhotos, lot => lot.SellerUser).Skip((page - 1) * amount).Take(amount).ProjectTo<LotModel>(mapper.ConfigurationProvider));
+        //}
 
         [AllowAnonymous]
         [Route("api/users/{email}/lots")]
@@ -71,7 +72,7 @@ namespace BestLot.WebAPI.Controllers
         [AllowAnonymous]
         public IHttpActionResult Get(int page, int amount, string name = null, string category = null, double minPrice = 0, double maxPrice = 0)
         {
-            Func<LotModel, bool> predicate = null;
+            Func<Lot, bool> predicate = null;
             if (name != null)
                 predicate += lot => lot.Name == name;
             if (category != null)
@@ -80,7 +81,9 @@ namespace BestLot.WebAPI.Controllers
                 predicate += lot => lot.Price > minPrice;
             if (maxPrice != 0)
                 predicate += lot => lot.Price < maxPrice;
-            return Ok(mapper.Map<IEnumerable<LotModel>>(lotOperationsHandler.GetAllLots(lot => lot.LotComments, lot => lot.LotPhotos, lot => lot.SellerUser).Where(mapper.Map<Func<Lot, bool>>(predicate)).Skip((page - 1) * amount).Take(amount)));
+            //if (predicate != null)
+            //    return Ok(lotOperationsHandler.GetAllLots(lot => lot.LotComments, lot => lot.LotPhotos, lot => lot.SellerUser).Where(predicate).Skip((page - 1) * amount).Take(amount).AsQueryable().ProjectTo<LotModel>(mapper.ConfigurationProvider));
+            return Ok(mapper.Map<IEnumerable<LotModel>>(lotOperationsHandler.GetAllLots(lot => lot.LotComments, lot => lot.LotPhotos, lot => lot.SellerUser).AsEnumerable().Skip((page - 1) * amount).Take(amount)));
         }
         // GET api/<controller>/5
         [AllowAnonymous]

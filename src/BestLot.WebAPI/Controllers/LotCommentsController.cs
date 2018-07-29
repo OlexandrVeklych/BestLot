@@ -79,6 +79,7 @@ namespace BestLot.WebAPI.Controllers
             }
         }
 
+        [Authorize]
         // POST api/<controller>
         [Route("api/lots/{lotId}/comments")]
         public IHttpActionResult Post([FromUri]int lotId, [FromBody]LotCommentModel value)

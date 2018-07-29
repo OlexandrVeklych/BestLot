@@ -39,7 +39,7 @@ namespace BestLot.WebAPI.Controllers
         // GET api/<controller>
         public IHttpActionResult Get(int page, int amount)
         {
-            return Ok(mapper.Map<IEnumerable<UserAccountInfoModel>>(userAccountOperationsHandler.GetAllUserAccounts(user => user.LotComments, user => user.Lots).Skip((page - 1) * amount).Take(amount)));
+            return Ok(mapper.Map<IEnumerable<UserAccountInfoModel>>(userAccountOperationsHandler.GetAllUserAccounts(user => user.LotComments, user => user.Lots).AsEnumerable().Skip((page - 1) * amount).Take(amount)));
         }
 
         // GET api/<controller>/5
