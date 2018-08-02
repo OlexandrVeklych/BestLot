@@ -39,7 +39,20 @@ namespace BestLot.WebAPI.Controllers
         // GET api/<controller>
         public IHttpActionResult Get(int page, int amount)
         {
-            return Ok(mapper.Map<IEnumerable<UserAccountInfoModel>>(userAccountOperationsHandler.GetAllUserAccounts(user => user.LotComments, user => user.Lots).AsEnumerable().Skip((page - 1) * amount).Take(amount)));
+            return Ok(mapper.Map<IEnumerable<UserAccountInfoModel>>(userAccountOperationsHandler.GetAllUserAccounts(user => user.LotComments, user => user.Lots).OrderBy(user => user.Email).Skip((page - 1) * amount).Take(amount).AsEnumerable()));
+        }
+
+        [Route("api/currentuser")]
+        public IHttpActionResult GetCurrentUser()
+        {
+            try
+            {
+                return Ok(mapper.Map<UserAccountInfoModel>(userAccountOperationsHandler.GetUserAccount(User.Identity.Name, user => user.Lots, user => user.LotComments)));
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         // GET api/<controller>/5
@@ -81,8 +94,8 @@ namespace BestLot.WebAPI.Controllers
         }
 
         // POST api/<controller>
-        [Route("api/users/{email}")]
-        public IHttpActionResult Post([FromBody]string value)
+        [Route("api/users/")]
+        public IHttpActionResult Post([FromBody]UserAccountInfoModel value)
         {
             return BadRequest("Use registration to add user");
         }
@@ -93,7 +106,7 @@ namespace BestLot.WebAPI.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
-            if (value.Email != User.Identity.Name)
+            if (value.Email != User.Identity.Name || email != User.Identity.Name)
                 return BadRequest("Not allowed");
             try
             {

@@ -13,6 +13,7 @@ using System.IO;
 using System.Web;
 using System.Drawing;
 using AutoMapper.QueryableExtensions;
+using System.Linq.Expressions;
 
 namespace BestLot.WebAPI.Controllers
 {
@@ -40,6 +41,21 @@ namespace BestLot.WebAPI.Controllers
         private readonly IMapper mapper;
 
         // GET api/<controller>
+        [AllowAnonymous]
+        public IHttpActionResult Get(int page, int amount, string name = null, string category = null, double minPrice = 0, double maxPrice = 0)
+        {
+            IQueryable<Lot> result = lotOperationsHandler.GetAllLots(lot => lot.LotComments, lot => lot.LotPhotos, lot => lot.SellerUser);
+            Expression<Func<Lot, bool>> predicate = null;
+            if (name != null)
+                result.Where(predicate = lot => lot.Name == name);
+            if (category != null)
+                result.Where(predicate = lot => lot.Category == category);
+            if (minPrice != 0)
+                result.Where(predicate = lot => lot.Price > minPrice);
+            if (maxPrice != 0)
+                result.Where(predicate = lot => lot.Price < maxPrice);
+            return Ok(mapper.Map<IEnumerable<LotModel>>(result.OrderBy(lot => lot.Id).Skip((page - 1) * amount).Take(amount).AsEnumerable()));
+        }
         //[AllowAnonymous]
         //public IHttpActionResult Get(int page, int amount)
         //{
@@ -50,41 +66,27 @@ namespace BestLot.WebAPI.Controllers
         [Route("api/users/{email}/lots")]
         public IHttpActionResult Get(string email, int page, int amount, string name = null, string category = null, double minPrice = 0, double maxPrice = 0)
         {
-            Func<LotModel, bool> predicate = null;
+            IQueryable<Lot> result = userAccountOperationsHandler.GetUserAccount(email, user => user.LotComments).Lots.AsQueryable();
+            Expression<Func<Lot, bool>> predicate = null;
             if (name != null)
-                predicate += lot => lot.Name == name;
+                result.Where(predicate = lot => lot.Name == name);
             if (category != null)
-                predicate += lot => lot.Category == category;
+                result.Where(predicate = lot => lot.Category == category);
             if (minPrice != 0)
-                predicate += lot => lot.Price > minPrice;
+                result.Where(predicate = lot => lot.Price > minPrice);
             if (maxPrice != 0)
-                predicate += lot => lot.Price < maxPrice;
+                result.Where(predicate = lot => lot.Price < maxPrice);
             try
             {
-                return Ok(mapper.Map<IEnumerable<LotModel>>(userAccountOperationsHandler.GetUserAccount(email, user => user.Lots).Lots.Where(mapper.Map<Func<Lot, bool>>(predicate)).Skip((page - 1) * amount).Take(amount)));
+                return Ok(mapper.Map<IEnumerable<LotModel>>(result.OrderBy(lot => lot.Id).Skip((page - 1) * amount).Take(amount).AsEnumerable()));
             }
-            catch(ArgumentException ex)
+            catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
             }
         }
 
-        [AllowAnonymous]
-        public IHttpActionResult Get(int page, int amount, string name = null, string category = null, double minPrice = 0, double maxPrice = 0)
-        {
-            Func<Lot, bool> predicate = null;
-            if (name != null)
-                predicate += lot => lot.Name == name;
-            if (category != null)
-                predicate += lot => lot.Category == category;
-            if (minPrice != 0)
-                predicate += lot => lot.Price > minPrice;
-            if (maxPrice != 0)
-                predicate += lot => lot.Price < maxPrice;
-            //if (predicate != null)
-            //    return Ok(lotOperationsHandler.GetAllLots(lot => lot.LotComments, lot => lot.LotPhotos, lot => lot.SellerUser).Where(predicate).Skip((page - 1) * amount).Take(amount).AsQueryable().ProjectTo<LotModel>(mapper.ConfigurationProvider));
-            return Ok(mapper.Map<IEnumerable<LotModel>>(lotOperationsHandler.GetAllLots(lot => lot.LotComments, lot => lot.LotPhotos, lot => lot.SellerUser).AsEnumerable().Skip((page - 1) * amount).Take(amount)));
-        }
+
         // GET api/<controller>/5
         [AllowAnonymous]
         public IHttpActionResult Get(int id)
@@ -114,34 +116,78 @@ namespace BestLot.WebAPI.Controllers
             {
                 return BadRequest(ex.Message);
             }
+            catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
             return Ok();
         }
 
         private void SavePhotos(LotModel lot)
         {
-            if (HttpContext.Current.Request.Files.Count == 0)
-                return;
-            string currentDirectory = AppDomain.CurrentDomain.GetData("DataDirectory").ToString() + "\\LotPhotos\\" + lot.SellerUserId;
-            for (int i = 0; i < HttpContext.Current.Request.Files.Count; i++)
+            string currentDirectory = System.Web.Hosting.HostingEnvironment.MapPath(@"~/Photos/") + lot.SellerUserId;
+            if (!Directory.Exists(currentDirectory))
+                Directory.CreateDirectory(currentDirectory);
+            for (int i = 0; i < lot.LotPhotos.Count; i++)
             {
-                byte[] fileData = null;
-                using (var binaryReader = new BinaryReader(HttpContext.Current.Request.Files[0].InputStream))
-                {
-                    fileData = binaryReader.ReadBytes(HttpContext.Current.Request.Files[0].ContentLength);
-                }
-
-                Image photo;
-
-                using (var ms = new MemoryStream(fileData))
-                {
-                    photo = Image.FromStream(ms);
-                }
-                string path = currentDirectory + "\\" + lot.Name + "_" + DateTime.Now.ToFileTime() + "_" + i + ".jpeg";
-                photo.Save(path, System.Drawing.Imaging.ImageFormat.Jpeg);
-
-                lot.LotPhotos[0].Path = path;
+                if (lot.LotPhotos[i].Path.Count() < 1)
+                    throw new Exception("Path count < 1");
+                byte[] photoBytes = Convert.FromBase64String(lot.LotPhotos[i].Path);
+                string photoPath = currentDirectory + "\\" + lot.Name + "_" + DateTime.Now.ToFileTime() + ".jpeg";
+                File.WriteAllBytes(photoPath, photoBytes);
+                lot.LotPhotos[i].Path = photoPath.Replace(currentDirectory, Request.RequestUri.GetLeftPart(UriPartial.Authority) + "\\Photos\\" + lot.SellerUserId);
             }
+        
+
+
+            //if (!Request.Content.IsMimeMultipartContent())
+            //    throw new HttpResponseException(HttpStatusCode.UnsupportedMediaType);
+            //
+            //var provider = new MultipartMemoryStreamProvider();
+            //await Request.Content.ReadAsMultipartAsync(provider);
+            //string currentDirectory = System.Web.Hosting.HostingEnvironment.MapPath(@"~/App_Data") + @"/LotPhotos/" + lot.SellerUserId;
+            //if (!Directory.Exists(currentDirectory))
+            //    Directory.CreateDirectory(currentDirectory);
+            //for (int i = 0; i < provider.Contents.Count; i++)
+            //{
+            //    var buffer = await provider.Contents[0].ReadAsByteArrayAsync();
+            //    Image photo;
+            //
+            //    using (var ms = new MemoryStream(buffer))
+            //    {
+            //        photo = Image.FromStream(ms);
+            //    }
+            //    string path = currentDirectory + @"/" + lot.Name + "_" + DateTime.Now.ToFileTime() + "_" + i + ".jpeg";
+            //    photo.Save(path, System.Drawing.Imaging.ImageFormat.Jpeg);
+            //
+            //    lot.LotPhotos[i].Path = path;
+            //}
+
+            //if (HttpContext.Current.Request.Files.Count == 0)
+            //    throw new ArgumentException("No files");
+            //string currentDirectory = System.Web.Hosting.HostingEnvironment.MapPath(@"~/App_Data") + @"/LotPhotos/" + lot.SellerUserId;
+            //if (!Directory.Exists(currentDirectory))
+            //    Directory.CreateDirectory(currentDirectory);
+            //for (int i = 0; i < HttpContext.Current.Request.Files.Count; i++)
+            //{
+            //    byte[] fileData = null;
+            //    using (var binaryReader = new BinaryReader(HttpContext.Current.Request.Files[0].InputStream))
+            //    {
+            //        fileData = binaryReader.ReadBytes(HttpContext.Current.Request.Files[0].ContentLength);
+            //    }
+            //
+            //    Image photo;
+            //
+            //    using (var ms = new MemoryStream(fileData))
+            //    {
+            //        photo = Image.FromStream(ms);
+            //    }
+            //    string path = currentDirectory + "\\" + lot.Name + "_" + DateTime.Now.ToFileTime() + "_" + i + ".jpeg";
+            //    photo.Save(path, System.Drawing.Imaging.ImageFormat.Jpeg);
+            //
+            //    lot.LotPhotos[i].Path = path;
         }
+        
 
         // PUT api/<controller>/5
         public IHttpActionResult Put(int id, [FromBody]LotModel value)

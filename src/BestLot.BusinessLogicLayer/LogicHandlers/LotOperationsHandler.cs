@@ -9,6 +9,7 @@ using BestLot.BusinessLogicLayer.Models;
 using AutoMapper;
 using System.Linq.Expressions;
 using AutoMapper.QueryableExtensions;
+using System.IO;
 
 namespace BestLot.BusinessLogicLayer.LogicHandlers
 {
@@ -110,8 +111,10 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
 
         public void DeleteLot(int lotId)
         {
-            if (UoW.Lots.Get(lotId) == null)
+            Lot lot;
+            if ((lot = mapper.Map<Lot>(UoW.Lots.Get(lotId))) == null)
                 throw new ArgumentException("Lot id is incorrect");
+            DeleteLotPhotos(lot);
             UoW.Lots.Delete(lotId);
             UoW.SaveChanges();
         }
@@ -122,6 +125,17 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
                 throw new ArgumentException("Lot id is incorrect");
             UoW.Lots.Delete(lotId);
             await UoW.SaveChangesAsync();
+        }
+
+        private void DeleteLotPhotos(Lot lot)
+        {
+            foreach(LotPhoto lotPhoto in lot.LotPhotos)
+            {
+                if (lotPhoto.Path.Contains("http://localhost:63959"))
+                    File.Delete(lotPhoto.Path.Replace("http://localhost:63959", @"C:\VS Projects\EPAM\BestLot\src\BestLot.WebAPI"));
+                else
+                    File.Delete(lotPhoto.Path);
+            }
         }
 
         public Lot GetLot(int lotId, params Expression<Func<Lot, object>>[] includeProperties)
