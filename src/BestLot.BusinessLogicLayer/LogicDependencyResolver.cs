@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BestLot.BusinessLogicLayer.Interfaces;
 using BestLot.BusinessLogicLayer.LogicHandlers;
 using BestLot.DataAccessLayer.UnitOfWork;
 
@@ -28,6 +29,16 @@ namespace BestLot.BusinessLogicLayer
         public static IUserAccountOperationsHandler ResloveUserAccountOperationsHandler()
         {
             return new UserAccountOperationsHandler(ResolveUnitOfWork());
+        }
+
+        public static ILotCommentsOperationsHandler ResloveLotCommentsOperationsHandler()
+        {
+            return new LotCommentsOperationsHandler(ResolveUnitOfWork());
+        }
+
+        public static ILotPhotosOperationsHandler ResloveLotPhotosOperationsHandler()
+        {
+            return new LotPhotoOperationsHandler(ResolveUnitOfWork());
         }
     }
 }

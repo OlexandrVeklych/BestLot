@@ -9,7 +9,7 @@ using BestLot.BusinessLogicLayer.Models;
 using AutoMapper;
 using System.Linq.Expressions;
 using AutoMapper.QueryableExtensions;
-using System.IO;
+using BestLot.BusinessLogicLayer.Interfaces;
 
 namespace BestLot.BusinessLogicLayer.LogicHandlers
 {
@@ -36,35 +36,38 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
                 cfg.CreateMap<UserAccountInfoEntity, UserAccountInfo>();
                 cfg.CreateMap<Expression<Func<Lot, object>>[], Expression<Func<LotEntity, object>>[]>();
             }).CreateMapper();
+            lotPhotosOperationsHandler = LogicDependencyResolver.ResloveLotPhotosOperationsHandler();
         }
-
+        private ILotPhotosOperationsHandler lotPhotosOperationsHandler;
         private IUnitOfWork UoW;
         private IMapper mapper;
 
-        public void AddLot(Lot lot)
+        public void AddLot(Lot lot, string hostingEnvironmentPath, string requestUriLeftPart)
         {
             if (UoW.UserAccounts.Get(lot.SellerUserId) == null)
                 throw new ArgumentException("Seller user id is incorrect");
             lot.StartDate = DateTime.Now;
             lot.BuyerUserId = null;
+            lotPhotosOperationsHandler.AddPhotosToNewLot(lot, hostingEnvironmentPath, requestUriLeftPart);
             UoW.Lots.Add(mapper.Map<LotEntity>(lot));
             UoW.SaveChanges();
         }
 
-        public async Task AddLotAsync(Lot lot)
+        public async Task AddLotAsync(Lot lot, string hostingEnvironmentPath, string requestUriLeftPart)
         {
             if (await UoW.UserAccounts.GetAsync(lot.SellerUserId) == null)
                 throw new ArgumentException("Seller user id is incorrect");
             lot.StartDate = DateTime.Now;
             lot.BuyerUserId = null;
+            await lotPhotosOperationsHandler.AddPhotosToNewLotAsync(lot, hostingEnvironmentPath, requestUriLeftPart);
             UoW.Lots.Add(mapper.Map<LotEntity>(lot));
             await UoW.SaveChangesAsync();
         }
 
-        public void ChangeLot(int id, Lot newLot)
+        public void ChangeLot(int id, Lot newLot, string hostingEnvironmentPath, string requestUriLeftPart)
         {
             if (UoW.Lots.Get(id) == null)
-                AddLot(newLot);
+                AddLot(newLot, hostingEnvironmentPath, requestUriLeftPart);
             else
             {
                 Lot currentLot = mapper.Map<Lot>(UoW.Lots.Get(id));
@@ -78,10 +81,10 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             }
         }
 
-        public async Task ChangeLotAsync(int id, Lot newLot)
+        public async Task ChangeLotAsync(int id, Lot newLot, string hostingEnvironmentPath, string requestUriLeftPart)
         {
             if (await UoW.Lots.GetAsync(id) == null)
-                await AddLotAsync(newLot);
+                await AddLotAsync(newLot, hostingEnvironmentPath, requestUriLeftPart);
             else
             {
                 Lot currentLot = mapper.Map<Lot>(await UoW.Lots.GetAsync(id));
@@ -96,47 +99,65 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         }
 
         //id of newLot is correct, don`t check it again
-        private void ChangeLot(Lot newLot)
+        public void ChangeLotUnsafe(Lot newLot)
         {
             UoW.Lots.Modify(newLot.Id, mapper.Map<LotEntity>(newLot));
             UoW.SaveChanges();
         }
 
         //id of newLot is correct, don`t check it again
-        private async Task ChangeLotAsync(Lot newLot)
+        public async Task ChangeLotUnsafeAsync(Lot newLot)
         {
             UoW.Lots.Modify(newLot.Id, mapper.Map<LotEntity>(newLot));
             await UoW.SaveChangesAsync();
         }
 
-        public void DeleteLot(int lotId)
+        public void DeleteLot(int lotId, string hostingEnvironmentPath, string requestUriLeftPart)
         {
             Lot lot;
             if ((lot = mapper.Map<Lot>(UoW.Lots.Get(lotId))) == null)
                 throw new ArgumentException("Lot id is incorrect");
-            DeleteLotPhotos(lot);
+            foreach(LotPhoto lotPhoto in lot.LotPhotos)
+                lotPhotosOperationsHandler.DeletePhoto(lotPhoto.Id, hostingEnvironmentPath, requestUriLeftPart);
             UoW.Lots.Delete(lotId);
             UoW.SaveChanges();
         }
 
-        public async Task DeleteLotAsync(int lotId)
+        public async Task DeleteLotAsync(int lotId, string hostingEnvironmentPath, string requestUriLeftPart)
         {
-            if (await UoW.Lots.GetAsync(lotId) == null)
+            Lot lot;
+            if ((lot = mapper.Map<Lot>(await UoW.Lots.GetAsync(lotId))) == null)
                 throw new ArgumentException("Lot id is incorrect");
+            foreach (LotPhoto lotPhoto in lot.LotPhotos)
+                await lotPhotosOperationsHandler.DeletePhotoAsync(lotPhoto.Id, hostingEnvironmentPath, requestUriLeftPart);
             UoW.Lots.Delete(lotId);
             await UoW.SaveChangesAsync();
         }
-
-        private void DeleteLotPhotos(Lot lot)
-        {
-            foreach(LotPhoto lotPhoto in lot.LotPhotos)
-            {
-                if (lotPhoto.Path.Contains("http://localhost:63959"))
-                    File.Delete(lotPhoto.Path.Replace("http://localhost:63959", @"C:\VS Projects\EPAM\BestLot\src\BestLot.WebAPI"));
-                else
-                    File.Delete(lotPhoto.Path);
-            }
-        }
+        
+        //private void DeleteLotPhotos(Lot lot, string hostingEnvironmentPath, string requestUriLeftPart)
+        //{
+        //    foreach(LotPhoto lotPhoto in lot.LotPhotos)
+        //    {
+        //        if (lotPhoto.Path.Contains(requestUriLeftPart))
+        //            File.Delete(lotPhoto.Path.Replace(requestUriLeftPart, hostingEnvironmentPath));
+        //        else
+        //            File.Delete(lotPhoto.Path);
+        //    }
+        //}
+        //
+        //private async Task DeleteLotPhotosAsync(Lot lot, string hostingEnvironmentPath, string requestUriLeftPart)
+        //{
+        //    await new Task(() =>
+        //    {
+        //        foreach (LotPhoto lotPhoto in lot.LotPhotos)
+        //        {
+        //            if (lotPhoto.Path.Contains(requestUriLeftPart))
+        //                File.Delete(lotPhoto.Path.Replace(requestUriLeftPart, hostingEnvironmentPath));
+        //            else
+        //                File.Delete(lotPhoto.Path);
+        //        }
+        //    });
+        //}
 
         public Lot GetLot(int lotId, params Expression<Func<Lot, object>>[] includeProperties)
         {
@@ -178,7 +199,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             lot.Price = price;
 
             //private ChangeLot, without checking LotId
-            ChangeLot(lot);
+            ChangeLotUnsafe(lot);
         }
 
         public async Task PlaceBetAsync(string buyerUserId, int lotId, double price)
@@ -194,33 +215,94 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             lot.Price = price;
 
             //private ChangeLot, without checking LotId
-            await ChangeLotAsync(lot);
+            await ChangeLotUnsafeAsync(lot);
         }
 
-        public void AddComment(LotComment lotComment)
-        {
-            if (UoW.UserAccounts.Get(lotComment.UserId) == null)
-                throw new ArgumentException("User id is incorrect");
-            Lot lot = mapper.Map<Lot>(UoW.Lots.Get(lotComment.LotId, l => l.LotPhotos, l => l.LotComments, l => l.SellerUser));
-            if (lot == null)
-                throw new ArgumentException("Lot id is incorrect");
-            lot.AddComment(lotComment);
-            UoW.LotComments.Add(mapper.Map<LotCommentEntity>(lotComment));
-            //private ChangeLot, without checking LotId
-            ChangeLot(lot);
-        }
-
-        public async Task AddCommentAsync(LotComment lotComment)
-        {
-            if (await UoW.UserAccounts.GetAsync(lotComment.UserId) == null)
-                throw new ArgumentException("User id is incorrect");
-            Lot lot = mapper.Map<Lot>(await UoW.Lots.GetAsync(lotComment.LotId, l => l.LotPhotos, l => l.LotComments, l => l.SellerUser));
-            if (lot == null)
-                throw new ArgumentException("Lot id is incorrect");
-            lot.AddComment(lotComment);
-            UoW.LotComments.Add(mapper.Map<LotCommentEntity>(lotComment));
-            //private ChangeLot, without checking LotId
-            await ChangeLotAsync(lot);
-        }
+        //public void AddPhotos(int lotId, LotPhoto[] lotPhotos, string hostingEnvironmentPath, string requestUriLeftPart)
+        //{
+        //    Lot lot = mapper.Map<Lot>(UoW.Lots.Get(lotId));
+        //    string currentDirectory = hostingEnvironmentPath + "\\Photos\\" + lot.SellerUserId;
+        //    if (!Directory.Exists(currentDirectory))
+        //        Directory.CreateDirectory(currentDirectory);
+        //    for (int i = 0; i < lotPhotos.Length; i++)
+        //    {
+        //        byte[] photoBytes = Convert.FromBase64String(lotPhotos[i].Path);
+        //        string photoPath = currentDirectory + "\\" + lot.Name + "_" + DateTime.Now.ToFileTime() + ".jpeg";
+        //        File.WriteAllBytes(photoPath, photoBytes);
+        //        lotPhotos[i].Path = photoPath.Replace(hostingEnvironmentPath, requestUriLeftPart);
+        //        lot.AddPhoto(lotPhotos[i]);
+        //        UoW.LotPhotos.Add(mapper.Map<LotPhotoEntity>(lotPhotos[i]));
+        //    }
+        //    ChangeLotUnsafe(lot);
+        //}
+        //
+        //public async Task AddPhotosAsync(int lotId, LotPhoto[] lotPhotos, string hostingEnvironmentPath, string requestUriLeftPart)
+        //{
+        //    Lot lot = mapper.Map<Lot>(await UoW.Lots.GetAsync(lotId));
+        //    string currentDirectory = hostingEnvironmentPath + "\\Photos\\" + lot.SellerUserId;
+        //    if (!Directory.Exists(currentDirectory))
+        //        Directory.CreateDirectory(currentDirectory);
+        //    for (int i = 0; i < lotPhotos.Length; i++)
+        //    {
+        //        byte[] photoBytes = Convert.FromBase64String(lotPhotos[i].Path);
+        //        string photoPath = currentDirectory + "\\" + lot.Name + "_" + DateTime.Now.ToFileTime() + ".jpeg";
+        //        File.WriteAllBytes(photoPath, photoBytes);
+        //        lotPhotos[i].Path = photoPath.Replace(hostingEnvironmentPath, requestUriLeftPart);
+        //        lot.AddPhoto(lotPhotos[i]);
+        //        UoW.LotPhotos.Add(mapper.Map<LotPhotoEntity>(lotPhotos[i]));
+        //    }
+        //    await ChangeLotUnsafeAsync(lot);
+        //}
+        //
+        //private void AddPhotos(Lot lot, string hostingEnvironmentPath, string requestUriLeftPart)
+        //{
+        //    string currentDirectory = hostingEnvironmentPath + "\\Photos\\" + lot.SellerUserId;
+        //    if (!Directory.Exists(currentDirectory))
+        //        Directory.CreateDirectory(currentDirectory);
+        //    for (int i = 0; i < lot.LotPhotos.Count; i++)
+        //    {
+        //        byte[] photoBytes = Convert.FromBase64String(lot.LotPhotos[i].Path);
+        //        string photoPath = currentDirectory + "\\" + lot.Name + "_" + DateTime.Now.ToFileTime() + ".jpeg";
+        //        File.WriteAllBytes(photoPath, photoBytes);
+        //        lot.LotPhotos[i].Path = photoPath.Replace(hostingEnvironmentPath, requestUriLeftPart);
+        //    }
+        //}
+        //
+        //private async Task AddPhotosAsync(Lot lot, string hostingEnvironmentPath, string requestUriLeftPart)
+        //{
+        //    await new Task(() =>
+        //    {
+        //        string currentDirectory = hostingEnvironmentPath + "\\Photos\\" + lot.SellerUserId;
+        //        if (!Directory.Exists(currentDirectory))
+        //            Directory.CreateDirectory(currentDirectory);
+        //        for (int i = 0; i < lot.LotPhotos.Count; i++)
+        //        {
+        //            byte[] photoBytes = Convert.FromBase64String(lot.LotPhotos[i].Path);
+        //            string photoPath = currentDirectory + "\\" + lot.Name + "_" + DateTime.Now.ToFileTime() + ".jpeg";
+        //            File.WriteAllBytes(photoPath, photoBytes);
+        //            lot.LotPhotos[i].Path = photoPath.Replace(hostingEnvironmentPath, requestUriLeftPart);
+        //        }
+        //    });
+        //}
+        //
+        //public void DeletePhoto(int photoId, string hostingEnvironmentPath, string requestUriLeftPart)
+        //{
+        //    LotPhoto lotPhoto;
+        //    if ((lotPhoto = mapper.Map<LotPhoto>(UoW.LotPhotos.Get(photoId))) == null)
+        //        throw new ArgumentException("Photo id is incorrect");
+        //    File.Delete(lotPhoto.Path.Replace(requestUriLeftPart, hostingEnvironmentPath));
+        //    UoW.LotPhotos.Delete(photoId);
+        //    UoW.SaveChanges();
+        //}
+        //
+        //public async Task DeletePhotoAsync(int photoId, string hostingEnvironmentPath, string requestUriLeftPart)
+        //{
+        //    LotPhoto lotPhoto;
+        //    if ((lotPhoto = mapper.Map<LotPhoto>(await UoW.LotPhotos.GetAsync(photoId))) == null)
+        //        throw new ArgumentException("Photo id is incorrect");
+        //    File.Delete(lotPhoto.Path.Replace(requestUriLeftPart, hostingEnvironmentPath));
+        //    UoW.LotPhotos.Delete(photoId);
+        //    await UoW.SaveChangesAsync();
+        //}
     }
 }

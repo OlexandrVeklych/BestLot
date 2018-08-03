@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BestLot.BusinessLogicLayer.Models;
 
-namespace BestLot.BusinessLogicLayer.LogicHandlers
+namespace BestLot.BusinessLogicLayer.Interfaces
 {
     public interface IUserAccountOperationsHandler
     {
@@ -16,6 +16,8 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         Task ChangeUserAccountAsync(string id, UserAccountInfo newUserAccount);
         void DeleteUserAccount(string userAccountId);
         Task DeleteUserAccountAsync(string userAccountId);
+        void DeleteUserPhotos(string userAccountId);
+        Task DeleteUserPhotosAsync(string userAccountId);
         UserAccountInfo GetUserAccount(string userAccountId, params Expression<Func<UserAccountInfo, object>>[] includeProperties);
         Task<UserAccountInfo> GetUserAccountAsync(string userAccountId, params Expression<Func<UserAccountInfo, object>>[] includeProperties);
         IQueryable<UserAccountInfo> GetAllUserAccounts(params Expression<Func<UserAccountInfo, object>>[] includeProperties);

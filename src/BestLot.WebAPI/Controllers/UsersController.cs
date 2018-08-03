@@ -4,7 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
-using BestLot.BusinessLogicLayer.LogicHandlers;
+using BestLot.BusinessLogicLayer.Interfaces;
 using BestLot.BusinessLogicLayer.Models;
 using BestLot.BusinessLogicLayer;
 using BestLot.WebAPI.Models;
@@ -37,9 +37,14 @@ namespace BestLot.WebAPI.Controllers
 
         [Authorize(Roles = "Admin")]
         // GET api/<controller>
+        [Route("api/users")]
         public IHttpActionResult Get(int page, int amount)
         {
-            return Ok(mapper.Map<IEnumerable<UserAccountInfoModel>>(userAccountOperationsHandler.GetAllUserAccounts(user => user.LotComments, user => user.Lots).OrderBy(user => user.Email).Skip((page - 1) * amount).Take(amount).AsEnumerable()));
+            return Ok(mapper.Map<IEnumerable<UserAccountInfoModel>>(userAccountOperationsHandler
+                .GetAllUserAccounts()
+                .OrderBy(user => user.Email)
+                .Skip((page - 1) * amount)
+                .Take(amount).AsEnumerable()));
         }
 
         [Route("api/currentuser")]
@@ -47,7 +52,8 @@ namespace BestLot.WebAPI.Controllers
         {
             try
             {
-                return Ok(mapper.Map<UserAccountInfoModel>(userAccountOperationsHandler.GetUserAccount(User.Identity.Name, user => user.Lots, user => user.LotComments)));
+                return Ok(mapper.Map<UserAccountInfoModel>(userAccountOperationsHandler
+                    .GetUserAccount(User.Identity.Name)));
             }
             catch (ArgumentException ex)
             {
@@ -63,7 +69,8 @@ namespace BestLot.WebAPI.Controllers
             if (Request.RequestUri.OriginalString.Contains("buyeruser"))
                 try
                 {
-                    return Ok(mapper.Map<UserAccountInfoModel>(userAccountOperationsHandler.GetUserAccount(lotOperationsHandler.GetLot(id).BuyerUserId)));
+                    return Ok(mapper.Map<UserAccountInfoModel>(userAccountOperationsHandler
+                        .GetUserAccount(lotOperationsHandler.GetLot(id).BuyerUserId)));
                 }
                 catch (ArgumentException ex)
                 {
@@ -71,7 +78,8 @@ namespace BestLot.WebAPI.Controllers
                 }
             try
             {
-                return Ok(mapper.Map<UserAccountInfoModel>(lotOperationsHandler.GetLot(id, lot => lot.SellerUser).SellerUser));
+                return Ok(mapper.Map<UserAccountInfoModel>(userAccountOperationsHandler
+                    .GetUserAccount(lotOperationsHandler.GetLot(id).SellerUserId)));
             }
             catch (ArgumentException ex)
             {
@@ -94,7 +102,7 @@ namespace BestLot.WebAPI.Controllers
         }
 
         // POST api/<controller>
-        [Route("api/users/")]
+        [Route("api/users")]
         public IHttpActionResult Post([FromBody]UserAccountInfoModel value)
         {
             return BadRequest("Use registration to add user");
@@ -106,7 +114,7 @@ namespace BestLot.WebAPI.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
-            if (value.Email != User.Identity.Name || email != User.Identity.Name)
+            if (value.Email != User.Identity.Name || email != value.Email)
                 return BadRequest("Not allowed");
             try
             {

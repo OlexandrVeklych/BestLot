@@ -10,6 +10,8 @@ using AutoMapper;
 using System.Linq.Expressions;
 using AutoMapper.QueryableExtensions;
 using System.Net.Mail;
+using System.IO;
+using BestLot.BusinessLogicLayer.Interfaces;
 
 namespace BestLot.BusinessLogicLayer.LogicHandlers
 {
@@ -23,7 +25,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
                 //MaxDepth(1) - to map User inside Lot without his Lots
                 //Lot.User.Name - ok
                 //Lot.User.Lots[n] - null reference
-                cfg.CreateMap<LotEntity, Lot>().MaxDepth(1);
+                cfg.CreateMap<LotEntity, Lot>();
                 cfg.CreateMap<Lot, LotEntity>();
                 //MaxDepth(1) - to map User inside Comment without his Lots
                 //LotComment.User.Name - ok
@@ -35,8 +37,6 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
                 cfg.CreateMap<UserAccountInfo, UserAccountInfoEntity>();
                 cfg.CreateMap<UserAccountInfoEntity, UserAccountInfo>();
                 cfg.CreateMap<Expression<Func<Lot, object>>[], Expression<Func<LotEntity, object>>[]>();
-                cfg.CreateMap<Func<Lot, bool>, Func<LotEntity, bool>>();
-                cfg.CreateMap<Func<Lot, object>, Func<LotEntity, object>>();
             }).CreateMapper();
         }
 
@@ -139,6 +139,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         {
             if (UoW.UserAccounts.Get(userAccountId) == null)
                 throw new ArgumentException("UserAccount id is incorrect");
+            DeleteUserPhotos(userAccountId);
             UoW.UserAccounts.Delete(userAccountId);
             UoW.SaveChanges();
         }
@@ -147,9 +148,21 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         {
             if (await UoW.UserAccounts.GetAsync(userAccountId) == null)
                 throw new ArgumentException("UserAccount id is incorrect");
+            await DeleteUserPhotosAsync(userAccountId);
             UoW.UserAccounts.Delete(userAccountId);
             await UoW.SaveChangesAsync();
         }
+
+        public void DeleteUserPhotos(string userAccountId)
+        {
+            Directory.Delete(@"C:\VS Projects\EPAM\BestLot\src\BestLot.WebAPI\Photos\" + userAccountId);
+        }
+
+        public async Task DeleteUserPhotosAsync(string userAccountId)
+        {
+            await new Task(() => { Directory.Delete(@"C:\VS Projects\EPAM\BestLot\src\BestLot.WebAPI\Photos\" + userAccountId); });
+        }
+
 
         public UserAccountInfo GetUserAccount(string userAccountId, params Expression<Func<UserAccountInfo, object>>[] includeProperties)
         {

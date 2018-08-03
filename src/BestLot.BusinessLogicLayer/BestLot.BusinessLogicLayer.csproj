@@ -7,7 +7,7 @@
     <ProjectGuid>{727D9D44-1FA4-43BF-8D10-9FAAD956FFEB}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BusinessLogicLayer</RootNamespace>
+    <RootNamespace>BestLot.BusinessLogicLayer</RootNamespace>
     <AssemblyName>BestLot.BusinessLogicLayer</AssemblyName>
     <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -47,11 +47,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="LogicHandlers\ILotOperationsHandler.cs" />
-    <Compile Include="LogicHandlers\ILotSalesHandler.cs" />
-    <Compile Include="LogicHandlers\IUserAccountOperationsHandler.cs" />
+    <Compile Include="Interfaces\ILotCommentsOperationsHandler.cs" />
+    <Compile Include="Interfaces\ILotOperationsHandler.cs" />
+    <Compile Include="Interfaces\ILotPhotosOperationsHandler.cs" />
+    <Compile Include="Interfaces\ILotSalesHandler.cs" />
+    <Compile Include="Interfaces\IUserAccountOperationsHandler.cs" />
     <Compile Include="LogicDependencyResolver.cs" />
+    <Compile Include="LogicHandlers\LotCommentsOperationsHandler.cs" />
     <Compile Include="LogicHandlers\LotOperationsHandler.cs" />
+    <Compile Include="LogicHandlers\LotPhotoOperationsHandler.cs" />
     <Compile Include="LogicHandlers\LotSalesHandler.cs" />
     <Compile Include="Models\LotComment.cs" />
     <Compile Include="Models\Lot.cs" />

@@ -9,6 +9,7 @@ using BestLot.DataAccessLayer.UnitOfWork;
 using BestLot.DataAccessLayer.Entities;
 using BestLot.BusinessLogicLayer.Models;
 using AutoMapper;
+using BestLot.BusinessLogicLayer.Interfaces;
 
 namespace BestLot.BusinessLogicLayer.LogicHandlers
 {

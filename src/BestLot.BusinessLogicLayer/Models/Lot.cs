@@ -28,6 +28,11 @@ namespace BestLot.BusinessLogicLayer.Models
             LotComments.Add(lotComment);
         }
 
+        public void AddPhoto(LotPhoto lotPhoto)
+        {
+            LotPhotos.Add(lotPhoto);
+        }
+
         public void Sell(UserAccountInfo buyerUser)
         {
             if (buyerUser != null)

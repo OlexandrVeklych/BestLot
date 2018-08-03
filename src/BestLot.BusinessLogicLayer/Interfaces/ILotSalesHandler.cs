@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BestLot.BusinessLogicLayer.LogicHandlers
+namespace BestLot.BusinessLogicLayer.Interfaces
 {
     public interface ILotSalesHandler
     {

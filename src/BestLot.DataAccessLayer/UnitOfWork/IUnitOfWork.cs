@@ -13,7 +13,7 @@ namespace BestLot.DataAccessLayer.UnitOfWork
         IRepository<LotEntity> Lots { get; }
         IRepository<ArchiveLotEntity> LotArchive { get; }
         IRepository<LotCommentEntity> LotComments { get; }
-
+        IRepository<LotPhotoEntity> LotPhotos { get; }
         IRepository<UserAccountInfoEntity> UserAccounts { get; }
 
         void SaveChanges();

@@ -5,7 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using Microsoft.AspNet.Identity;
-using BestLot.BusinessLogicLayer.LogicHandlers;
+using BestLot.BusinessLogicLayer.Interfaces;
 using BestLot.BusinessLogicLayer.Models;
 using BestLot.BusinessLogicLayer;
 using BestLot.WebAPI.Models;
@@ -19,19 +19,17 @@ namespace BestLot.WebAPI.Controllers
         {
             mapper = new MapperConfiguration(cfg =>
             {
-                cfg.CreateMap<LotModel, Lot>().MaxDepth(1);
+                cfg.CreateMap<LotModel, Lot>();
                 cfg.CreateMap<Lot, LotModel>();
-                cfg.CreateMap<LotCommentModel, LotComment>().MaxDepth(1);
+                cfg.CreateMap<LotCommentModel, LotComment>();
                 cfg.CreateMap<LotComment, LotCommentModel>();
                 cfg.CreateMap<LotPhotoModel, LotPhoto>();
                 cfg.CreateMap<LotPhoto, LotPhotoModel>();
             }).CreateMapper();
-            lotOperationsHandler = LogicDependencyResolver.ResloveLotOperationsHandler();
-            userAccountOperationsHandler = LogicDependencyResolver.ResloveUserAccountOperationsHandler();
+            lotCommentsOperationsHandler = LogicDependencyResolver.ResloveLotCommentsOperationsHandler();
         }
 
-        private readonly ILotOperationsHandler lotOperationsHandler;
-        private readonly IUserAccountOperationsHandler userAccountOperationsHandler;
+        private readonly ILotCommentsOperationsHandler lotCommentsOperationsHandler;
         private readonly IMapper mapper;
         // GET api/<controller>
         [Route("api/lots/{lotId}/comments")]
@@ -39,7 +37,11 @@ namespace BestLot.WebAPI.Controllers
         {
             try
             {
-                return Ok(mapper.Map<IEnumerable<LotCommentModel>>(lotOperationsHandler.GetLot(lotId, lot => lot.LotComments).LotComments.Skip((page - 1) * amount).Take(amount)));
+                return Ok(mapper.Map<IEnumerable<LotCommentModel>>(lotCommentsOperationsHandler
+                    .GetLotComments(lotId)
+                    .OrderBy(lotComment => lotComment.Id)
+                    .Skip((page - 1) * amount)
+                    .Take(amount).AsEnumerable()));
             }
             catch (ArgumentException ex)
             {
@@ -53,7 +55,11 @@ namespace BestLot.WebAPI.Controllers
         {
             try
             {
-                return Ok(mapper.Map<IEnumerable<LotCommentModel>>(userAccountOperationsHandler.GetUserAccount(email, user => user.LotComments).LotComments.Skip((page - 1) * amount).Take(amount)));
+                return Ok(mapper.Map<IEnumerable<LotCommentModel>>(lotCommentsOperationsHandler
+                    .GetUserComments(email)
+                    .OrderBy(lotComment => lotComment.Id)
+                    .Skip((page - 1) * amount)
+                    .Take(amount).AsEnumerable()));
             }
             catch (ArgumentException ex)
             {
@@ -67,15 +73,17 @@ namespace BestLot.WebAPI.Controllers
         {
             try
             {
-                return Ok(mapper.Map<LotCommentModel>(lotOperationsHandler.GetLot(lotId, lot => lot.LotComments).LotComments[commentNumber]));
-            }
-            catch(IndexOutOfRangeException)
-            {
-                return BadRequest("Wrong number of comment");
+                return Ok(mapper.Map<LotCommentModel>(lotCommentsOperationsHandler
+                    .GetLotComments(lotId)
+                    .ElementAt(commentNumber)));
             }
             catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
+            }
+            catch (IndexOutOfRangeException)
+            {
+                return BadRequest("Wrong number of comment");
             }
         }
 
@@ -90,7 +98,7 @@ namespace BestLot.WebAPI.Controllers
             value.LotId = lotId;
             try
             {
-                lotOperationsHandler.AddComment(mapper.Map<LotComment>(value));
+                lotCommentsOperationsHandler.AddComment(mapper.Map<LotComment>(value));
             }
             catch (ArgumentException ex)
             {

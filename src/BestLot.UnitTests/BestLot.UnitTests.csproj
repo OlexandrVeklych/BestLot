@@ -9,7 +9,7 @@
     <ProjectGuid>{721566BC-8F02-4050-BDFD-80F34C220F18}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>UnitTests</RootNamespace>
+    <RootNamespace>BestLot.UnitTests</RootNamespace>
     <AssemblyName>BestLot.UnitTests</AssemblyName>
     <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
