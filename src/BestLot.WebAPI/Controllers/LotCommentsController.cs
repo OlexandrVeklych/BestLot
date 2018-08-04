@@ -19,12 +19,8 @@ namespace BestLot.WebAPI.Controllers
         {
             mapper = new MapperConfiguration(cfg =>
             {
-                cfg.CreateMap<LotModel, Lot>();
-                cfg.CreateMap<Lot, LotModel>();
-                cfg.CreateMap<LotCommentModel, LotComment>();
-                cfg.CreateMap<LotComment, LotCommentModel>();
-                cfg.CreateMap<LotPhotoModel, LotPhoto>();
-                cfg.CreateMap<LotPhoto, LotPhotoModel>();
+                cfg.CreateMap<LotCommentInModel, LotComment>();
+                cfg.CreateMap<LotComment, LotCommentOutModel>();
             }).CreateMapper();
             lotCommentsOperationsHandler = LogicDependencyResolver.ResolveLotCommentsOperationsHandler();
         }
@@ -37,7 +33,7 @@ namespace BestLot.WebAPI.Controllers
         {
             try
             {
-                return Ok(mapper.Map<IEnumerable<LotCommentModel>>(lotCommentsOperationsHandler
+                return Ok(mapper.Map<IEnumerable<LotCommentOutModel>>(lotCommentsOperationsHandler
                     .GetLotComments(lotId)
                     .OrderBy(lotComment => lotComment.Id)
                     .Skip((page - 1) * amount)
@@ -55,7 +51,7 @@ namespace BestLot.WebAPI.Controllers
         {
             try
             {
-                return Ok(mapper.Map<IEnumerable<LotCommentModel>>(lotCommentsOperationsHandler
+                return Ok(mapper.Map<IEnumerable<LotCommentOutModel>>(lotCommentsOperationsHandler
                     .GetUserComments(email)
                     .OrderBy(lotComment => lotComment.Id)
                     .Skip((page - 1) * amount)
@@ -73,9 +69,9 @@ namespace BestLot.WebAPI.Controllers
         {
             try
             {
-                return Ok(mapper.Map<LotCommentModel>(lotCommentsOperationsHandler
+                return Ok(mapper.Map<LotCommentOutModel>(lotCommentsOperationsHandler
                     .GetLotComments(lotId)
-                    .ElementAt(commentNumber)));
+                    .ToList()[commentNumber]));
             }
             catch (ArgumentException ex)
             {
@@ -90,7 +86,7 @@ namespace BestLot.WebAPI.Controllers
         [Authorize]
         // POST api/<controller>
         [Route("api/lots/{lotId}/comments")]
-        public IHttpActionResult Post([FromUri]int lotId, [FromBody]LotCommentModel value)
+        public IHttpActionResult Post([FromUri]int lotId, [FromBody]LotCommentInModel value)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

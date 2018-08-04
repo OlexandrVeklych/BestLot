@@ -178,7 +178,14 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             Lot lot;
             if ((lot = lotOperationsHandler.GetLot(lotId)) == null)
                 throw new ArgumentException("Wrong lot id");
-            return GetUserAccount(lot.BuyerUserId);
+            try
+            {
+                return GetUserAccount(lot.BuyerUserId);
+            }
+            catch(ArgumentException)
+            {
+                return null;
+            }
         }
 
         public async Task<UserAccountInfo> GetBuyerUserAsync(int lotId, params Expression<Func<UserAccountInfo, object>>[] includeProperties)
@@ -186,7 +193,14 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             Lot lot;
             if ((lot = await lotOperationsHandler.GetLotAsync(lotId)) == null)
                 throw new ArgumentException("Wrong lot id");
-            return await GetUserAccountAsync(lot.BuyerUserId);
+            try
+            {
+                return await GetUserAccountAsync(lot.BuyerUserId);
+            }
+            catch (ArgumentException)
+            {
+                return null;
+            }
         }
 
         public UserAccountInfo GetUserAccount(string userAccountId, params Expression<Func<UserAccountInfo, object>>[] includeProperties)

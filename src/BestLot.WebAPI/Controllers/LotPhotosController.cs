@@ -19,12 +19,9 @@ namespace BestLot.WebAPI.Controllers
         {
             mapper = new MapperConfiguration(cfg =>
             {
-                cfg.CreateMap<LotModel, Lot>();
-                cfg.CreateMap<Lot, LotModel>();
-                cfg.CreateMap<LotCommentModel, LotComment>();
-                cfg.CreateMap<LotComment, LotCommentModel>();
-                cfg.CreateMap<LotPhotoModel, LotPhoto>();
-                cfg.CreateMap<LotPhoto, LotPhotoModel>();
+
+                cfg.CreateMap<LotPhotoInModel, LotPhoto>();
+                cfg.CreateMap<LotPhoto, LotPhotoOutModel>();
             }).CreateMapper();
             lotPhotosOperationsHandler = LogicDependencyResolver.ResolveLotPhotosOperationsHandler();
         }
@@ -38,7 +35,7 @@ namespace BestLot.WebAPI.Controllers
         {
             try
             {
-                return Ok(mapper.Map<IEnumerable<LotPhotoModel>>(lotPhotosOperationsHandler.GetLotPhotos(lotId).AsEnumerable()));
+                return Ok(mapper.Map<IEnumerable<LotPhotoOutModel>>(lotPhotosOperationsHandler.GetLotPhotos(lotId).AsEnumerable()));
             }
             catch (ArgumentException ex)
             {
@@ -52,21 +49,22 @@ namespace BestLot.WebAPI.Controllers
         {
             try
             {
-                return Ok(mapper.Map<LotPhotoModel>(lotPhotosOperationsHandler.GetLotPhotos(lotId).ElementAt(photoNumber)));
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
+                return Ok(mapper.Map<LotPhotoOutModel>(lotPhotosOperationsHandler
+                    .GetLotPhotoByNumber(lotId, photoNumber)));
             }
             catch (IndexOutOfRangeException)
             {
                 return BadRequest("Wrong number of photo");
             }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         // POST api/<controller>
         [Route("api/lots/{lotId}/photos")]
-        public IHttpActionResult Post([FromUri] int lotId, [FromBody]LotPhotoModel[] value)
+        public IHttpActionResult Post([FromUri] int lotId, [FromBody]LotPhotoInModel[] value)
         {
             try
             {

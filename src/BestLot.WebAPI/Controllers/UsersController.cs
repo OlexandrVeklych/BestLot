@@ -18,14 +18,8 @@ namespace BestLot.WebAPI.Controllers
         {
             mapper = new MapperConfiguration(cfg =>
             {
-                cfg.CreateMap<LotModel, Lot>();
-                cfg.CreateMap<Lot, LotModel>();
-                cfg.CreateMap<LotCommentModel, LotComment>();
-                cfg.CreateMap<LotComment, LotCommentModel>();
-                cfg.CreateMap<LotPhotoModel, LotPhoto>();
-                cfg.CreateMap<LotPhoto, LotPhotoModel>();
-                cfg.CreateMap<UserAccountInfo, UserAccountInfoModel>();
-                cfg.CreateMap<UserAccountInfoModel, UserAccountInfo>();
+                cfg.CreateMap<UserAccountInfoInModel, UserAccountInfo>();
+                cfg.CreateMap<UserAccountInfo, UserAccountInfoOutModel>();
             }).CreateMapper();
             userAccountOperationsHandler = LogicDependencyResolver.ResolveUserAccountOperationsHandler();
             lotOperationsHandler = LogicDependencyResolver.ResolveLotOperationsHandler();
@@ -40,7 +34,7 @@ namespace BestLot.WebAPI.Controllers
         [Route("api/users")]
         public IHttpActionResult Get(int page, int amount)
         {
-            return Ok(mapper.Map<IEnumerable<UserAccountInfoModel>>(userAccountOperationsHandler
+            return Ok(mapper.Map<IEnumerable<UserAccountInfoOutModel>>(userAccountOperationsHandler
                 .GetAllUserAccounts()
                 .OrderBy(user => user.Email)
                 .Skip((page - 1) * amount)
@@ -52,7 +46,7 @@ namespace BestLot.WebAPI.Controllers
         {
             try
             {
-                return Ok(mapper.Map<UserAccountInfoModel>(userAccountOperationsHandler
+                return Ok(mapper.Map<UserAccountInfoOutModel>(userAccountOperationsHandler
                     .GetUserAccount(User.Identity.Name)));
             }
             catch (ArgumentException ex)
@@ -69,7 +63,7 @@ namespace BestLot.WebAPI.Controllers
             if (Request.RequestUri.OriginalString.Contains("buyeruser"))
                 try
                 {
-                    return Ok(mapper.Map<UserAccountInfoModel>(userAccountOperationsHandler
+                    return Ok(mapper.Map<UserAccountInfoOutModel>(userAccountOperationsHandler
                         .GetBuyerUser(lotId)));
                 }
                 catch (ArgumentException ex)
@@ -78,7 +72,7 @@ namespace BestLot.WebAPI.Controllers
                 }
             try
             {
-                return Ok(mapper.Map<UserAccountInfoModel>(userAccountOperationsHandler
+                return Ok(mapper.Map<UserAccountInfoOutModel>(userAccountOperationsHandler
                     .GetSellerUser(lotId)));
             }
             catch (ArgumentException ex)
@@ -93,7 +87,7 @@ namespace BestLot.WebAPI.Controllers
         {
             try
             {
-                return Ok(mapper.Map<UserAccountInfoModel>(userAccountOperationsHandler.GetUserAccount(email)));
+                return Ok(mapper.Map<UserAccountInfoOutModel>(userAccountOperationsHandler.GetUserAccount(email)));
             }
             catch (ArgumentException ex)
             {
@@ -103,14 +97,14 @@ namespace BestLot.WebAPI.Controllers
 
         // POST api/<controller>
         [Route("api/users")]
-        public IHttpActionResult Post([FromBody]UserAccountInfoModel value)
+        public IHttpActionResult Post([FromBody]UserAccountInfoInModel value)
         {
             return BadRequest("Use registration to add user");
         }
 
         // PUT api/<controller>/5
         [Route("api/users/{email}")]
-        public IHttpActionResult Put(string email, [FromBody]UserAccountInfoModel value)
+        public IHttpActionResult Put([FromUri]string email, [FromBody]UserAccountInfoInModel value)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

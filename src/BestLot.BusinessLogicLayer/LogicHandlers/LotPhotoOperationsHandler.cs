@@ -29,7 +29,8 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
                 //MaxDepth(1) - to map User inside Comment without his Lots
                 //LotComment.User.Name - ok
                 //LotComment.User.Lots[n] - null reference
-                cfg.CreateMap<LotPhotoEntity, LotPhoto>();
+                cfg.CreateMap<LotCommentEntity, LotComment>().MaxDepth(1);
+                cfg.CreateMap<LotPhotoEntity, LotPhoto>().MaxDepth(1);
                 cfg.CreateMap<LotPhoto, LotPhotoEntity>();
             }).CreateMapper();
             lotOperationsHandler = LogicDependencyResolver.ResolveLotOperationsHandler();
@@ -48,7 +49,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
                 //MaxDepth(1) - to map User inside Comment without his Lots
                 //LotComment.User.Name - ok
                 //LotComment.User.Lots[n] - null reference
-                cfg.CreateMap<LotPhotoEntity, LotPhoto>();
+                cfg.CreateMap<LotPhotoEntity, LotPhoto>().MaxDepth(1);
                 cfg.CreateMap<LotPhoto, LotPhotoEntity>();
             }).CreateMapper();
             this.lotOperationsHandler = lotOperationsHandler;
@@ -73,6 +74,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
                 lot.AddPhoto(lotPhotos[i]);
                 UoW.LotPhotos.Add(mapper.Map<LotPhotoEntity>(lotPhotos[i]));
             }
+            UoW.SaveChanges();
             lotOperationsHandler.ChangeLotUnsafe(lot);
         }
 
@@ -91,6 +93,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
                 lot.AddPhoto(lotPhotos[i]);
                 UoW.LotPhotos.Add(mapper.Map<LotPhotoEntity>(lotPhotos[i]));
             }
+            await UoW.SaveChangesAsync();
             await lotOperationsHandler.ChangeLotUnsafeAsync(lot);
         }
 
@@ -153,6 +156,32 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         public async Task DeleteAllUserPhotosAsync(string userAccountId, string hostingEnvironmentPath)
         {
             await new Task(() => { Directory.Delete(hostingEnvironmentPath + "\\Photos\\" + userAccountId); });
+        }
+
+        public LotPhoto GetLotPhotoByNumber(int lotId, int photoNumber, params Expression<Func<Lot, object>>[] includeProperties)
+        {
+            try
+            {
+                return mapper.Map<LotPhoto>(GetLotPhotos(lotId)
+                        .ToList()[photoNumber]);
+            }
+            catch (IndexOutOfRangeException)
+            {
+                return null;
+            }
+        }
+
+        public async Task<LotPhoto> GetLotPhotoByNumberAsync(int lotId, int photoNumber, params Expression<Func<Lot, object>>[] includeProperties)
+        {
+            try
+            {
+                return mapper.Map<LotPhoto>((await GetLotPhotosAsync(lotId))
+                        .ToList()[photoNumber]);
+            }
+            catch (IndexOutOfRangeException)
+            {
+                return null;
+            }
         }
 
         public IQueryable<LotPhoto> GetLotPhotos(int lotId, params Expression<Func<Lot, object>>[] includeProperties)

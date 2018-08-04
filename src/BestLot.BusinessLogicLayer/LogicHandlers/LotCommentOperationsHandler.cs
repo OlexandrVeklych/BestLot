@@ -55,6 +55,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
                 throw new ArgumentException("Lot id is incorrect");
             lot.AddComment(lotComment);
             UoW.LotComments.Add(mapper.Map<LotCommentEntity>(lotComment));
+            UoW.SaveChanges();
             //private ChangeLot, without checking LotId
             lotOperationsHandler.ChangeLotUnsafe(lot);
         }
@@ -68,6 +69,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
                 throw new ArgumentException("Lot id is incorrect");
             lot.AddComment(lotComment);
             UoW.LotComments.Add(mapper.Map<LotCommentEntity>(lotComment));
+            await UoW.SaveChangesAsync();
             //private ChangeLot, without checking LotId
             await lotOperationsHandler.ChangeLotUnsafeAsync(lot);
         }

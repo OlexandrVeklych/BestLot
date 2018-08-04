@@ -20,12 +20,9 @@ namespace BestLot.WebAPI.Controllers
         {
             mapper = new MapperConfiguration(cfg =>
             {
-                cfg.CreateMap<LotModel, Lot>();
-                cfg.CreateMap<Lot, LotModel>();
-                cfg.CreateMap<LotCommentModel, LotComment>();
-                cfg.CreateMap<LotComment, LotCommentModel>();
-                cfg.CreateMap<LotPhotoModel, LotPhoto>();
-                cfg.CreateMap<LotPhoto, LotPhotoModel>();
+                cfg.CreateMap<LotInModel, Lot>();
+                cfg.CreateMap<Lot, LotOutModel>();
+                cfg.CreateMap<LotPhotoInModel, LotPhoto>();
             }).CreateMapper();
             lotOperationsHandler = LogicDependencyResolver.ResolveLotOperationsHandler();
         }
@@ -47,7 +44,7 @@ namespace BestLot.WebAPI.Controllers
                 result = result.Where(predicate = lot => lot.Price > minPrice);
             if (maxPrice != 0)
                 result = result.Where(predicate = lot => lot.Price < maxPrice);
-            return Ok(mapper.Map<IEnumerable<LotModel>>(result
+            return Ok(mapper.Map<IEnumerable<LotOutModel>>(result
                 .OrderBy(lot => lot.Id)
                 .Skip((page - 1) * amount)
                 .Take(amount).AsEnumerable()));
@@ -69,7 +66,7 @@ namespace BestLot.WebAPI.Controllers
                 result = result.Where(predicate = lot => lot.Price < maxPrice);
             try
             {
-                return Ok(mapper.Map<IEnumerable<LotModel>>(result
+                return Ok(mapper.Map<IEnumerable<LotOutModel>>(result
                     .OrderBy(lot => lot.Id)
                     .Skip((page - 1) * amount)
                     .Take(amount).AsEnumerable()));
@@ -87,7 +84,7 @@ namespace BestLot.WebAPI.Controllers
         {
             try
             {
-                return Ok(mapper.Map<LotModel>(lotOperationsHandler.GetLot(id)));
+                return Ok(mapper.Map<LotOutModel>(lotOperationsHandler.GetLot(id)));
             }
             catch(ArgumentException ex)
             {
@@ -96,7 +93,7 @@ namespace BestLot.WebAPI.Controllers
         }
 
         // POST api/<controller>
-        public IHttpActionResult Post([FromBody]LotModel value)
+        public IHttpActionResult Post([FromBody]LotInModel value)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -117,7 +114,7 @@ namespace BestLot.WebAPI.Controllers
         }       
 
         // PUT api/<controller>/5
-        public IHttpActionResult Put(int id, [FromBody]LotModel value)
+        public IHttpActionResult Put(int id, [FromBody]LotInModel value)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

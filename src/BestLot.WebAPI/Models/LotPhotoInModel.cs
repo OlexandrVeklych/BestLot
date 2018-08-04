@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace BestLot.WebAPI.Models
 {
-    public class LotPhotoModel
+    public class LotPhotoInModel
     {
         public int Id { get; set; }
         public string Path { get; set; }
         public string Description { get; set; }
         public int LotId { get; set; }
-        public LotModel Lot { get; set; }
+        public LotInModel Lot { get; set; }
     }
 }

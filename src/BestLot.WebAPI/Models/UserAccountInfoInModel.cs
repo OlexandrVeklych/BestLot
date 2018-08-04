@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BestLot.WebAPI.Models
 {
-    public class UserAccountInfoModel
+    public class UserAccountInfoInModel
     {
         [Required]
         [DataType(DataType.EmailAddress)]
@@ -24,7 +24,7 @@ namespace BestLot.WebAPI.Models
         [DataType(DataType.PhoneNumber)]
         public string TelephoneNumber { get; set; }
 
-        public List<LotModel> Lots { get; set; }
-        public List<LotCommentModel> LotComments { get; set; }
+        public List<LotInModel> Lots { get; set; }
+        public List<LotCommentInModel> LotComments { get; set; }
     }
 }
