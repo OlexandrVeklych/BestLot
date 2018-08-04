@@ -27,8 +27,8 @@ namespace BestLot.WebAPI.Controllers
                 cfg.CreateMap<UserAccountInfo, UserAccountInfoModel>();
                 cfg.CreateMap<UserAccountInfoModel, UserAccountInfo>();
             }).CreateMapper();
-            userAccountOperationsHandler = LogicDependencyResolver.ResloveUserAccountOperationsHandler();
-            lotOperationsHandler = LogicDependencyResolver.ResloveLotOperationsHandler();
+            userAccountOperationsHandler = LogicDependencyResolver.ResolveUserAccountOperationsHandler();
+            lotOperationsHandler = LogicDependencyResolver.ResolveLotOperationsHandler();
         }
 
         private readonly IUserAccountOperationsHandler userAccountOperationsHandler;
@@ -62,15 +62,15 @@ namespace BestLot.WebAPI.Controllers
         }
 
         // GET api/<controller>/5
-        [Route("api/lots/{id}/selleruser")]
-        [Route("api/lots/{id}/buyeruser")]
-        public IHttpActionResult Get(int id)
+        [Route("api/lots/{lotId}/selleruser")]
+        [Route("api/lots/{lotId}/buyeruser")]
+        public IHttpActionResult Get(int lotId)
         {
             if (Request.RequestUri.OriginalString.Contains("buyeruser"))
                 try
                 {
                     return Ok(mapper.Map<UserAccountInfoModel>(userAccountOperationsHandler
-                        .GetUserAccount(lotOperationsHandler.GetLot(id).BuyerUserId)));
+                        .GetBuyerUser(lotId)));
                 }
                 catch (ArgumentException ex)
                 {
@@ -79,7 +79,7 @@ namespace BestLot.WebAPI.Controllers
             try
             {
                 return Ok(mapper.Map<UserAccountInfoModel>(userAccountOperationsHandler
-                    .GetUserAccount(lotOperationsHandler.GetLot(id).SellerUserId)));
+                    .GetSellerUser(lotId)));
             }
             catch (ArgumentException ex)
             {
@@ -135,7 +135,7 @@ namespace BestLot.WebAPI.Controllers
                 return BadRequest("Not allowed");
             try
             {
-                userAccountOperationsHandler.DeleteUserAccount(email);
+                userAccountOperationsHandler.DeleteUserAccount(email, System.Web.Hosting.HostingEnvironment.MapPath(@"~"));
                 return Ok();
             }
             catch (ArgumentException ex)

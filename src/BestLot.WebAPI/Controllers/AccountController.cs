@@ -329,7 +329,7 @@ namespace BestLot.WebAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            var userAccountOperationsHandler = LogicDependencyResolver.ResloveUserAccountOperationsHandler();
+            var userAccountOperationsHandler = LogicDependencyResolver.ResolveUserAccountOperationsHandler();
 
             try
             {
@@ -363,7 +363,7 @@ namespace BestLot.WebAPI.Controllers
             }
             if (!result.Succeeded)
             {
-                userAccountOperationsHandler.DeleteUserAccount(model.Email);
+                userAccountOperationsHandler.DeleteUserAccount(model.Email, System.Web.Hosting.HostingEnvironment.MapPath(@"~"));
                 return GetErrorResult(result);
             }
 

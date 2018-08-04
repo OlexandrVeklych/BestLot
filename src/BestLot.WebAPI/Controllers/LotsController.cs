@@ -9,11 +9,6 @@ using BestLot.BusinessLogicLayer.Models;
 using BestLot.BusinessLogicLayer;
 using BestLot.WebAPI.Models;
 using AutoMapper;
-івф
-ів
-    фів
-    фі
-    //Винеси пошук продавця, покупця і т.д. в окремі методи логіки, а не в контроллері
 using System.Linq.Expressions;
 
 namespace BestLot.WebAPI.Controllers
@@ -32,7 +27,7 @@ namespace BestLot.WebAPI.Controllers
                 cfg.CreateMap<LotPhotoModel, LotPhoto>();
                 cfg.CreateMap<LotPhoto, LotPhotoModel>();
             }).CreateMapper();
-            lotOperationsHandler = LogicDependencyResolver.ResloveLotOperationsHandler();
+            lotOperationsHandler = LogicDependencyResolver.ResolveLotOperationsHandler();
         }
 
         private readonly ILotOperationsHandler lotOperationsHandler;
@@ -44,9 +39,9 @@ namespace BestLot.WebAPI.Controllers
         {
             IQueryable<Lot> result = lotOperationsHandler.GetAllLots();
             Expression<Func<Lot, bool>> predicate = null;
-            if (name != null)
+            if (name != null && name != "null")
                 result = result.Where(predicate = lot => lot.Name == name);
-            if (category != null)
+            if (category != null && category != "null")
                 result = result.Where(predicate = lot => lot.Category.Contains(category));
             if (minPrice != 0)
                 result = result.Where(predicate = lot => lot.Price > minPrice);
@@ -62,17 +57,16 @@ namespace BestLot.WebAPI.Controllers
         [Route("api/users/{email}/lots")]
         public IHttpActionResult Get(string email, int page, int amount, string name = null, string category = null, double minPrice = 0, double maxPrice = 0)
         {
-            //IQueryable<Lot> result = userAccountOperationsHandler.GetUserAccount(email, user => user.LotComments).Lots.AsQueryable();
             Expression<Func<Lot, bool>> predicate = null;
-            IQueryable<Lot> result = lotOperationsHandler.GetAllLots().Where(predicate = lot => lot.SellerUserId == email);
-            if (name != null)
-                result.Where(predicate = lot => lot.Name == name);
-            if (category != null)
-                result.Where(predicate = lot => lot.Category == category);
+            IQueryable<Lot> result = lotOperationsHandler.GetUserLots(email);
+            if (name != null && name != "null")
+                result = result.Where(predicate = lot => lot.Name == name);
+            if (category != null && category != "null")
+                result = result.Where(predicate = lot => lot.Category == category);
             if (minPrice != 0)
-                result.Where(predicate = lot => lot.Price > minPrice);
+                result = result.Where(predicate = lot => lot.Price > minPrice);
             if (maxPrice != 0)
-                result.Where(predicate = lot => lot.Price < maxPrice);
+                result = result.Where(predicate = lot => lot.Price < maxPrice);
             try
             {
                 return Ok(mapper.Map<IEnumerable<LotModel>>(result

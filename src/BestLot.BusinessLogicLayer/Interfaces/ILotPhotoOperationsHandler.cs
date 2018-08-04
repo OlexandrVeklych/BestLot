@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace BestLot.BusinessLogicLayer.Interfaces
 {
-    public interface ILotPhotosOperationsHandler
+    public interface ILotPhotoOperationsHandler
     {
         void AddPhotosToExistingLot(int lotId, LotPhoto[] lotPhotos, string hostingEnvironmentPath, string requestUriLeftPart);
         Task AddPhotosToExistingLotAsync(int lotId, LotPhoto[] lotPhotos, string hostingEnvironmentPath, string requestUriLeftPart);
@@ -16,6 +16,8 @@ namespace BestLot.BusinessLogicLayer.Interfaces
         Task AddPhotosToNewLotAsync(Lot lot, string hostingEnvironmentPath, string requestUriLeftPart);
         void DeletePhoto(int photoId, string hostingEnvironmentPath, string requestUriLeftPart);
         Task DeletePhotoAsync(int photoId, string hostingEnvironmentPath, string requestUriLeftPart);
+        void DeleteAllUserPhotos(string userAccountId, string hostingEnvironmentPath);
+        Task DeleteAllUserPhotosAsync(string userAccountId, string hostingEnvironmentPath);
         IQueryable<LotPhoto> GetLotPhotos(int lotId, params Expression<Func<Lot, object>>[] includeProperties);
         Task<IQueryable<LotPhoto>> GetLotPhotosAsync(int lotId, params Expression<Func<Lot, object>>[] includeProperties);
     }

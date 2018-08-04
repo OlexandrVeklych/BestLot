@@ -21,22 +21,22 @@ namespace BestLot.BusinessLogicLayer
             return new LotSalesHandler(ResolveUnitOfWork(), refreshTimeMillisecs, checkTimeMillisecs);
         }
 
-        public static ILotOperationsHandler ResloveLotOperationsHandler()
+        public static ILotOperationsHandler ResolveLotOperationsHandler()
         {
             return new LotOperationsHandler(ResolveUnitOfWork());
         }
 
-        public static IUserAccountOperationsHandler ResloveUserAccountOperationsHandler()
+        public static IUserAccountOperationsHandler ResolveUserAccountOperationsHandler()
         {
             return new UserAccountOperationsHandler(ResolveUnitOfWork());
         }
 
-        public static ILotCommentsOperationsHandler ResloveLotCommentsOperationsHandler()
+        public static ILotCommentOperationsHandler ResolveLotCommentsOperationsHandler()
         {
-            return new LotCommentsOperationsHandler(ResolveUnitOfWork());
+            return new LotCommentOperationsHandler(ResolveUnitOfWork());
         }
 
-        public static ILotPhotosOperationsHandler ResloveLotPhotosOperationsHandler()
+        public static ILotPhotoOperationsHandler ResolveLotPhotosOperationsHandler()
         {
             return new LotPhotoOperationsHandler(ResolveUnitOfWork());
         }

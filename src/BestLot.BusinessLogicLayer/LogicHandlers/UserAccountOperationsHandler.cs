@@ -38,8 +38,12 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
                 cfg.CreateMap<UserAccountInfoEntity, UserAccountInfo>();
                 cfg.CreateMap<Expression<Func<Lot, object>>[], Expression<Func<LotEntity, object>>[]>();
             }).CreateMapper();
+            lotOperationsHandler = LogicDependencyResolver.ResolveLotOperationsHandler();
+            lotPhotoOperationsHandler = LogicDependencyResolver.ResolveLotPhotosOperationsHandler();
         }
 
+        private ILotPhotoOperationsHandler lotPhotoOperationsHandler;
+        private ILotOperationsHandler lotOperationsHandler;
         private IUnitOfWork UoW;
         private IMapper mapper;
 
@@ -135,34 +139,55 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             }
         }
 
-        public void DeleteUserAccount(string userAccountId)
+        public void DeleteUserAccount(string userAccountId, string hostingEnvironmentPath)
         {
             if (UoW.UserAccounts.Get(userAccountId) == null)
                 throw new ArgumentException("UserAccount id is incorrect");
-            DeleteUserPhotos(userAccountId);
+            lotPhotoOperationsHandler.DeleteAllUserPhotos(userAccountId, hostingEnvironmentPath);
             UoW.UserAccounts.Delete(userAccountId);
             UoW.SaveChanges();
         }
 
-        public async Task DeleteUserAccountAsync(string userAccountId)
+        public async Task DeleteUserAccountAsync(string userAccountId, string hostingEnvironmentPath)
         {
             if (await UoW.UserAccounts.GetAsync(userAccountId) == null)
                 throw new ArgumentException("UserAccount id is incorrect");
-            await DeleteUserPhotosAsync(userAccountId);
+            await lotPhotoOperationsHandler.DeleteAllUserPhotosAsync(userAccountId, hostingEnvironmentPath);
             UoW.UserAccounts.Delete(userAccountId);
             await UoW.SaveChangesAsync();
         }
 
-        public void DeleteUserPhotos(string userAccountId)
+        public UserAccountInfo GetSellerUser(int lotId, params Expression<Func<UserAccountInfo, object>>[] includeProperties)
         {
-            Directory.Delete(@"C:\VS Projects\EPAM\BestLot\src\BestLot.WebAPI\Photos\" + userAccountId);
+            Lot lot;
+            if ((lot = lotOperationsHandler.GetLot(lotId)) == null)
+                throw new ArgumentException("Wrong lot id");
+            return GetUserAccount(lot.SellerUserId);
         }
 
-        public async Task DeleteUserPhotosAsync(string userAccountId)
+        public async Task<UserAccountInfo> GetSellerUserAsync(int lotId, params Expression<Func<UserAccountInfo, object>>[] includeProperties)
         {
-            await new Task(() => { Directory.Delete(@"C:\VS Projects\EPAM\BestLot\src\BestLot.WebAPI\Photos\" + userAccountId); });
+            Lot lot;
+            if ((lot = await lotOperationsHandler.GetLotAsync(lotId)) == null)
+                throw new ArgumentException("Wrong lot id");
+            return await GetUserAccountAsync(lot.SellerUserId);
         }
 
+        public UserAccountInfo GetBuyerUser(int lotId, params Expression<Func<UserAccountInfo, object>>[] includeProperties)
+        {
+            Lot lot;
+            if ((lot = lotOperationsHandler.GetLot(lotId)) == null)
+                throw new ArgumentException("Wrong lot id");
+            return GetUserAccount(lot.BuyerUserId);
+        }
+
+        public async Task<UserAccountInfo> GetBuyerUserAsync(int lotId, params Expression<Func<UserAccountInfo, object>>[] includeProperties)
+        {
+            Lot lot;
+            if ((lot = await lotOperationsHandler.GetLotAsync(lotId)) == null)
+                throw new ArgumentException("Wrong lot id");
+            return await GetUserAccountAsync(lot.BuyerUserId);
+        }
 
         public UserAccountInfo GetUserAccount(string userAccountId, params Expression<Func<UserAccountInfo, object>>[] includeProperties)
         {

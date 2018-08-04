@@ -26,10 +26,10 @@ namespace BestLot.WebAPI.Controllers
                 cfg.CreateMap<LotPhotoModel, LotPhoto>();
                 cfg.CreateMap<LotPhoto, LotPhotoModel>();
             }).CreateMapper();
-            lotCommentsOperationsHandler = LogicDependencyResolver.ResloveLotCommentsOperationsHandler();
+            lotCommentsOperationsHandler = LogicDependencyResolver.ResolveLotCommentsOperationsHandler();
         }
 
-        private readonly ILotCommentsOperationsHandler lotCommentsOperationsHandler;
+        private readonly ILotCommentOperationsHandler lotCommentsOperationsHandler;
         private readonly IMapper mapper;
         // GET api/<controller>
         [Route("api/lots/{lotId}/comments")]

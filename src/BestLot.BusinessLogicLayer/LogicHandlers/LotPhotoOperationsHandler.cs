@@ -14,7 +14,7 @@ using BestLot.BusinessLogicLayer.Interfaces;
 
 namespace BestLot.BusinessLogicLayer.LogicHandlers
 {
-    public class LotPhotoOperationsHandler : ILotPhotosOperationsHandler
+    public class LotPhotoOperationsHandler : ILotPhotoOperationsHandler
     {
         public LotPhotoOperationsHandler(IUnitOfWork unitOfWork)
         {
@@ -29,20 +29,32 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
                 //MaxDepth(1) - to map User inside Comment without his Lots
                 //LotComment.User.Name - ok
                 //LotComment.User.Lots[n] - null reference
-                cfg.CreateMap<LotCommentEntity, LotComment>().MaxDepth(1);
-                cfg.CreateMap<LotComment, LotCommentEntity>();
                 cfg.CreateMap<LotPhotoEntity, LotPhoto>();
                 cfg.CreateMap<LotPhoto, LotPhotoEntity>();
-                cfg.CreateMap<UserAccountInfo, UserAccountInfoEntity>();
-                cfg.CreateMap<UserAccountInfoEntity, UserAccountInfo>();
-                cfg.CreateMap<Expression<Func<Lot, object>>[], Expression<Func<LotEntity, object>>[]>();
             }).CreateMapper();
-            lotOperationsHandler = LogicDependencyResolver.ResloveLotOperationsHandler();
-            userAccountOperationsHandler = LogicDependencyResolver.ResloveUserAccountOperationsHandler();
+            lotOperationsHandler = LogicDependencyResolver.ResolveLotOperationsHandler();
+        }
+
+        public LotPhotoOperationsHandler(IUnitOfWork unitOfWork, ILotOperationsHandler lotOperationsHandler)
+        {
+            UoW = unitOfWork;
+            mapper = new MapperConfiguration(cfg =>
+            {
+                //MaxDepth(1) - to map User inside Lot without his Lots
+                //Lot.User.Name - ok
+                //Lot.User.Lots[n] - null reference
+                cfg.CreateMap<LotEntity, Lot>().MaxDepth(1);
+                cfg.CreateMap<Lot, LotEntity>();
+                //MaxDepth(1) - to map User inside Comment without his Lots
+                //LotComment.User.Name - ok
+                //LotComment.User.Lots[n] - null reference
+                cfg.CreateMap<LotPhotoEntity, LotPhoto>();
+                cfg.CreateMap<LotPhoto, LotPhotoEntity>();
+            }).CreateMapper();
+            this.lotOperationsHandler = lotOperationsHandler;
         }
 
         private ILotOperationsHandler lotOperationsHandler;
-        private IUserAccountOperationsHandler userAccountOperationsHandler;
         private IUnitOfWork UoW;
         private IMapper mapper;
 
@@ -131,6 +143,16 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             File.Delete(lotPhoto.Path.Replace(requestUriLeftPart, hostingEnvironmentPath));
             UoW.LotPhotos.Delete(photoId);
             await UoW.SaveChangesAsync();
+        }
+
+        public void DeleteAllUserPhotos(string userAccountId, string hostingEnvironmentPath)
+        {
+            Directory.Delete(hostingEnvironmentPath + "\\Photos\\" + userAccountId);
+        }
+
+        public async Task DeleteAllUserPhotosAsync(string userAccountId, string hostingEnvironmentPath)
+        {
+            await new Task(() => { Directory.Delete(hostingEnvironmentPath + "\\Photos\\" + userAccountId); });
         }
 
         public IQueryable<LotPhoto> GetLotPhotos(int lotId, params Expression<Func<Lot, object>>[] includeProperties)

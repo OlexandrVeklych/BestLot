@@ -14,9 +14,9 @@ using BestLot.DataAccessLayer.UnitOfWork;
 
 namespace BestLot.BusinessLogicLayer.LogicHandlers
 {
-    public class LotCommentsOperationsHandler : ILotCommentsOperationsHandler
+    public class LotCommentOperationsHandler : ILotCommentOperationsHandler
     {
-        public LotCommentsOperationsHandler(IUnitOfWork unitOfWork)
+        public LotCommentOperationsHandler(IUnitOfWork unitOfWork)
         {
             UoW = unitOfWork;
             mapper = new MapperConfiguration(cfg =>
@@ -37,8 +37,8 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
                 cfg.CreateMap<UserAccountInfoEntity, UserAccountInfo>();
                 cfg.CreateMap<Expression<Func<Lot, object>>[], Expression<Func<LotEntity, object>>[]>();
             }).CreateMapper();
-            lotOperationsHandler = LogicDependencyResolver.ResloveLotOperationsHandler();
-            userAccountOperationsHandler = LogicDependencyResolver.ResloveUserAccountOperationsHandler();
+            lotOperationsHandler = LogicDependencyResolver.ResolveLotOperationsHandler();
+            userAccountOperationsHandler = LogicDependencyResolver.ResolveUserAccountOperationsHandler();
         }
 
         private ILotOperationsHandler lotOperationsHandler;

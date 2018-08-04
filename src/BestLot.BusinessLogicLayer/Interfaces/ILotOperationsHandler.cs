@@ -22,6 +22,8 @@ namespace BestLot.BusinessLogicLayer.Interfaces
         Task<Lot> GetLotAsync(int lotId, params Expression<Func<Lot, object>>[] includeProperties);
         IQueryable<Lot> GetAllLots(params Expression<Func<Lot, object>>[] includeProperties);
         Task<IQueryable<Lot>> GetAllLotsAsync(params Expression<Func<Lot, object>>[] includeProperties);
+        IQueryable<Lot> GetUserLots(string userId, params Expression<Func<Lot, object>>[] includeProperties);
+        Task<IQueryable<Lot>> GetUserLotsAsync(string userId, params Expression<Func<Lot, object>>[] includeProperties);
         void PlaceBet(string buyerUserId, int lotId, double price);
         Task PlaceBetAsync(string buyerUserId, int lotId, double price);
     }

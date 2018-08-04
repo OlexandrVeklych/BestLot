@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace BestLot.BusinessLogicLayer.Interfaces
 {
-    public interface ILotCommentsOperationsHandler
+    public interface ILotCommentOperationsHandler
     {
         void AddComment(LotComment lotComment);
         Task AddCommentAsync(LotComment lotComment);

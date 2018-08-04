@@ -36,9 +36,9 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
                 cfg.CreateMap<UserAccountInfoEntity, UserAccountInfo>();
                 cfg.CreateMap<Expression<Func<Lot, object>>[], Expression<Func<LotEntity, object>>[]>();
             }).CreateMapper();
-            lotPhotosOperationsHandler = LogicDependencyResolver.ResloveLotPhotosOperationsHandler();
+            lotPhotosOperationsHandler = new LotPhotoOperationsHandler(unitOfWork, this);
         }
-        private ILotPhotosOperationsHandler lotPhotosOperationsHandler;
+        private ILotPhotoOperationsHandler lotPhotosOperationsHandler;
         private IUnitOfWork UoW;
         private IMapper mapper;
 
@@ -184,6 +184,23 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         {
             var result = await UoW.Lots.GetAllAsync(mapper.Map<Expression<Func<LotEntity, object>>[]>(includeProperties));
             return result.ProjectTo<Lot>(mapper.ConfigurationProvider);
+        }
+
+        public IQueryable<Lot> GetUserLots(string userId, params Expression<Func<Lot, object>>[] includeProperties)
+        {
+            Expression<Func<LotEntity, bool>> predicate = null;
+            return UoW.Lots.GetAll()
+                .Where(predicate = lot => lot.SellerUserId == userId)
+                .ProjectTo<Lot>(mapper.ConfigurationProvider);
+        }
+
+        public async Task<IQueryable<Lot>> GetUserLotsAsync(string userId, params Expression<Func<Lot, object>>[] includeProperties)
+        {
+            Expression<Func<LotEntity, bool>> predicate = null;
+            var result = await UoW.Lots.GetAllAsync();
+            return (await UoW.Lots.GetAllAsync())
+                .Where(predicate = lot => lot.SellerUserId == userId)
+                .ProjectTo<Lot>(mapper.ConfigurationProvider);            
         }
 
         public void PlaceBet(string buyerUserId, int lotId, double price)
