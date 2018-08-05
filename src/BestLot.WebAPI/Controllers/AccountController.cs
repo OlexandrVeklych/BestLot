@@ -17,6 +17,7 @@ using BestLot.WebAPI.Models;
 using BestLot.WebAPI.Providers;
 using BestLot.WebAPI.Results;
 using BestLot.BusinessLogicLayer;
+using System.Security.Principal;
 
 namespace BestLot.WebAPI.Controllers
 {
@@ -367,6 +368,33 @@ namespace BestLot.WebAPI.Controllers
                 return GetErrorResult(result);
             }
 
+            return Ok();
+        }
+
+        [Route("DeleteUser")]
+        public IHttpActionResult DeleteUser(string userName)
+        {
+            ApplicationUser userToDelete;
+            if (userName != User.Identity.Name)
+            {
+                if (!User.IsInRole("Admin"))
+                    return Unauthorized();
+                userToDelete = UserManager.FindByName(userName);
+            }
+            else
+                userToDelete = UserManager.FindByName(userName);
+
+            var userAccountOperationsHandler = LogicDependencyResolver.ResolveUserAccountOperationsHandler();
+
+            try
+            {
+                userAccountOperationsHandler.DeleteUserAccount(userToDelete.Email, System.Web.Hosting.HostingEnvironment.MapPath(@"~"));
+                UserManager.Delete(userToDelete);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             return Ok();
         }
 

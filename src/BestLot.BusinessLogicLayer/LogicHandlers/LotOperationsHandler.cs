@@ -30,10 +30,10 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
                 //LotComment.User.Lots[n] - null reference
                 cfg.CreateMap<LotCommentEntity, LotComment>().MaxDepth(1);
                 cfg.CreateMap<LotComment, LotCommentEntity>();
-                cfg.CreateMap<LotPhotoEntity, LotPhoto>();
+                cfg.CreateMap<LotPhotoEntity, LotPhoto>().MaxDepth(1); ;
                 cfg.CreateMap<LotPhoto, LotPhotoEntity>();
                 cfg.CreateMap<UserAccountInfo, UserAccountInfoEntity>();
-                cfg.CreateMap<UserAccountInfoEntity, UserAccountInfo>();
+                cfg.CreateMap<UserAccountInfoEntity, UserAccountInfo>().MaxDepth(1); ;
                 cfg.CreateMap<Expression<Func<Lot, object>>[], Expression<Func<LotEntity, object>>[]>();
             }).CreateMapper();
             lotPhotosOperationsHandler = new LotPhotoOperationsHandler(unitOfWork, this);
@@ -114,10 +114,10 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
 
         public void DeleteLot(int lotId, string hostingEnvironmentPath, string requestUriLeftPart)
         {
-            Lot lot;
-            if ((lot = mapper.Map<Lot>(UoW.Lots.Get(lotId))) == null)
+            if (UoW.Lots.Get(lotId) == null)
                 throw new ArgumentException("Lot id is incorrect");
-            foreach(LotPhoto lotPhoto in lot.LotPhotos)
+            List<LotPhoto> lotPhotos = lotPhotosOperationsHandler.GetLotPhotos(lotId).ToList();
+            foreach (LotPhoto lotPhoto in lotPhotos)
                 lotPhotosOperationsHandler.DeletePhoto(lotPhoto.Id, hostingEnvironmentPath, requestUriLeftPart);
             UoW.Lots.Delete(lotId);
             UoW.SaveChanges();

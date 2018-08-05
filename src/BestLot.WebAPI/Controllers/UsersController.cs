@@ -103,8 +103,8 @@ namespace BestLot.WebAPI.Controllers
         }
 
         // PUT api/<controller>/5
-        [Route("api/users/{email}")]
-        public IHttpActionResult Put([FromUri]string email, [FromBody]UserAccountInfoInModel value)
+        [Route("api/users/")]
+        public IHttpActionResult Put(string email, [FromBody]UserAccountInfoInModel value)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -113,23 +113,6 @@ namespace BestLot.WebAPI.Controllers
             try
             {
                 userAccountOperationsHandler.ChangeUserAccount(email, mapper.Map<UserAccountInfo>(value));
-                return Ok();
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
-        // DELETE api/<controller>/5
-        [Route("api/users/{email}")]
-        public IHttpActionResult Delete(string email)
-        {
-            if (!User.IsInRole("Admin") && User.Identity.Name != email)
-                return BadRequest("Not allowed");
-            try
-            {
-                userAccountOperationsHandler.DeleteUserAccount(email, System.Web.Hosting.HostingEnvironment.MapPath(@"~"));
                 return Ok();
             }
             catch (ArgumentException ex)

@@ -68,7 +68,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
                 throw new ArgumentException("User email is incorrect");
             if (currentUser.Email != newUserAccount.Email)
                 throw new ArgumentException("No permission to change Email");
-            ValidateUser(newUserAccount, false);
+            ValidateUser(newUserAccount, currentUser, false);
             UoW.UserAccounts.Modify(id, mapper.Map<UserAccountInfoEntity>(newUserAccount));
             UoW.SaveChanges();
         }
@@ -80,48 +80,67 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
                 throw new ArgumentException("User email is incorrect");
             if (currentUser.Email != newUserAccount.Email)
                 throw new ArgumentException("No permission to change Email");
-            await ValidateUserAsync(newUserAccount, false);
+            await ValidateUserAsync(newUserAccount, currentUser, false);
             UoW.UserAccounts.Modify(id, mapper.Map<UserAccountInfoEntity>(newUserAccount));
             await UoW.SaveChangesAsync();
         }
 
         //if !newUser, don`t check email
-        private void ValidateUser(UserAccountInfo userAccount, bool newUser = true)
+        private void ValidateUser(UserAccountInfo userAccount, UserAccountInfo oldUserAccount = null, bool newUser = true)
         {
-            if (userAccount.TelephoneNumber != null)
-            {
-                if (!Regex.IsMatch(userAccount.TelephoneNumber, @"^\+380[0-9]{9}$"))
-                    throw new ArgumentException("Incorrect telephone number format");
-                var userAccountsTelephones = UoW.UserAccounts.GetAll().Select(user => user.TelephoneNumber);
-                if (userAccountsTelephones.Contains(userAccount.TelephoneNumber))
-                    throw new ArgumentException("Telephone number is already occupied");
-            }
             if (newUser)
             {
                 try
                 {
                     MailAddress temp = new MailAddress(userAccount.Email);
                 }
-                catch(FormatException)
+                catch (FormatException)
                 {
                     throw new ArgumentException("Incorrect email format");
                 }
                 var userAccountsEmails = GetAllUserAccounts().Select(user => user.Email);
                 if (userAccountsEmails.Contains(userAccount.Email))
                     throw new ArgumentException("Email is already occupied");
+                if (userAccount.TelephoneNumber != null)
+                {
+                    if (!Regex.IsMatch(userAccount.TelephoneNumber, @"^\+380[0-9]{9}$"))
+                        throw new ArgumentException("Incorrect telephone number format");
+                    var userAccountsTelephones = UoW.UserAccounts.GetAll().Select(user => user.TelephoneNumber);
+                    if (userAccountsTelephones.Contains(userAccount.TelephoneNumber))
+                        throw new ArgumentException("Telephone number is already occupied");
+                }
             }
+            else
+            {
+                if (userAccount.TelephoneNumber != null)
+                {
+                    if (userAccount.TelephoneNumber != oldUserAccount.TelephoneNumber)
+                    {
+                        if (!Regex.IsMatch(userAccount.TelephoneNumber, @"^\+380[0-9]{9}$"))
+                        throw new ArgumentException("Incorrect telephone number format");           
+                        var userAccountsTelephones = UoW.UserAccounts.GetAll().Select(user => user.TelephoneNumber);
+                        if (userAccountsTelephones.Contains(userAccount.TelephoneNumber))
+                            throw new ArgumentException("Telephone number is already occupied");
+                    }
+                }
+            }
+            
         }
 
         //if !newUser, don`t check email
-        private async Task ValidateUserAsync(UserAccountInfo userAccount, bool newUser = true)
+        private async Task ValidateUserAsync(UserAccountInfo userAccount, UserAccountInfo oldUserAccount = null, bool newUser = true)
         {
             if (userAccount.TelephoneNumber != null)
             {
                 if (!Regex.IsMatch(userAccount.TelephoneNumber, @"^\+380[0-9]{9}$"))
                     throw new ArgumentException("Incorrect telephone number format");
-                var userAccountsTelephones = (await GetAllUserAccountsAsync()).Select(user => user.TelephoneNumber);
-                if (userAccountsTelephones.Contains(userAccount.TelephoneNumber))
-                    throw new ArgumentException("Telephone number is already occupied");
+                if (!newUser)
+                    if (userAccount.TelephoneNumber != oldUserAccount.TelephoneNumber)
+                    {
+                        var userAccountsTelephones = (await GetAllUserAccountsAsync()).Select(user => user.TelephoneNumber);
+                        if (userAccountsTelephones.Contains(userAccount.TelephoneNumber))
+                            throw new ArgumentException("Telephone number is already occupied");
+                    }
             }
             if (newUser)
             {
