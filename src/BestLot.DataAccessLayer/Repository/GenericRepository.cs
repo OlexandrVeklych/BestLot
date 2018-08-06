@@ -21,7 +21,7 @@ namespace BestLot.DataAccessLayer.Repository
 
         public void Delete(object id)
         {
-            DbSet.Remove(DbSet.Find(id));
+            Context.Entry(DbSet.Find(id)).State = EntityState.Deleted;
         }
 
         public void Add(T item)

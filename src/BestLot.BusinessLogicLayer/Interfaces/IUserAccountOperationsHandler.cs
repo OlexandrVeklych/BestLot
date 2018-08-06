@@ -14,8 +14,8 @@ namespace BestLot.BusinessLogicLayer.Interfaces
         Task AddUserAccountAsync(UserAccountInfo userAccount);
         void ChangeUserAccount(string id, UserAccountInfo newUserAccount);
         Task ChangeUserAccountAsync(string id, UserAccountInfo newUserAccount);
-        void DeleteUserAccount(string userAccountId, string hostingEnvironmentPath);
-        Task DeleteUserAccountAsync(string userAccountId, string hostingEnvironmentPath);
+        void DeleteUserAccount(string userAccountId, string hostingEnvironmentPath, string requestUriLeftPart);
+        Task DeleteUserAccountAsync(string userAccountId, string hostingEnvironmentPath, string requestUriLeftPart);
         UserAccountInfo GetUserAccount(string userAccountId, params Expression<Func<UserAccountInfo, object>>[] includeProperties);
         Task<UserAccountInfo> GetUserAccountAsync(string userAccountId, params Expression<Func<UserAccountInfo, object>>[] includeProperties);
         UserAccountInfo GetSellerUser(int lotId, params Expression<Func<UserAccountInfo, object>>[] includeProperties);

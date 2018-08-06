@@ -15,9 +15,8 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
 {
     public class LotSalesHandler : ILotSalesHandler, IDisposable
     {
-        public LotSalesHandler(IUnitOfWork unitOfWork, double refreshTimeMillisecs, double checkTimeMillisecs)
+        private LotSalesHandler(double refreshTimeMillisecs, double checkTimeMillisecs)
         {
-            UoW = unitOfWork;
             mapper = new MapperConfiguration(cfg =>
             {
                 cfg.CreateMap<LotEntity, Lot>();
@@ -31,6 +30,11 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             checkTimer = new Timer(checkTimeMillisecs);
             checkTimer.AutoReset = true;
             checkTimer.Elapsed += CheckLots;
+        }
+
+        public LotSalesHandler(IUnitOfWork unitOfWork, double refreshTimeMillisecs, double checkTimeMillisecs) :this(refreshTimeMillisecs, checkTimeMillisecs)
+        {
+            this.UoW = unitOfWork;
         }
 
         private Timer refreshTimer;

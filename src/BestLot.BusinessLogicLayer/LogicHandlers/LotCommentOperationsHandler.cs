@@ -16,9 +16,8 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
 {
     public class LotCommentOperationsHandler : ILotCommentOperationsHandler
     {
-        public LotCommentOperationsHandler(IUnitOfWork unitOfWork)
+        private LotCommentOperationsHandler()
         {
-            UoW = unitOfWork;
             mapper = new MapperConfiguration(cfg =>
             {
                 //MaxDepth(1) - to map User inside Lot without his Lots
@@ -37,8 +36,13 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
                 cfg.CreateMap<UserAccountInfoEntity, UserAccountInfo>();
                 cfg.CreateMap<Expression<Func<Lot, object>>[], Expression<Func<LotEntity, object>>[]>();
             }).CreateMapper();
-            lotOperationsHandler = LogicDependencyResolver.ResolveLotOperationsHandler();
-            userAccountOperationsHandler = LogicDependencyResolver.ResolveUserAccountOperationsHandler();
+        }
+
+        public LotCommentOperationsHandler(IUnitOfWork unitOfWork, ILotOperationsHandler lotOperationsHandler, IUserAccountOperationsHandler userAccountOperationsHandler) : this()
+        {
+            this.UoW = unitOfWork;
+            this.lotOperationsHandler = lotOperationsHandler;
+            this.userAccountOperationsHandler = userAccountOperationsHandler;
         }
 
         private ILotOperationsHandler lotOperationsHandler;

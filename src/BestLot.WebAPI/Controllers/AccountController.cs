@@ -364,7 +364,7 @@ namespace BestLot.WebAPI.Controllers
             }
             if (!result.Succeeded)
             {
-                userAccountOperationsHandler.DeleteUserAccount(model.Email, System.Web.Hosting.HostingEnvironment.MapPath(@"~"));
+                userAccountOperationsHandler.DeleteUserAccount(model.Email, System.Web.Hosting.HostingEnvironment.MapPath(@"~"), Request.RequestUri.GetLeftPart(UriPartial.Authority));
                 return GetErrorResult(result);
             }
 
@@ -388,7 +388,7 @@ namespace BestLot.WebAPI.Controllers
 
             try
             {
-                userAccountOperationsHandler.DeleteUserAccount(userToDelete.Email, System.Web.Hosting.HostingEnvironment.MapPath(@"~"));
+                userAccountOperationsHandler.DeleteUserAccount(userToDelete.Email, System.Web.Hosting.HostingEnvironment.MapPath(@"~"), Request.RequestUri.GetLeftPart(UriPartial.Authority));
                 UserManager.Delete(userToDelete);
             }
             catch (ArgumentException ex)

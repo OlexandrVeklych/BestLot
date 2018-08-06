@@ -22,7 +22,7 @@ namespace BestLot.WebAPI.Controllers
                 cfg.CreateMap<LotCommentInModel, LotComment>();
                 cfg.CreateMap<LotComment, LotCommentOutModel>();
             }).CreateMapper();
-            lotCommentsOperationsHandler = LogicDependencyResolver.ResolveLotCommentsOperationsHandler();
+            lotCommentsOperationsHandler = LogicDependencyResolver.ResolveLotCommentOperationsHandler();
         }
 
         private readonly ILotCommentOperationsHandler lotCommentsOperationsHandler;

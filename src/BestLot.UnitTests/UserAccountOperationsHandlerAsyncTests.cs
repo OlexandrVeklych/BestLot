@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using BestLot.BusinessLogicLayer.LogicHandlers;
+using BestLot.BusinessLogicLayer.Interfaces;
 using BestLot.BusinessLogicLayer.Models;
 using BestLot.DataAccessLayer.UnitOfWork;
 using NUnit.Framework;
@@ -12,6 +12,7 @@ namespace BestLot.UnitTests
     public class UserAccountOperationsHandlerAsyncTests
     {
         private IUserAccountOperationsHandler userAccountOperationsHandler;
+        private ILotCommentOperationsHandler lotCommentOperationsHandler;
         private ILotOperationsHandler lotOperationsHandler;
         private IUnitOfWork unitOfWork;
 
@@ -19,8 +20,9 @@ namespace BestLot.UnitTests
         public void SetUp()
         {
             unitOfWork = UnitTestDependencyResolver.ResolveUnitOfWork();
-            lotOperationsHandler = UnitTestDependencyResolver.ResloveLotOperationsHandler(unitOfWork);
-            userAccountOperationsHandler = UnitTestDependencyResolver.ResloveUserAccountOperationsHandler(unitOfWork);
+            lotOperationsHandler = UnitTestDependencyResolver.ResolveLotOperationsHandler(unitOfWork);
+            userAccountOperationsHandler = UnitTestDependencyResolver.ResolveUserAccountOperationsHandler(unitOfWork);
+            lotCommentOperationsHandler = UnitTestDependencyResolver.ResolveLotCommentOperationsHandler(unitOfWork);
         }
 
         [TearDown]
@@ -85,15 +87,15 @@ namespace BestLot.UnitTests
             var comment2 = new LotComment { Message = "Message2", UserId = "veklich99@mail.ru", LotId = 1 };
             var lot = new Lot { SellerUserId = "veklich99@mail.ru", StartDate = DateTime.Now, SellDate = DateTime.Now, };
             await userAccountOperationsHandler.AddUserAccountAsync(user);
-            await lotOperationsHandler.AddLotAsync(lot);
-            await lotOperationsHandler.AddCommentAsync(comment1);
-            await lotOperationsHandler.AddCommentAsync(comment2);
+            await lotOperationsHandler.AddLotAsync(lot, "", "");
+            await lotCommentOperationsHandler.AddCommentAsync(comment1);
+            await lotCommentOperationsHandler.AddCommentAsync(comment2);
 
-            await userAccountOperationsHandler.DeleteUserAccountAsync("veklich99@mail.ru");
+            await userAccountOperationsHandler.DeleteUserAccountAsync("veklich99@mail.ru", "", "");
 
             Assert.AreEqual(0, (await userAccountOperationsHandler.GetAllUserAccountsAsync()).Count());
             //Lot was deleted together with user, so lot with Id = 1 doesn`t exist
-            Assert.ThrowsAsync<ArgumentException>(() => lotOperationsHandler.GetLotAsync(1, l => lot.LotComments));
+            Assert.ThrowsAsync<ArgumentException>(() => lotOperationsHandler.GetLotAsync(1));
         }
 
         [Test]
@@ -102,7 +104,7 @@ namespace BestLot.UnitTests
             var user = new UserAccountInfo { Name = "User1", Email = "veklich99@mail.ru" };
             await userAccountOperationsHandler.AddUserAccountAsync(user);
 
-            Assert.ThrowsAsync<ArgumentException>(() => userAccountOperationsHandler.DeleteUserAccountAsync("veklich99@gmail.com"));
+            Assert.ThrowsAsync<ArgumentException>(() => userAccountOperationsHandler.DeleteUserAccountAsync("veklich99@gmail.com", "", ""));
         }
 
         [Test]
@@ -150,7 +152,7 @@ namespace BestLot.UnitTests
             var user = new UserAccountInfo { Name = "User1", Email = "veklich99@mail.ru" };
             await userAccountOperationsHandler.AddUserAccountAsync(user);
             var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now, LotComments = new List<LotComment> { new LotComment { Message = "Message1", LotId = 1, UserId = "veklich99@mail.ru" } } };
-            await lotOperationsHandler.AddLotAsync(lot);
+            await lotOperationsHandler.AddLotAsync(lot, "", "");
 
             var resultUsers = await userAccountOperationsHandler.GetAllUserAccountsAsync(u => u.LotComments);
 
@@ -165,8 +167,8 @@ namespace BestLot.UnitTests
             var user2 = new UserAccountInfo { Name = "User2", Email = "veklich99@gmail.com" };
             await userAccountOperationsHandler.AddUserAccountAsync(user2);
             var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now, LotComments = new List<LotComment> { new LotComment { Message = "Message1", LotId = 1, UserId = "veklich99@mail.ru" } } };
-            await lotOperationsHandler.AddLotAsync(lot);
-            await lotOperationsHandler.AddCommentAsync(new LotComment { Message = "Message2", LotId = 1, UserId = "veklich99@gmail.com" });
+            await lotOperationsHandler.AddLotAsync(lot, "", "");
+            await lotCommentOperationsHandler.AddCommentAsync(new LotComment { Message = "Message2", LotId = 1, UserId = "veklich99@gmail.com" });
 
             var resultUsers = (await userAccountOperationsHandler.GetAllUserAccountsAsync(u => u.LotComments)).Where(u => u.LotComments.Where(c => c.Message == "Message2").Count() > 0);
 

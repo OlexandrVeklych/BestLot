@@ -67,6 +67,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="LotCommentOperationsHandlerAsyncTests.cs" />
+    <Compile Include="LotCommentOperationsHandlerTests.cs" />
     <Compile Include="LotOperationsHandlerAsyncTests.cs" />
     <Compile Include="LotOperationsHandlerTests.cs" />
     <Compile Include="LotSalesHandlerTests.cs" />

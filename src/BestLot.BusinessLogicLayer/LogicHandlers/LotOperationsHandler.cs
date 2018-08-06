@@ -15,9 +15,8 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
 {
     public class LotOperationsHandler : ILotOperationsHandler
     {
-        public LotOperationsHandler(IUnitOfWork unitOfWork)
+        private LotOperationsHandler()
         {
-            UoW = unitOfWork;
             mapper = new MapperConfiguration(cfg =>
             {
                 //MaxDepth(1) - to map User inside Lot without his Lots
@@ -36,9 +35,25 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
                 cfg.CreateMap<UserAccountInfoEntity, UserAccountInfo>().MaxDepth(1); ;
                 cfg.CreateMap<Expression<Func<Lot, object>>[], Expression<Func<LotEntity, object>>[]>();
             }).CreateMapper();
-            lotPhotosOperationsHandler = new LotPhotoOperationsHandler(unitOfWork, this);
         }
-        private ILotPhotoOperationsHandler lotPhotosOperationsHandler;
+
+        public LotOperationsHandler(IUnitOfWork unitOfWork, ILotPhotoOperationsHandler lotPhotoOperationsHandler) : this()
+        {
+            this.UoW = unitOfWork;
+            this.lotPhotoOperationsHandler = lotPhotoOperationsHandler;
+        }
+
+        private ILotPhotoOperationsHandler lotPhotoOperationsHandler;
+        public ILotPhotoOperationsHandler LotPhotoOperationsHandler {
+            get
+            {
+                return lotPhotoOperationsHandler;
+            }
+            set
+            {
+                lotPhotoOperationsHandler = value;
+            }
+        }
         private IUnitOfWork UoW;
         private IMapper mapper;
 
@@ -48,7 +63,8 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
                 throw new ArgumentException("Seller user id is incorrect");
             lot.StartDate = DateTime.Now;
             lot.BuyerUserId = null;
-            lotPhotosOperationsHandler.AddPhotosToNewLot(lot, hostingEnvironmentPath, requestUriLeftPart);
+            if (lot.LotPhotos != null && lot.LotPhotos.Any())
+                lotPhotoOperationsHandler.AddPhotosToNewLot(lot, hostingEnvironmentPath, requestUriLeftPart);
             UoW.Lots.Add(mapper.Map<LotEntity>(lot));
             UoW.SaveChanges();
         }
@@ -59,7 +75,8 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
                 throw new ArgumentException("Seller user id is incorrect");
             lot.StartDate = DateTime.Now;
             lot.BuyerUserId = null;
-            await lotPhotosOperationsHandler.AddPhotosToNewLotAsync(lot, hostingEnvironmentPath, requestUriLeftPart);
+            if (lot.LotPhotos != null && lot.LotPhotos.Any())
+                await lotPhotoOperationsHandler.AddPhotosToNewLotAsync(lot, hostingEnvironmentPath, requestUriLeftPart);
             UoW.Lots.Add(mapper.Map<LotEntity>(lot));
             await UoW.SaveChangesAsync();
         }
@@ -114,11 +131,12 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
 
         public void DeleteLot(int lotId, string hostingEnvironmentPath, string requestUriLeftPart)
         {
-            if (UoW.Lots.Get(lotId) == null)
+            Lot lot;
+            if ((lot = mapper.Map<Lot>(UoW.Lots.Get(lotId))) == null)
                 throw new ArgumentException("Lot id is incorrect");
-            List<LotPhoto> lotPhotos = lotPhotosOperationsHandler.GetLotPhotos(lotId).ToList();
-            foreach (LotPhoto lotPhoto in lotPhotos)
-                lotPhotosOperationsHandler.DeletePhoto(lotPhoto.Id, hostingEnvironmentPath, requestUriLeftPart);
+            lotPhotoOperationsHandler.DeleteAllLotPhotos(lot.Id, hostingEnvironmentPath, requestUriLeftPart);
+            foreach (LotComment lotComment in lot.LotComments)
+                UoW.LotComments.Delete(lotComment.Id); UoW.Lots.Delete(lotId);
             UoW.Lots.Delete(lotId);
             UoW.SaveChanges();
         }
@@ -128,8 +146,9 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             Lot lot;
             if ((lot = mapper.Map<Lot>(await UoW.Lots.GetAsync(lotId))) == null)
                 throw new ArgumentException("Lot id is incorrect");
-            foreach (LotPhoto lotPhoto in lot.LotPhotos)
-                await lotPhotosOperationsHandler.DeletePhotoAsync(lotPhoto.Id, hostingEnvironmentPath, requestUriLeftPart);
+            await lotPhotoOperationsHandler.DeleteAllLotPhotosAsync(lot.Id, hostingEnvironmentPath, requestUriLeftPart);
+            foreach (LotComment lotComment in lot.LotComments)
+                UoW.LotComments.Delete(lotComment.Id);
             UoW.Lots.Delete(lotId);
             await UoW.SaveChangesAsync();
         }

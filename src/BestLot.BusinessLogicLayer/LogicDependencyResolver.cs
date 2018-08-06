@@ -23,22 +23,29 @@ namespace BestLot.BusinessLogicLayer
 
         public static ILotOperationsHandler ResolveLotOperationsHandler()
         {
-            return new LotOperationsHandler(ResolveUnitOfWork());
+            var correctLotPhotoOperationsHandler = ResolveLotPhotoOperationsHandler(new LotOperationsHandler(ResolveUnitOfWork(), new LotPhotoOperationsHandler(null, null)));
+            correctLotPhotoOperationsHandler.LotOperationsHandler.LotPhotoOperationsHandler = correctLotPhotoOperationsHandler;
+            return new LotOperationsHandler(ResolveUnitOfWork(), correctLotPhotoOperationsHandler);
         }
 
         public static IUserAccountOperationsHandler ResolveUserAccountOperationsHandler()
         {
-            return new UserAccountOperationsHandler(ResolveUnitOfWork());
+            return new UserAccountOperationsHandler(ResolveUnitOfWork(), ResolveLotOperationsHandler(), ResolveLotPhotoOperationsHandler());
         }
 
-        public static ILotCommentOperationsHandler ResolveLotCommentsOperationsHandler()
+        public static ILotCommentOperationsHandler ResolveLotCommentOperationsHandler()
         {
-            return new LotCommentOperationsHandler(ResolveUnitOfWork());
+            return new LotCommentOperationsHandler(ResolveUnitOfWork(), ResolveLotOperationsHandler(), ResolveUserAccountOperationsHandler());
         }
 
-        public static ILotPhotoOperationsHandler ResolveLotPhotosOperationsHandler()
+        public static ILotPhotoOperationsHandler ResolveLotPhotoOperationsHandler()
         {
-            return new LotPhotoOperationsHandler(ResolveUnitOfWork());
+            return new LotPhotoOperationsHandler(ResolveUnitOfWork(), ResolveLotOperationsHandler());
+        }
+
+        public static ILotPhotoOperationsHandler ResolveLotPhotoOperationsHandler(ILotOperationsHandler lotOperationsHandler)
+        {
+            return new LotPhotoOperationsHandler(ResolveUnitOfWork(), lotOperationsHandler);
         }
     }
 }

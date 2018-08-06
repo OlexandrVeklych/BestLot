@@ -17,9 +17,8 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
 {
     public class UserAccountOperationsHandler : IUserAccountOperationsHandler
     {
-        public UserAccountOperationsHandler(IUnitOfWork unitOfWork)
+        private UserAccountOperationsHandler()
         {
-            UoW = unitOfWork;
             mapper = new MapperConfiguration(cfg =>
             {
                 //MaxDepth(1) - to map User inside Lot without his Lots
@@ -38,8 +37,13 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
                 cfg.CreateMap<UserAccountInfoEntity, UserAccountInfo>();
                 cfg.CreateMap<Expression<Func<Lot, object>>[], Expression<Func<LotEntity, object>>[]>();
             }).CreateMapper();
-            lotOperationsHandler = LogicDependencyResolver.ResolveLotOperationsHandler();
-            lotPhotoOperationsHandler = LogicDependencyResolver.ResolveLotPhotosOperationsHandler();
+        }
+
+        public UserAccountOperationsHandler(IUnitOfWork unitOfWork, ILotOperationsHandler lotOperationsHandler, ILotPhotoOperationsHandler lotPhotoOperationsHandler) : this()
+        {
+            this.UoW = unitOfWork;
+            this.lotOperationsHandler = lotOperationsHandler;
+            this.lotPhotoOperationsHandler = lotPhotoOperationsHandler;
         }
 
         private ILotPhotoOperationsHandler lotPhotoOperationsHandler;
@@ -158,19 +162,25 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             }
         }
 
-        public void DeleteUserAccount(string userAccountId, string hostingEnvironmentPath)
+        public void DeleteUserAccount(string userAccountId, string hostingEnvironmentPath, string requestUriLeftPart)
         {
-            if (UoW.UserAccounts.Get(userAccountId) == null)
+            UserAccountInfo user;
+            if ((user = GetUserAccount(userAccountId)) == null)
                 throw new ArgumentException("UserAccount id is incorrect");
+            foreach (Lot lot in user.Lots)
+                lotOperationsHandler.DeleteLot(lot.Id, hostingEnvironmentPath, requestUriLeftPart);
             lotPhotoOperationsHandler.DeleteAllUserPhotos(userAccountId, hostingEnvironmentPath);
             UoW.UserAccounts.Delete(userAccountId);
             UoW.SaveChanges();
         }
 
-        public async Task DeleteUserAccountAsync(string userAccountId, string hostingEnvironmentPath)
+        public async Task DeleteUserAccountAsync(string userAccountId, string hostingEnvironmentPath, string requestUriLeftPart)
         {
-            if (await UoW.UserAccounts.GetAsync(userAccountId) == null)
+            UserAccountInfo user;
+            if ((user = await GetUserAccountAsync(userAccountId)) == null)
                 throw new ArgumentException("UserAccount id is incorrect");
+            foreach (Lot lot in user.Lots)
+                await lotOperationsHandler.DeleteLotAsync(lot.Id, hostingEnvironmentPath, requestUriLeftPart);
             await lotPhotoOperationsHandler.DeleteAllUserPhotosAsync(userAccountId, hostingEnvironmentPath);
             UoW.UserAccounts.Delete(userAccountId);
             await UoW.SaveChangesAsync();

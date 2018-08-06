@@ -16,9 +16,8 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
 {
     public class LotPhotoOperationsHandler : ILotPhotoOperationsHandler
     {
-        public LotPhotoOperationsHandler(IUnitOfWork unitOfWork)
+        private LotPhotoOperationsHandler()
         {
-            UoW = unitOfWork;
             mapper = new MapperConfiguration(cfg =>
             {
                 //MaxDepth(1) - to map User inside Lot without his Lots
@@ -33,30 +32,27 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
                 cfg.CreateMap<LotPhotoEntity, LotPhoto>().MaxDepth(1);
                 cfg.CreateMap<LotPhoto, LotPhotoEntity>();
             }).CreateMapper();
-            lotOperationsHandler = LogicDependencyResolver.ResolveLotOperationsHandler();
         }
 
-        public LotPhotoOperationsHandler(IUnitOfWork unitOfWork, ILotOperationsHandler lotOperationsHandler)
+        public LotPhotoOperationsHandler(IUnitOfWork unitOfWork, ILotOperationsHandler lotOperationsHandler) : this()
         {
-            UoW = unitOfWork;
-            mapper = new MapperConfiguration(cfg =>
-            {
-                //MaxDepth(1) - to map User inside Lot without his Lots
-                //Lot.User.Name - ok
-                //Lot.User.Lots[n] - null reference
-                cfg.CreateMap<LotEntity, Lot>().MaxDepth(1);
-                cfg.CreateMap<Lot, LotEntity>();
-                //MaxDepth(1) - to map User inside Comment without his Lots
-                //LotComment.User.Name - ok
-                //LotComment.User.Lots[n] - null reference
-                cfg.CreateMap<LotCommentEntity, LotComment>().MaxDepth(1);
-                cfg.CreateMap<LotPhotoEntity, LotPhoto>().MaxDepth(1);
-                cfg.CreateMap<LotPhoto, LotPhotoEntity>();
-            }).CreateMapper();
+            this.UoW = unitOfWork;
             this.lotOperationsHandler = lotOperationsHandler;
         }
 
         private ILotOperationsHandler lotOperationsHandler;
+        public ILotOperationsHandler LotOperationsHandler
+        {
+            get
+            {
+                return lotOperationsHandler;
+            }
+            set
+            {
+                lotOperationsHandler = value;
+            }
+        }
+
         private IUnitOfWork UoW;
         private IMapper mapper;
 
@@ -153,14 +149,55 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             await UoW.SaveChangesAsync();
         }
 
+        public void DeleteAllLotPhotos(int lotId, string hostingEnvironmentPath, string requestUriLeftPart)
+        {
+            Expression<Func<LotPhotoEntity, bool>> predicate = null;
+            List<LotPhoto> lotPhotos;
+            if ((lotPhotos = UoW.LotPhotos
+                .GetAll()
+                .Where(predicate = photo => photo.LotId == lotId)
+                .ProjectTo<LotPhoto>(mapper.ConfigurationProvider)
+                .ToList()) == null)
+                throw new ArgumentException("Photo id is incorrect");
+            foreach (LotPhoto lotPhoto in lotPhotos)
+            {
+                File.Delete(lotPhoto.Path.Replace(requestUriLeftPart, hostingEnvironmentPath));
+                UoW.LotPhotos.Delete(lotPhoto.Id);
+            }
+            UoW.SaveChanges();
+        }
+
+        public async Task DeleteAllLotPhotosAsync(int lotId, string hostingEnvironmentPath, string requestUriLeftPart)
+        {
+            Expression<Func<LotPhotoEntity, bool>> predicate = null;
+            List<LotPhoto> lotPhotos;
+            if ((lotPhotos = (await UoW.LotPhotos
+                .GetAllAsync())
+                .Where(predicate = photo => photo.LotId == lotId)
+                .ProjectTo<LotPhoto>(mapper.ConfigurationProvider)
+                .ToList()) == null)
+                throw new ArgumentException("Photo id is incorrect");
+            foreach (LotPhoto lotPhoto in lotPhotos)
+            {
+                File.Delete(lotPhoto.Path.Replace(requestUriLeftPart, hostingEnvironmentPath));
+                UoW.LotPhotos.Delete(lotPhoto.Id);
+            }
+            await UoW.SaveChangesAsync();
+        }
+
         public void DeleteAllUserPhotos(string userAccountId, string hostingEnvironmentPath)
         {
-            Directory.Delete(hostingEnvironmentPath + "\\Photos\\" + userAccountId, true);
+            if (Directory.Exists(hostingEnvironmentPath + "\\Photos\\" + userAccountId))
+                Directory.Delete(hostingEnvironmentPath + "\\Photos\\" + userAccountId, true);
         }
 
         public async Task DeleteAllUserPhotosAsync(string userAccountId, string hostingEnvironmentPath)
         {
-            await new Task(() => { Directory.Delete(hostingEnvironmentPath + "\\Photos\\" + userAccountId, true); });
+            if (Directory.Exists(hostingEnvironmentPath + "\\Photos\\" + userAccountId))
+                await new Task(() => 
+                {
+                    Directory.Delete(hostingEnvironmentPath + "\\Photos\\" + userAccountId, true);
+                });
         }
 
         public LotPhoto GetLotPhotoByNumber(int lotId, int photoNumber, params Expression<Func<Lot, object>>[] includeProperties)

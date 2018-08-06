@@ -23,7 +23,7 @@ namespace BestLot.WebAPI.Controllers
                 cfg.CreateMap<LotPhotoInModel, LotPhoto>();
                 cfg.CreateMap<LotPhoto, LotPhotoOutModel>();
             }).CreateMapper();
-            lotPhotosOperationsHandler = LogicDependencyResolver.ResolveLotPhotosOperationsHandler();
+            lotPhotosOperationsHandler = LogicDependencyResolver.ResolveLotPhotoOperationsHandler();
         }
 
         private ILotPhotoOperationsHandler lotPhotosOperationsHandler;

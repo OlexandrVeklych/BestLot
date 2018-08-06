@@ -10,6 +10,7 @@ namespace BestLot.BusinessLogicLayer.Interfaces
 {
     public interface ILotOperationsHandler
     {
+        ILotPhotoOperationsHandler LotPhotoOperationsHandler { get; set; }
         void AddLot(Lot lot, string hostingEnvironmentPath, string requestUriLeftPart);
         Task AddLotAsync(Lot lot, string hostingEnvironmentPath, string requestUriLeftPart);
         void ChangeLot(int id, Lot newLot, string hostingEnvironmentPath, string requestUriLeftPart);

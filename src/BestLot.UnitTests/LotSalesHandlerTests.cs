@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using BestLot.BusinessLogicLayer.LogicHandlers;
+using BestLot.BusinessLogicLayer.Interfaces;
 using BestLot.BusinessLogicLayer.Models;
 using BestLot.DataAccessLayer.UnitOfWork;
 using NUnit.Framework;
@@ -20,9 +20,9 @@ namespace BestLot.UnitTests
         public void SetUp()
         {
             unitOfWork = UnitTestDependencyResolver.ResolveUnitOfWork();
-            lotOperationsHandler = UnitTestDependencyResolver.ResloveLotOperationsHandler(unitOfWork);
+            lotOperationsHandler = UnitTestDependencyResolver.ResolveLotOperationsHandler(unitOfWork);
             lotSalesHandler = UnitTestDependencyResolver.ResolveLotSalesHandler(unitOfWork, 1500, 500);
-            userAccountOperationsHandler = UnitTestDependencyResolver.ResloveUserAccountOperationsHandler(unitOfWork);
+            userAccountOperationsHandler = UnitTestDependencyResolver.ResolveUserAccountOperationsHandler(unitOfWork);
             userAccountOperationsHandler.AddUserAccount(new UserAccountInfo { Name = "DefaultUser", Email = "veklich99@mail.ru" });
             userAccountOperationsHandler.AddUserAccount(new UserAccountInfo { Name = "DefaultUser2", Email = "veklich99@gmail.com" });
         }
@@ -39,7 +39,7 @@ namespace BestLot.UnitTests
         public void RefreshLots_Timer1700Millisec_AddsAllLotsToDictionary()
         {
             var lot = new Lot { SellDate = DateTime.Now.AddSeconds(2), SellerUserId = "veklich99@mail.ru", BuyerUserId = "veklich99@gmail.com" };
-            lotOperationsHandler.AddLot(lot);
+            lotOperationsHandler.AddLot(lot, "", "");
 
             lotSalesHandler.RunSalesHandler();
             Assert.That(() => lotSalesHandler.lotsSellDate.Count, Is.EqualTo(1).After(1700));
@@ -49,9 +49,9 @@ namespace BestLot.UnitTests
         public void Timers_DBContains2Lots_TimersWorkRight()
         {
             var lot = new Lot { SellDate = DateTime.Now.AddSeconds(2), SellerUserId = "veklich99@mail.ru", BuyerUserId = "veklich99@gmail.com" };
-            lotOperationsHandler.AddLot(lot);
+            lotOperationsHandler.AddLot(lot, "", "");
             var lot2 = new Lot { SellDate = DateTime.Now.AddSeconds(10), SellerUserId = "veklich99@mail.ru", BuyerUserId = "veklich99@gmail.com" };
-            lotOperationsHandler.AddLot(lot2);
+            lotOperationsHandler.AddLot(lot2, "", "");
 
             lotSalesHandler.RunSalesHandler();
 
