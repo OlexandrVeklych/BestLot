@@ -37,7 +37,22 @@ namespace BestLot.WebAPI.Models
     {
         protected override void Seed(ApplicationDbContext context)
         {
-            context.Roles.Add(new IdentityRole { Name = "Admin" });
+            var roleStore = new RoleStore<IdentityRole>(context);
+            var roleManager = new RoleManager<IdentityRole>(roleStore);
+            var adminRole = new IdentityRole { Name = "Admin" };
+            var moderatorRole = new IdentityRole { Name = "Moderator" };
+            var userRole = new IdentityRole { Name = "User" };
+
+            roleManager.Create(adminRole);
+            roleManager.Create(moderatorRole);
+            roleManager.Create(userRole);
+
+            var userStore = new UserStore<ApplicationUser>(context);
+            var userManager = new UserManager<ApplicationUser>(userStore);
+            var admin = new ApplicationUser { UserName = "admin", Email = "admin" };
+
+            userManager.Create(admin, "Admin1234!");
+            userManager.AddToRole(admin.Id, "Admin");
             base.Seed(context);
         }
     }

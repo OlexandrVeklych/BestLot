@@ -31,7 +31,7 @@ namespace BestLot.WebAPI.Controllers
 
         // GET api/<controller>
         [Route("api/lots/{lotId}/photos")]
-        public IHttpActionResult Get(int lotId)
+        public IHttpActionResult GetLotPhotos(int lotId)
         {
             try
             {
@@ -45,7 +45,7 @@ namespace BestLot.WebAPI.Controllers
 
         // GET api/<controller>/5
         [Route("api/lots/{lotId}/photos/{photoNumber}")]
-        public IHttpActionResult Get(int lotId, int photoNumber)
+        public IHttpActionResult GetLotPhotoByNumber(int lotId, int photoNumber)
         {
             try
             {
@@ -64,7 +64,7 @@ namespace BestLot.WebAPI.Controllers
 
         // POST api/<controller>
         [Route("api/lots/{lotId}/photos")]
-        public IHttpActionResult Post([FromUri] int lotId, [FromBody]LotPhotoInModel[] value)
+        public IHttpActionResult PostLotPhoto([FromUri] int lotId, [FromBody]LotPhotoInModel[] value)
         {
             try
             {
@@ -78,7 +78,7 @@ namespace BestLot.WebAPI.Controllers
         }
 
         // DELETE api/<controller>/5
-        public IHttpActionResult Delete(int id)
+        public IHttpActionResult DeleteLotPhoto(int id)
         {
             try
             {

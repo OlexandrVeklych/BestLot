@@ -10,9 +10,14 @@ namespace BestLot.DataAccessLayer.Contexts
 {
     public class LotContext : DbContext
     {
-        public LotContext(string connectionString) : base(connectionString) { }
+        public LotContext(string connectionString) : base(connectionString)
+        {
+            Database.SetInitializer(new LotContextInitializer());
+        }
         public DbSet<LotEntity> Lots { get; set; }
         public DbSet<UserAccountInfoEntity> UserAccounts { get; set; }
+        public DbSet<LotCommentEntity> LotComments { get; set; }
+        public DbSet<LotPhotoEntity> LotPhotos { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
@@ -46,6 +51,15 @@ namespace BestLot.DataAccessLayer.Contexts
                .WillCascadeOnDelete(false);
 
             base.OnModelCreating(modelBuilder);
+        }
+    }
+
+    public class LotContextInitializer : CreateDatabaseIfNotExists<LotContext>
+    {
+        protected override void Seed(LotContext context)
+        {
+            context.UserAccounts.Add(new UserAccountInfoEntity { Email = "admin", Name = "Olexandr", Surname = "Veklych", TelephoneNumber = "+380678524229" });
+            base.Seed(context);
         }
     }
 }

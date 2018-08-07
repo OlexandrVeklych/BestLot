@@ -32,7 +32,7 @@ namespace BestLot.WebAPI.Controllers
         [Authorize(Roles = "Admin")]
         // GET api/<controller>
         [Route("api/users")]
-        public IHttpActionResult Get(int page, int amount)
+        public IHttpActionResult GetAllUsers(int page, int amount)
         {
             return Ok(mapper.Map<IEnumerable<UserAccountInfoOutModel>>(userAccountOperationsHandler
                 .GetAllUserAccounts()
@@ -58,7 +58,7 @@ namespace BestLot.WebAPI.Controllers
         // GET api/<controller>/5
         [Route("api/lots/{lotId}/selleruser")]
         [Route("api/lots/{lotId}/buyeruser")]
-        public IHttpActionResult Get(int lotId)
+        public IHttpActionResult GetLotRelatedUser(int lotId)
         {
             if (Request.RequestUri.OriginalString.Contains("buyeruser"))
                 try
@@ -83,7 +83,7 @@ namespace BestLot.WebAPI.Controllers
 
         // GET api/<controller>/5
         [Route("api/users/{email}")]
-        public IHttpActionResult Get(string email)
+        public IHttpActionResult GetUser(string email)
         {
             try
             {
@@ -97,14 +97,14 @@ namespace BestLot.WebAPI.Controllers
 
         // POST api/<controller>
         [Route("api/users")]
-        public IHttpActionResult Post([FromBody]UserAccountInfoInModel value)
+        public IHttpActionResult PostUser([FromBody]UserAccountInfoInModel value)
         {
             return BadRequest("Use registration to add user");
         }
 
         // PUT api/<controller>/5
-        [Route("api/users/")]
-        public IHttpActionResult Put(string email, [FromBody]UserAccountInfoInModel value)
+        [Route("api/users")]
+        public IHttpActionResult PutUser(string email, [FromBody]UserAccountInfoInModel value)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

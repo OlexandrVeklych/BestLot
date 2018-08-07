@@ -32,7 +32,7 @@ namespace BestLot.WebAPI.Controllers
 
         // GET api/<controller>
         [AllowAnonymous]
-        public IHttpActionResult Get(int page, int amount, string name = null, string category = null, double minPrice = 0, double maxPrice = 0)
+        public IHttpActionResult GetAllLots(int page, int amount, string name = null, string category = null, double minPrice = 0, double maxPrice = 0)
         {
             IQueryable<Lot> result = lotOperationsHandler.GetAllLots();
             Expression<Func<Lot, bool>> predicate = null;
@@ -52,7 +52,7 @@ namespace BestLot.WebAPI.Controllers
 
         [AllowAnonymous]
         [Route("api/users/{email}/lots")]
-        public IHttpActionResult Get(string email, int page, int amount, string name = null, string category = null, double minPrice = 0, double maxPrice = 0)
+        public IHttpActionResult GetUserLots(string email, int page, int amount, string name = null, string category = null, double minPrice = 0, double maxPrice = 0)
         {
             Expression<Func<Lot, bool>> predicate = null;
             IQueryable<Lot> result = lotOperationsHandler.GetUserLots(email);
@@ -80,7 +80,7 @@ namespace BestLot.WebAPI.Controllers
 
         // GET api/<controller>/5
         [AllowAnonymous]
-        public IHttpActionResult Get(int id)
+        public IHttpActionResult GetLot(int id)
         {
             try
             {
@@ -93,7 +93,7 @@ namespace BestLot.WebAPI.Controllers
         }
 
         // POST api/<controller>
-        public IHttpActionResult Post([FromBody]LotInModel value)
+        public IHttpActionResult PostLot([FromBody]LotInModel value)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -114,7 +114,7 @@ namespace BestLot.WebAPI.Controllers
         }       
 
         // PUT api/<controller>/5
-        public IHttpActionResult Put(int id, [FromBody]LotInModel value)
+        public IHttpActionResult PutLot(int id, [FromBody]LotInModel value)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -132,7 +132,7 @@ namespace BestLot.WebAPI.Controllers
         }
 
         // DELETE api/<controller>/5
-        public IHttpActionResult Delete(int id)
+        public IHttpActionResult DeleteLot(int id)
         {
             if (lotOperationsHandler.GetLot(id).SellerUserId != User.Identity.Name && !User.IsInRole("Admin"))
                 return BadRequest("Not Allowed");

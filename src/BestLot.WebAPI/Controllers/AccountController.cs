@@ -330,20 +330,15 @@ namespace BestLot.WebAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            var userAccountOperationsHandler = LogicDependencyResolver.ResolveUserAccountOperationsHandler();
-
-            try
-            {
-                userAccountOperationsHandler.AddUserAccount(new BusinessLogicLayer.Models.UserAccountInfo { Email = model.Email, Name = model.Name, Surname = model.Surname, TelephoneNumber = model.TelephoneNumber });
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-
             var user = new ApplicationUser() { UserName = model.Email, Email = model.Email };
 
+
             IdentityResult result = await UserManager.CreateAsync(user, model.Password);
+
+            if (!result.Succeeded)
+            {
+                return GetErrorResult(result);
+            }
 
             using (var context = new ApplicationDbContext())
             {
@@ -351,8 +346,12 @@ namespace BestLot.WebAPI.Controllers
                 var roleManager = new RoleManager<IdentityRole>(roleStore);
 
                 if (roleManager.FindByName(model.Role) == null)
+                {
+                    UserManager.Delete(user);
                     return BadRequest("Incorrect role");
+                }
             }
+
             try
             {
                 await UserManager.AddToRoleAsync(user.Id, model.Role);
@@ -360,12 +359,19 @@ namespace BestLot.WebAPI.Controllers
 
             catch (Exception ex)
             {
-                return (BadRequest(ex.StackTrace));
+                UserManager.Delete(user);
+                return BadRequest(ex.StackTrace);
             }
-            if (!result.Succeeded)
+
+            try
             {
-                userAccountOperationsHandler.DeleteUserAccount(model.Email, System.Web.Hosting.HostingEnvironment.MapPath(@"~"), Request.RequestUri.GetLeftPart(UriPartial.Authority));
-                return GetErrorResult(result);
+                var userAccountOperationsHandler = LogicDependencyResolver.ResolveUserAccountOperationsHandler();
+                userAccountOperationsHandler.AddUserAccount(new BusinessLogicLayer.Models.UserAccountInfo { Email = model.Email, Name = model.Name, Surname = model.Surname, TelephoneNumber = model.TelephoneNumber });
+            }
+            catch (ArgumentException ex)
+            {
+                UserManager.Delete(user);
+                return BadRequest(ex.Message);
             }
 
             return Ok();

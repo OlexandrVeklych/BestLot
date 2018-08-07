@@ -27,9 +27,10 @@ namespace BestLot.WebAPI.Controllers
 
         private readonly ILotCommentOperationsHandler lotCommentsOperationsHandler;
         private readonly IMapper mapper;
+
         // GET api/<controller>
         [Route("api/lots/{lotId}/comments")]
-        public IHttpActionResult Get(int lotId, int page, int amount)
+        public IHttpActionResult GetLotComments(int lotId, int page, int amount)
         {
             try
             {
@@ -47,7 +48,7 @@ namespace BestLot.WebAPI.Controllers
 
         [Authorize(Roles = "Admin")]
         [Route("api/users/{email}/comments")]
-        public IHttpActionResult Get(string email, int page, int amount)
+        public IHttpActionResult GetUserComments(string email, int page, int amount)
         {
             try
             {
@@ -65,7 +66,7 @@ namespace BestLot.WebAPI.Controllers
 
         // GET api/<controller>/5
         [Route("api/lots/{lotId}/comments/{commentNumber}")]
-        public IHttpActionResult Get(int lotId, int commentNumber)
+        public IHttpActionResult GetLotCommentByNumber(int lotId, int commentNumber)
         {
             try
             {
@@ -86,7 +87,7 @@ namespace BestLot.WebAPI.Controllers
         [Authorize]
         // POST api/<controller>
         [Route("api/lots/{lotId}/comments")]
-        public IHttpActionResult Post([FromUri]int lotId, [FromBody]LotCommentInModel value)
+        public IHttpActionResult PostLotComment([FromUri]int lotId, [FromBody]LotCommentInModel value)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
