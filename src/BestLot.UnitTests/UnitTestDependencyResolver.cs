@@ -16,9 +16,9 @@ namespace BestLot.UnitTests
             return new UnitOfWork("UnitTestLotContext", "UnitTestLotArchiveContext"); ;
         }
 
-        public static ILotSalesHandler ResolveLotSalesHandler(IUnitOfWork unitOfWork, double refreshTimeMillisecs, double checkTimeMillisecs)
+        public static ILotSalesHandler ResolveLotSalesHandler(IUnitOfWork unitOfWork, double refreshTimeMillisecs, double checkTimeMillisecs, string hostingEnvironment, string requestUriLeftPart)
         {
-            return new LotSalesHandler(unitOfWork, refreshTimeMillisecs, checkTimeMillisecs);
+            return new LotSalesHandler(unitOfWork, ResolveLotOperationsHandler(unitOfWork), refreshTimeMillisecs, checkTimeMillisecs, hostingEnvironment, requestUriLeftPart);
         }
 
         public static ILotOperationsHandler ResolveLotOperationsHandler(IUnitOfWork unitOfWork)

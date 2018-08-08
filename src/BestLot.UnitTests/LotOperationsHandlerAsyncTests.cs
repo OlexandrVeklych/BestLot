@@ -185,12 +185,12 @@ namespace BestLot.UnitTests
         }
 
         [Test]
-        public async Task PlaceBetAsync_ValidInput_ChangesPriceAndBuyerUserId()
+        public async Task PlaceBidAsync_ValidInput_ChangesPriceAndBuyerUserId()
         {
             var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now, Name = "Name1" };
             await lotOperationsHandler.AddLotAsync(lot, "","");
 
-            await lotOperationsHandler.PlaceBetAsync("veklich99@mail.ru", 1, 15);
+            await lotOperationsHandler.PlaceBidAsync(1, "veklich99@mail.ru", 15);
 
             var resultLot = await lotOperationsHandler.GetLotAsync(1);
             Assert.AreEqual(1, (await lotOperationsHandler.GetAllLotsAsync()).Count());
@@ -200,13 +200,13 @@ namespace BestLot.UnitTests
         }
 
         [Test]
-        public async Task PlaceBetAsync_InvalidInput_ThrowsArgumentException()
+        public async Task PlaceBidAsync_InvalidInput_ThrowsArgumentException()
         {
             var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now, Name = "Name1" };
             await lotOperationsHandler.AddLotAsync(lot, "","");
 
-            Assert.ThrowsAsync<ArgumentException>(() => lotOperationsHandler.PlaceBetAsync("veklich98@gmail.com", 1, 15));
-            Assert.ThrowsAsync<ArgumentException>(() => lotOperationsHandler.PlaceBetAsync("veklich99@mail.ru", 3, 15));
+            Assert.ThrowsAsync<ArgumentException>(() => lotOperationsHandler.PlaceBidAsync(1, "veklich98@gmail.com", 15));
+            Assert.ThrowsAsync<ArgumentException>(() => lotOperationsHandler.PlaceBidAsync(3, "veklich99@mail.ru", 15));
         }
     }
 }

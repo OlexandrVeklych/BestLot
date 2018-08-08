@@ -181,12 +181,12 @@ namespace BestLot.UnitTests
         }
 
         [Test]
-        public void PlaceBet_ValidInput_ChangesPriceAndBuyerUserId()
+        public void PlaceBid_ValidInput_ChangesPriceAndBuyerUserId()
         {
             var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now, Name = "Name1" };
             lotOperationsHandler.AddLot(lot, "", "");
 
-            lotOperationsHandler.PlaceBet("veklich99@mail.ru", 1, 15);
+            lotOperationsHandler.PlaceBid(1, "veklich99@mail.ru", 15);
 
             var resultLot = lotOperationsHandler.GetLot(1);
             Assert.AreEqual(1, lotOperationsHandler.GetAllLots().Count());
@@ -196,15 +196,13 @@ namespace BestLot.UnitTests
         }
 
         [Test]
-        public void PlaceBet_InvalidInput_ThrowsArgumentException()
+        public void PlaceBid_InvalidInput_ThrowsArgumentException()
         {
             var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now, Name = "Name1" };
             lotOperationsHandler.AddLot(lot, "", "");
 
-            Assert.Throws<ArgumentException>(() => lotOperationsHandler.PlaceBet("veklich98@gmail.com", 1, 15));
-            Assert.Throws<ArgumentException>(() => lotOperationsHandler.PlaceBet("veklich99@mail.ru", 3, 15));
+            Assert.Throws<ArgumentException>(() => lotOperationsHandler.PlaceBid(1, "veklich98@gmail.com", 15));
+            Assert.Throws<ArgumentException>(() => lotOperationsHandler.PlaceBid( 3, "veklich99@mail.ru", 15));
         }
-
-        
     }
 }

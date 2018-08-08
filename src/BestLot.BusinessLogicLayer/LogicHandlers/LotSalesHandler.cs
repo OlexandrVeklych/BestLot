@@ -15,7 +15,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
 {
     public class LotSalesHandler : ILotSalesHandler, IDisposable
     {
-        private LotSalesHandler(double refreshTimeMillisecs, double checkTimeMillisecs)
+        private LotSalesHandler(double refreshTimeMillisecs, double checkTimeMillisecs, string hostingEnvironment, string requestUriLeftPart)
         {
             mapper = new MapperConfiguration(cfg =>
             {
@@ -30,17 +30,24 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             checkTimer = new Timer(checkTimeMillisecs);
             checkTimer.AutoReset = true;
             checkTimer.Elapsed += CheckLots;
+            this.hostingEnvironment = hostingEnvironment;
+            this.requestUriLeftPart = requestUriLeftPart;
         }
 
-        public LotSalesHandler(IUnitOfWork unitOfWork, double refreshTimeMillisecs, double checkTimeMillisecs) :this(refreshTimeMillisecs, checkTimeMillisecs)
+        public LotSalesHandler(IUnitOfWork unitOfWork, ILotOperationsHandler lotOperationsHandler, double refreshTimeMillisecs, double checkTimeMillisecs, string hostingEnvironment, string requestUriLeftPart) :this(refreshTimeMillisecs, checkTimeMillisecs, hostingEnvironment, requestUriLeftPart)
         {
             this.UoW = unitOfWork;
+            this.lotOperationsHandler = lotOperationsHandler;
         }
 
+
+        private ILotOperationsHandler lotOperationsHandler;
         private Timer refreshTimer;
         private Timer checkTimer;
         private IUnitOfWork UoW;
         private IMapper mapper;
+        private string hostingEnvironment;
+        private string requestUriLeftPart;
         public Dictionary<int, DateTime> lotsSellDate { get; private set; }
 
         public void StopSalesHandler()
@@ -69,7 +76,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         private void RefreshLots(object sender, ElapsedEventArgs e)
         {
             lotsSellDate.Clear();
-            foreach (Lot lot in mapper.Map<IEnumerable<Lot>>(UoW.Lots.GetAll()))
+            foreach (Lot lot in lotOperationsHandler.GetAllLots())
             {
                 lotsSellDate.Add(lot.Id, lot.SellDate);
             }
@@ -85,9 +92,8 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             lotsSellDate.Remove(lotId);
 
             UoW.LotArchive.Add(mapper.Map<ArchiveLotEntity>(UoW.Lots.Get(lotId)));
-            UoW.Lots.Delete(lotId);
+            lotOperationsHandler.DeleteLot(lotId, hostingEnvironment, requestUriLeftPart);
             UoW.SaveArchiveChanges();
-            UoW.SaveChanges();
         }
 
         private bool disposed = false;

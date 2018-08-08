@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BestLot.BusinessLogicLayer.Models
 {
-    public class Lot
+    public class Lot : IBidable
     {
         public int Id { get; set; }
         public string Name { get; set; }
@@ -22,6 +22,7 @@ namespace BestLot.BusinessLogicLayer.Models
         public DateTime SellDate { get; set; }
         public List<LotPhoto> LotPhotos { get; set; }
         public List<LotComment> LotComments { get; set; }
+        public int BidPlacer { get; set; }
 
         public void AddComment(LotComment lotComment)
         {
@@ -31,6 +32,24 @@ namespace BestLot.BusinessLogicLayer.Models
         public void AddPhoto(LotPhoto lotPhoto)
         {
             LotPhotos.Add(lotPhoto);
+        }
+
+        public void PlaceBid(string buyerUserId, double price)
+        {
+            IBidPlacer bidPlacer = null;
+            switch (BidPlacer)
+            {
+                case 1:
+                    bidPlacer = new DeterminedSelldateBidPlacer();
+                    break;
+                case 2:
+                    bidPlacer = new RelativeSelldateBidPlacer();
+                    break;
+                default:
+                    bidPlacer = new DeterminedSelldateBidPlacer();
+                    break;
+            }
+            bidPlacer.PlaceBid(this, buyerUserId, price);
         }
 
         public void Sell(UserAccountInfo buyerUser)

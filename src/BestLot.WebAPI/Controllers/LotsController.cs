@@ -37,7 +37,7 @@ namespace BestLot.WebAPI.Controllers
             IQueryable<Lot> result = lotOperationsHandler.GetAllLots();
             Expression<Func<Lot, bool>> predicate = null;
             if (name != null && name != "null")
-                result = result.Where(predicate = lot => lot.Name == name);
+                result = result.Where(predicate = lot => lot.Name.Contains(name));
             if (category != null && category != "null")
                 result = result.Where(predicate = lot => lot.Category.Contains(category));
             if (minPrice != 0)
@@ -86,13 +86,28 @@ namespace BestLot.WebAPI.Controllers
             {
                 return Ok(mapper.Map<LotOutModel>(lotOperationsHandler.GetLot(id)));
             }
-            catch(ArgumentException ex)
+            catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
             }
         }
 
-        // POST api/<controller>
+        [Route("api/lots/{lotId}/bid")]
+        public IHttpActionResult PostBid([FromUri]int lotId, [FromBody]double value)
+        {
+            if (!User.IsInRole("User"))
+                return BadRequest("Sorry, admins and moderators can`t place bids");
+            try
+            {
+                lotOperationsHandler.PlaceBid(lotId, User.Identity.Name, value);
+                return Ok();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+                // POST api/<controller>
         public IHttpActionResult PostLot([FromBody]LotInModel value)
         {
             if (!ModelState.IsValid)

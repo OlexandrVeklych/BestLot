@@ -16,9 +16,9 @@ namespace BestLot.BusinessLogicLayer
             return new UnitOfWork("LotContext", "LotArchiveContext");
         }
 
-        public static ILotSalesHandler ResolveLotSalesHandler(double refreshTimeMillisecs, double checkTimeMillisecs)
+        public static ILotSalesHandler ResolveLotSalesHandler(double refreshTimeMillisecs, double checkTimeMillisecs, string hostingEnvironment, string requestUriLeftPart)
         {
-            return new LotSalesHandler(ResolveUnitOfWork(), refreshTimeMillisecs, checkTimeMillisecs);
+            return new LotSalesHandler(ResolveUnitOfWork(), ResolveLotOperationsHandler(), refreshTimeMillisecs, checkTimeMillisecs, hostingEnvironment, requestUriLeftPart);
         }
 
         public static ILotOperationsHandler ResolveLotOperationsHandler()

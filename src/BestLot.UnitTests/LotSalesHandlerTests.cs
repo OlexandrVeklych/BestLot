@@ -21,7 +21,7 @@ namespace BestLot.UnitTests
         {
             unitOfWork = UnitTestDependencyResolver.ResolveUnitOfWork();
             lotOperationsHandler = UnitTestDependencyResolver.ResolveLotOperationsHandler(unitOfWork);
-            lotSalesHandler = UnitTestDependencyResolver.ResolveLotSalesHandler(unitOfWork, 1500, 500);
+            lotSalesHandler = UnitTestDependencyResolver.ResolveLotSalesHandler(unitOfWork, 1500, 500, "","");
             userAccountOperationsHandler = UnitTestDependencyResolver.ResolveUserAccountOperationsHandler(unitOfWork);
             userAccountOperationsHandler.AddUserAccount(new UserAccountInfo { Name = "DefaultUser", Email = "veklich99@mail.ru" });
             userAccountOperationsHandler.AddUserAccount(new UserAccountInfo { Name = "DefaultUser2", Email = "veklich99@gmail.com" });

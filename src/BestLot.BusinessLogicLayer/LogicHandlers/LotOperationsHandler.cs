@@ -222,33 +222,23 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
                 .ProjectTo<Lot>(mapper.ConfigurationProvider);            
         }
 
-        public void PlaceBet(string buyerUserId, int lotId, double price)
+        public void PlaceBid(int lotId, string buyerUserId, double price)
         {
             if (UoW.UserAccounts.Get(buyerUserId) == null)
                 throw new ArgumentException("User id is incorrect");
-            Lot lot = mapper.Map<Lot>(UoW.Lots.Get(lotId, l => l.LotPhotos, l => l.LotComments, l => l.SellerUser));
-            if (lot == null)
-                throw new ArgumentException("Lot id is incorrect");
-            if (price < lot.Price + lot.MinStep)
-                throw new ArgumentException("Your bet can be " + (lot.Price + lot.MinStep) + " or higher");
-            lot.BuyerUserId = buyerUserId;
-            lot.Price = price;
+            Lot lot = GetLot(lotId);
+            lot.PlaceBid(buyerUserId, price);
 
             //private ChangeLot, without checking LotId
             ChangeLotUnsafe(lot);
         }
 
-        public async Task PlaceBetAsync(string buyerUserId, int lotId, double price)
+        public async Task PlaceBidAsync(int lotId, string buyerUserId, double price)
         {
             if (await UoW.UserAccounts.GetAsync(buyerUserId) == null)
                 throw new ArgumentException("User id is incorrect");
-            Lot lot = mapper.Map<Lot>(await UoW.Lots.GetAsync(lotId, l => l.LotPhotos, l => l.LotComments, l => l.SellerUser));
-            if (lot == null)
-                throw new ArgumentException("Lot id is incorrect");
-            if (price < lot.Price + lot.MinStep)
-                throw new ArgumentException("Your bet can be " + (lot.Price + lot.MinStep) + " or higher");
-            lot.BuyerUserId = buyerUserId;
-            lot.Price = price;
+            Lot lot = await GetLotAsync(lotId);
+            lot.PlaceBid(buyerUserId, price);
 
             //private ChangeLot, without checking LotId
             await ChangeLotUnsafeAsync(lot);
