@@ -19,5 +19,6 @@ namespace BestLot.WebAPI.Models
         public double MinStep { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime SellDate { get; set; }
+        public int BidPlacer { get; set; }
     }
 }

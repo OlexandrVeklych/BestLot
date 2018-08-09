@@ -25,8 +25,10 @@ namespace BestLot.WebAPI.Controllers
                 cfg.CreateMap<LotPhotoInModel, LotPhoto>();
             }).CreateMapper();
             lotOperationsHandler = LogicDependencyResolver.ResolveLotOperationsHandler();
+            userAccountOperationsHandler = LogicDependencyResolver.ResolveUserAccountOperationsHandler();
         }
 
+        private readonly IUserAccountOperationsHandler userAccountOperationsHandler;
         private readonly ILotOperationsHandler lotOperationsHandler;
         private readonly IMapper mapper;
 
@@ -107,12 +109,35 @@ namespace BestLot.WebAPI.Controllers
                 return BadRequest(ex.Message);
             }
         }
-                // POST api/<controller>
+
+        [AllowAnonymous]
+        [Route("api/lots/{lotId}/bid")]
+        public IHttpActionResult GetBidInfo([FromUri]int lotId)
+        {
+            try
+            {
+                return Ok(new {
+                    Price = lotOperationsHandler.GetLotPrice(lotId),
+                    SellDate = lotOperationsHandler.GetLotSellDate(lotId),
+                    BuyerUser = userAccountOperationsHandler.GetBuyerUser(lotId)
+                });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        // POST api/<controller>
         public IHttpActionResult PostLot([FromBody]LotInModel value)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
             value.SellerUserId = User.Identity.Name;
+            if (value.BidPlacer == 2)
+            {
+                value.SellDate = value.StartDate.Add(value.SellDate.Subtract(value.StartDate));
+            }
             try
             {
                 lotOperationsHandler.AddLot(mapper.Map<Lot>(value), System.Web.Hosting.HostingEnvironment.MapPath(@"~"), Request.RequestUri.GetLeftPart(UriPartial.Authority));

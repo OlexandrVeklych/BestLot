@@ -40,5 +40,8 @@ namespace BestLot.WebAPI.Models
 
         public List<LotPhotoInModel> LotPhotos { get; set; }
         public List<LotCommentInModel> LotComments { get; set; }
+
+        [Required]
+        public int BidPlacer { get; set; }
     }
 }
