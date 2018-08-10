@@ -61,7 +61,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         {
             if (UoW.UserAccounts.Get(lot.SellerUserId) == null)
                 throw new ArgumentException("Seller user id is incorrect");
-            if (lot.StartDate == null)
+            if (lot.StartDate == null || lot.StartDate.Year < 2018)
                 lot.StartDate = DateTime.Now;
             lot.BuyerUserId = null;
             if (lot.LotPhotos != null && lot.LotPhotos.Any())
@@ -74,7 +74,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         {
             if (await UoW.UserAccounts.GetAsync(lot.SellerUserId) == null)
                 throw new ArgumentException("Seller user id is incorrect");
-            if (lot.StartDate == null)
+            if (lot.StartDate == null || lot.StartDate.Year < 2018)
                 lot.StartDate = DateTime.Now;
             lot.BuyerUserId = null;
             if (lot.LotPhotos != null && lot.LotPhotos.Any())
@@ -239,6 +239,16 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         public async Task<DateTime> GetLotSellDateAsync(int lotId)
         {
             return (await GetLotAsync(lotId)).SellDate;
+        }
+
+        public DateTime GetLotStartDate(int lotId)
+        {
+            return GetLot(lotId).StartDate;
+        }
+
+        public async Task<DateTime> GetLotStartDateAsync(int lotId)
+        {
+            return (await GetLotAsync(lotId)).StartDate;
         }
     }
 }

@@ -31,5 +31,7 @@ namespace BestLot.BusinessLogicLayer.Interfaces
         Task<double> GetLotPriceAsync(int lotId);
         DateTime GetLotSellDate(int lotId);
         Task<DateTime> GetLotSellDateAsync(int lotId);
+        DateTime GetLotStartDate(int lotId);
+        Task<DateTime> GetLotStartDateAsync(int lotId);
     }
 }

@@ -43,29 +43,37 @@ namespace BestLot.WebAPI.Controllers
             if (category != null && category != "null")
                 result = result.Where(predicate = lot => lot.Category.Contains(category));
             if (minPrice != 0)
-                result = result.Where(predicate = lot => lot.Price > minPrice);
+                result = result.Where(predicate = lot => lot.Price >= minPrice);
             if (maxPrice != 0)
-                result = result.Where(predicate = lot => lot.Price < maxPrice);
-            return Ok(mapper.Map<IEnumerable<LotOutModel>>(result
-                .OrderBy(lot => lot.Id)
-                .Skip((page - 1) * amount)
-                .Take(amount).AsEnumerable()));
+                result = result.Where(predicate = lot => lot.Price <= maxPrice);
+            try
+            {
+                return Ok(mapper.Map<IEnumerable<LotOutModel>>(result
+                    .OrderBy(lot => lot.Id)
+                    .Skip((page - 1) * amount)
+                    .Take(amount).AsEnumerable()));
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [AllowAnonymous]
         [Route("api/users/{email}/lots")]
         public IHttpActionResult GetUserLots(string email, int page, int amount, string name = null, string category = null, double minPrice = 0, double maxPrice = 0)
         {
-            Expression<Func<Lot, bool>> predicate = null;
             IQueryable<Lot> result = lotOperationsHandler.GetUserLots(email);
+            Expression<Func<Lot, bool>> predicate = null;
             if (name != null && name != "null")
-                result = result.Where(predicate = lot => lot.Name == name);
+                result = result.Where(predicate = lot => lot.Name.Contains(name));
             if (category != null && category != "null")
-                result = result.Where(predicate = lot => lot.Category == category);
+                result = result.Where(predicate = lot => lot.Category.Contains(category));
             if (minPrice != 0)
-                result = result.Where(predicate = lot => lot.Price > minPrice);
+                result = result.Where(predicate = lot => lot.Price >= minPrice);
             if (maxPrice != 0)
-                result = result.Where(predicate = lot => lot.Price < maxPrice);
+                result = result.Where(predicate = lot => lot.Price <= maxPrice);
+
             try
             {
                 return Ok(mapper.Map<IEnumerable<LotOutModel>>(result
@@ -116,11 +124,19 @@ namespace BestLot.WebAPI.Controllers
         {
             try
             {
-                return Ok(new {
-                    Price = lotOperationsHandler.GetLotPrice(lotId),
-                    SellDate = lotOperationsHandler.GetLotSellDate(lotId),
-                    BuyerUser = userAccountOperationsHandler.GetBuyerUser(lotId)
-                });
+                LotOutModel lot = mapper.Map<LotOutModel>(lotOperationsHandler.GetLot(lotId));
+                UserAccountInfoOutModel buyerUser = null;
+                if (lot.BuyerUserId != null)
+                    buyerUser = mapper.Map<UserAccountInfoOutModel>(userAccountOperationsHandler.GetUserAccount(lot.BuyerUserId));
+                if (lot.BidPlacer == 1)
+                    return Ok(new { lot.Price, BuyerUser = buyerUser });
+                return Ok(new { lot.Price, lot.StartDate, lot.SellDate, BuyerUser = buyerUser });
+                //return Ok(new {
+                //    Price = lotOperationsHandler.GetLotPrice(lotId),
+                //    StartDate = lotOperationsHandler.GetLotStartDate(lotId),
+                //    SellDate = lotOperationsHandler.GetLotSellDate(lotId),
+                //    BuyerUser = userAccountOperationsHandler.GetBuyerUser(lotId)
+                //});
             }
             catch (ArgumentException ex)
             {

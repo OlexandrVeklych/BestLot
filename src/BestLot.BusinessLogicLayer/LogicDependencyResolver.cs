@@ -16,9 +16,9 @@ namespace BestLot.BusinessLogicLayer
             return new UnitOfWork("LotContext", "LotArchiveContext");
         }
 
-        public static ILotSalesHandler ResolveLotSalesHandler(double refreshTimeMillisecs, double checkTimeMillisecs, string hostingEnvironment, string requestUriLeftPart)
+        public static ILotSalesHandler ResolveLotSalesHandler(double refreshTimeMillisecs, double checkTimeMillisecs)
         {
-            return new LotSalesHandler(ResolveUnitOfWork(), ResolveLotOperationsHandler(), refreshTimeMillisecs, checkTimeMillisecs, hostingEnvironment, requestUriLeftPart);
+            return new LotSalesHandler(ResolveUnitOfWork(), ResolveLotOperationsHandler(), ResolveUserAccountOperationsHandler(), refreshTimeMillisecs, checkTimeMillisecs, @"C:\VS Projects\EPAM\BestLot\src\BestLot.WebAPI", "http://localhost:63959");
         }
 
         public static ILotOperationsHandler ResolveLotOperationsHandler()

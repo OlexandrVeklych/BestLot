@@ -34,14 +34,16 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             this.requestUriLeftPart = requestUriLeftPart;
         }
 
-        public LotSalesHandler(IUnitOfWork unitOfWork, ILotOperationsHandler lotOperationsHandler, double refreshTimeMillisecs, double checkTimeMillisecs, string hostingEnvironment, string requestUriLeftPart) :this(refreshTimeMillisecs, checkTimeMillisecs, hostingEnvironment, requestUriLeftPart)
+        public LotSalesHandler(IUnitOfWork unitOfWork, ILotOperationsHandler lotOperationsHandler, IUserAccountOperationsHandler userAccountOperationsHandler, double refreshTimeMillisecs, double checkTimeMillisecs, string hostingEnvironment, string requestUriLeftPart) :this(refreshTimeMillisecs, checkTimeMillisecs, hostingEnvironment, requestUriLeftPart)
         {
             this.UoW = unitOfWork;
             this.lotOperationsHandler = lotOperationsHandler;
+            this.userAccountOperationsHandler = userAccountOperationsHandler;
         }
 
 
         private ILotOperationsHandler lotOperationsHandler;
+        private IUserAccountOperationsHandler userAccountOperationsHandler;
         private Timer refreshTimer;
         private Timer checkTimer;
         private IUnitOfWork UoW;
@@ -66,10 +68,10 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
 
         private void CheckLots(object sender, ElapsedEventArgs e)
         {
-            foreach (var idDatePair in lotsSellDate)
+            for (int i = 0; i < lotsSellDate.Count; i++)
             {
-                if (idDatePair.Value.CompareTo(DateTime.Now) <= 0)
-                    SellLot(idDatePair.Key);
+                if (lotsSellDate.Values.ElementAt(i).CompareTo(DateTime.Now) <= 0)
+                    SellLot(lotsSellDate.Keys.ElementAt(i));
             }
         }
 
@@ -84,9 +86,9 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
 
         private void SellLot(int lotId)
         {
-            //Lot lotForSale = mapper.Map<Lot>(UoW.Lots.Get(lotId, l => l.SellerUser));
+            //Lot lotForSale = mapper.Map<Lot>(lotOperationsHandler.GetLot(lotId));
+            //lotForSale.SellerUser = userAccountOperationsHandler.GetSellerUser(lotId);
             //UserAccountInfo buyerUser = mapper.Map<UserAccountInfo>(UoW.UserAccounts.Get(lotForSale.BuyerUserId));
-            //
             //lotForSale.Sell(buyerUser);
 
             lotsSellDate.Remove(lotId);

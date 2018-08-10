@@ -18,7 +18,7 @@ namespace BestLot.UnitTests
 
         public static ILotSalesHandler ResolveLotSalesHandler(IUnitOfWork unitOfWork, double refreshTimeMillisecs, double checkTimeMillisecs, string hostingEnvironment, string requestUriLeftPart)
         {
-            return new LotSalesHandler(unitOfWork, ResolveLotOperationsHandler(unitOfWork), refreshTimeMillisecs, checkTimeMillisecs, hostingEnvironment, requestUriLeftPart);
+            return new LotSalesHandler(unitOfWork, ResolveLotOperationsHandler(unitOfWork), ResolveUserAccountOperationsHandler(unitOfWork), refreshTimeMillisecs, checkTimeMillisecs, hostingEnvironment, requestUriLeftPart);
         }
 
         public static ILotOperationsHandler ResolveLotOperationsHandler(IUnitOfWork unitOfWork)
