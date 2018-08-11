@@ -10,7 +10,7 @@ using System.Web.Http;
 
 namespace BestLot.WebAPI.Controllers
 {
-    [Authorize(Roles ="Admin")]
+    [Authorize(Roles = "Admin")]
     public class RolesController : ApiController
     {
         // GET api/<controller>

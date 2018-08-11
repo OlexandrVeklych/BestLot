@@ -121,14 +121,14 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
                     if (userAccount.TelephoneNumber != oldUserAccount.TelephoneNumber)
                     {
                         if (!Regex.IsMatch(userAccount.TelephoneNumber, @"^\+380[0-9]{9}$"))
-                        throw new ArgumentException("Incorrect telephone number format");           
+                            throw new ArgumentException("Incorrect telephone number format");
                         var userAccountsTelephones = UoW.UserAccounts.GetAll().Select(user => user.TelephoneNumber);
                         if (userAccountsTelephones.Contains(userAccount.TelephoneNumber))
                             throw new ArgumentException("Telephone number is already occupied");
                     }
                 }
             }
-            
+
         }
 
         //if !newUser, don`t check email
@@ -211,7 +211,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             {
                 return GetUserAccount(lot.BuyerUserId);
             }
-            catch(ArgumentException)
+            catch (ArgumentException)
             {
                 return null;
             }

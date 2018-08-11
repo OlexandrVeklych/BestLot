@@ -47,7 +47,7 @@ namespace BestLot.UnitTests
         {
             var user = new UserAccountInfo { Name = "User1", Email = "Kek" };
 
-            Assert.Throws<ArgumentException>(()=> userAccountOperationsHandler.AddUserAccount(user));
+            Assert.Throws<ArgumentException>(() => userAccountOperationsHandler.AddUserAccount(user));
         }
 
         [Test]
@@ -174,9 +174,9 @@ namespace BestLot.UnitTests
             var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now, LotComments = new List<LotComment> { new LotComment { Message = "Message1", LotId = 1, UserId = "veklich99@mail.ru" } } };
             lotOperationsHandler.AddLot(lot, "", "");
             lotCommentOperationsHandler.AddComment(new LotComment { Message = "Message2", LotId = 1, UserId = "veklich99@gmail.com" });
-        
+
             var resultUsers = userAccountOperationsHandler.GetAllUserAccounts(u => u.LotComments).Where(u => u.LotComments.Where(c => c.Message == "Message2").Count() > 0);
-        
+
             Assert.AreEqual(1, resultUsers.Count());
             Assert.AreEqual("Message2", resultUsers.ToList()[0].LotComments[0].Message);
         }

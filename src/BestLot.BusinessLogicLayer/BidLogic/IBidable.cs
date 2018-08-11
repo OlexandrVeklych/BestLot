@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BestLot.BusinessLogicLayer
+namespace BestLot.BusinessLogicLayer.BidLogic
 {
     public interface IBidable
     {

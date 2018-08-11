@@ -38,7 +38,7 @@ namespace BestLot.UnitTests
         {
             var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now, StartDate = DateTime.Now };
 
-            await lotOperationsHandler.AddLotAsync(lot, "","");
+            await lotOperationsHandler.AddLotAsync(lot, "", "");
 
             Assert.AreEqual(1, (await lotOperationsHandler.GetAllLotsAsync()).Count());
         }
@@ -83,7 +83,7 @@ namespace BestLot.UnitTests
         public async Task GetLotAsync_InvalidId_ThrowsArgumentException()
         {
             var lot = new Lot { SellerUserId = "veklich99@mail.ru", Name = "Name1", SellDate = DateTime.Now, LotComments = new List<LotComment> { new LotComment { LotId = 1, UserId = "veklich99@mail.ru", Message = "Message1" } } };
-            await lotOperationsHandler.AddLotAsync(lot, "","");
+            await lotOperationsHandler.AddLotAsync(lot, "", "");
 
             Assert.ThrowsAsync<ArgumentException>(async () => await lotOperationsHandler.GetLotAsync(2));
         }
@@ -92,7 +92,7 @@ namespace BestLot.UnitTests
         public async Task GetAllLotsAsync_DBContains1Elem_CountReturns1Elem()
         {
             var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now, StartDate = DateTime.Now };
-            await lotOperationsHandler.AddLotAsync(lot, "","");
+            await lotOperationsHandler.AddLotAsync(lot, "", "");
 
             var resultLots = await lotOperationsHandler.GetAllLotsAsync();
 
@@ -103,7 +103,7 @@ namespace BestLot.UnitTests
         public async Task GetAllLotsAsync_WithInclude_ReturnsObjectWithInnerProperties()
         {
             var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now, LotComments = new List<LotComment> { new LotComment { LotId = 1, UserId = "veklich99@mail.ru", Message = "Message1" } } };
-            await lotOperationsHandler.AddLotAsync(lot, "","");
+            await lotOperationsHandler.AddLotAsync(lot, "", "");
 
             var resultLots = await lotOperationsHandler.GetAllLotsAsync(l => l.LotComments);
 
@@ -128,7 +128,7 @@ namespace BestLot.UnitTests
         public async Task ChangeLotAsync_ChangedNameAndComments_NameChangedCommentsNotChanged()
         {
             var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now, Name = "Name1", LotComments = new List<LotComment> { new LotComment { Message = "Message1", LotId = 1, UserId = "veklich99@mail.ru" } } };
-            await lotOperationsHandler.AddLotAsync(lot, "","");
+            await lotOperationsHandler.AddLotAsync(lot, "", "");
 
             var lotComment = new LotComment { Message = "Message2", LotId = 1, UserId = "veklich99@mail.ru" };
             var modifiedLot = await lotOperationsHandler.GetLotAsync(1, l => l.LotComments, l => l.LotPhotos, l => l.SellerUser);
@@ -147,7 +147,7 @@ namespace BestLot.UnitTests
         public async Task ChangeLotAsync_InvalidLot_ThrowsArgumentException()
         {
             var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now, Name = "Name1" };
-            await lotOperationsHandler.AddLotAsync(lot, "","");
+            await lotOperationsHandler.AddLotAsync(lot, "", "");
 
             var modifiedLot = await lotOperationsHandler.GetLotAsync(1, l => l.LotComments, l => l.LotPhotos, l => l.SellerUser);
             modifiedLot.Id = 2;
@@ -167,7 +167,7 @@ namespace BestLot.UnitTests
         public async Task DeleteLotAsync_ValidId_DeletesInDB()
         {
             var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now, Name = "Name1" };
-            await lotOperationsHandler.AddLotAsync(lot, "","");
+            await lotOperationsHandler.AddLotAsync(lot, "", "");
             await lotCommentOperationsHandler.AddCommentAsync(new LotComment { Message = "Comment1", LotId = 1, UserId = "veklich99@mail.ru" });
             await lotOperationsHandler.DeleteLotAsync(1, "", "");
 
@@ -179,7 +179,7 @@ namespace BestLot.UnitTests
         public async Task DeleteLotAsync_InvalidId_ThrowsArgumentException()
         {
             var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now, Name = "Name1" };
-            await lotOperationsHandler.AddLotAsync(lot, "","");
+            await lotOperationsHandler.AddLotAsync(lot, "", "");
 
             Assert.ThrowsAsync<ArgumentException>(() => lotOperationsHandler.DeleteLotAsync(2, "", ""));
         }
@@ -188,22 +188,23 @@ namespace BestLot.UnitTests
         public async Task PlaceBidAsync_ValidInput_ChangesPriceAndBuyerUserId()
         {
             var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now, Name = "Name1" };
-            await lotOperationsHandler.AddLotAsync(lot, "","");
+            var user = new UserAccountInfo { Name = "SecondUser", Email = "veklich98@mail.ru" };
+            await lotOperationsHandler.AddLotAsync(lot, "", "");
+            await userAccountOperationsHandler.AddUserAccountAsync(user);
 
-            await lotOperationsHandler.PlaceBidAsync(1, "veklich99@mail.ru", 15);
+            await lotOperationsHandler.PlaceBidAsync(1, "veklich98@mail.ru", 15);
 
             var resultLot = await lotOperationsHandler.GetLotAsync(1);
             Assert.AreEqual(1, (await lotOperationsHandler.GetAllLotsAsync()).Count());
             Assert.AreEqual(15, resultLot.Price);
-            Assert.AreEqual("veklich99@mail.ru", resultLot.BuyerUserId);
-            Assert.AreEqual("DefaultUser", (await userAccountOperationsHandler.GetUserAccountAsync("veklich99@mail.ru")).Name);
+            Assert.AreEqual("veklich98@mail.ru", resultLot.BuyerUserId);
         }
 
         [Test]
         public async Task PlaceBidAsync_InvalidInput_ThrowsArgumentException()
         {
             var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now, Name = "Name1" };
-            await lotOperationsHandler.AddLotAsync(lot, "","");
+            await lotOperationsHandler.AddLotAsync(lot, "", "");
 
             Assert.ThrowsAsync<ArgumentException>(() => lotOperationsHandler.PlaceBidAsync(1, "veklich98@gmail.com", 15));
             Assert.ThrowsAsync<ArgumentException>(() => lotOperationsHandler.PlaceBidAsync(3, "veklich99@mail.ru", 15));

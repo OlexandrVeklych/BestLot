@@ -158,16 +158,16 @@ namespace BestLot.WebAPI.Controllers
             {
                 lotOperationsHandler.AddLot(mapper.Map<Lot>(value), System.Web.Hosting.HostingEnvironment.MapPath(@"~"), Request.RequestUri.GetLeftPart(UriPartial.Authority));
             }
-            catch(ArgumentException ex)
+            catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
             return Ok();
-        }       
+        }
 
         // PUT api/<controller>/5
         public IHttpActionResult PutLot(int id, [FromBody]LotInModel value)

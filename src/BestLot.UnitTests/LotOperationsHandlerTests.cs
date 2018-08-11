@@ -127,10 +127,10 @@ namespace BestLot.UnitTests
             var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now, Name = "Name1", LotComments = new List<LotComment> { new LotComment { Message = "Message1", LotId = 1, UserId = "veklich99@mail.ru" } } };
             lotOperationsHandler.AddLot(lot, "", "");
 
-            var lotComment = new LotComment { Message = "Message2", LotId = 1, UserId ="veklich99@mail.ru"};
+            var lotComment = new LotComment { Message = "Message2", LotId = 1, UserId = "veklich99@mail.ru" };
             var modifiedLot = lotOperationsHandler.GetLot(1, l => l.LotComments, l => l.LotPhotos, l => l.SellerUser);
             modifiedLot.LotComments.Add(lotComment); //List was initialized because of Automapper
-            modifiedLot.Name = "Name2";          
+            modifiedLot.Name = "Name2";
             lotOperationsHandler.ChangeLot(1, modifiedLot, "", "");
 
             var resultLot = lotOperationsHandler.GetLot(1, l => l.LotComments);
@@ -184,15 +184,16 @@ namespace BestLot.UnitTests
         public void PlaceBid_ValidInput_ChangesPriceAndBuyerUserId()
         {
             var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now, Name = "Name1" };
+            var user = new UserAccountInfo { Name = "SecondUser", Email = "veklich98@mail.ru" };
             lotOperationsHandler.AddLot(lot, "", "");
+            userAccountOperationsHandler.AddUserAccount(user);
 
-            lotOperationsHandler.PlaceBid(1, "veklich99@mail.ru", 15);
+            lotOperationsHandler.PlaceBid(1, "veklich98@mail.ru", 15);
 
             var resultLot = lotOperationsHandler.GetLot(1);
             Assert.AreEqual(1, lotOperationsHandler.GetAllLots().Count());
             Assert.AreEqual(15, resultLot.Price);
-            Assert.AreEqual("veklich99@mail.ru", resultLot.BuyerUserId);
-            Assert.AreEqual("DefaultUser", userAccountOperationsHandler.GetUserAccount("veklich99@mail.ru").Name);
+            Assert.AreEqual("veklich98@mail.ru", resultLot.BuyerUserId);
         }
 
         [Test]
@@ -202,7 +203,7 @@ namespace BestLot.UnitTests
             lotOperationsHandler.AddLot(lot, "", "");
 
             Assert.Throws<ArgumentException>(() => lotOperationsHandler.PlaceBid(1, "veklich98@gmail.com", 15));
-            Assert.Throws<ArgumentException>(() => lotOperationsHandler.PlaceBid( 3, "veklich99@mail.ru", 15));
+            Assert.Throws<ArgumentException>(() => lotOperationsHandler.PlaceBid(3, "veklich99@mail.ru", 15));
         }
     }
 }

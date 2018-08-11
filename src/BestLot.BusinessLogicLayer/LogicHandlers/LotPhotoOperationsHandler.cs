@@ -111,7 +111,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
                 lot.LotPhotos[i].Path = photoPath.Replace(hostingEnvironmentPath, requestUriLeftPart);
             }
         }
-        
+
         public async Task AddPhotosToNewLotAsync(Lot lot, string hostingEnvironmentPath, string requestUriLeftPart)
         {
             await new Task(() =>
@@ -194,7 +194,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         public async Task DeleteAllUserPhotosAsync(string userAccountId, string hostingEnvironmentPath)
         {
             if (Directory.Exists(hostingEnvironmentPath + "\\Photos\\" + userAccountId))
-                await new Task(() => 
+                await new Task(() =>
                 {
                     Directory.Delete(hostingEnvironmentPath + "\\Photos\\" + userAccountId, true);
                 });

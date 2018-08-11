@@ -10,7 +10,8 @@ using NUnit.Framework;
 
 namespace BestLot.UnitTests
 {
-    class LotCommentOperationsHandlerAsyncTests
+    [TestFixture]
+    public class LotCommentOperationsHandlerAsyncTests
     {
         private ILotOperationsHandler lotOperationsHandler;
         private ILotCommentOperationsHandler lotCommentOperationsHandler;

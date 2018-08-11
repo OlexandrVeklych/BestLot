@@ -26,7 +26,7 @@ namespace BestLot.WebAPI.Models
         {
             Database.SetInitializer(new RolesInitializer());
         }
-        
+
         public static ApplicationDbContext Create()
         {
             return new ApplicationDbContext();

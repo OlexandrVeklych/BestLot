@@ -37,7 +37,7 @@ namespace BestLot.DataAccessLayer.Repository
 
         public T Get(object id, params Expression<Func<T, object>>[] includeProperties)
         {
-            IQueryable<T> query = new List<T> {DbSet.Find(id)}.AsQueryable();
+            IQueryable<T> query = new List<T> { DbSet.Find(id) }.AsQueryable();
             return includeProperties.Aggregate(query, (current, includeProperty) => current.Include(includeProperty)).First();
         }
 

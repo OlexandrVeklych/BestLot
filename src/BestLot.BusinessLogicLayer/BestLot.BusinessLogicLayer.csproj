@@ -47,14 +47,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DeterminedSelldateBidPlacer.cs" />
-    <Compile Include="IBidPlacer.cs" />
+    <Compile Include="BidLogic\DeterminedSelldateBidPlacer.cs" />
+    <Compile Include="BidLogic\IBidPlacer.cs" />
     <Compile Include="Interfaces\ILotCommentOperationsHandler.cs" />
     <Compile Include="Interfaces\ILotOperationsHandler.cs" />
     <Compile Include="Interfaces\ILotPhotoOperationsHandler.cs" />
     <Compile Include="Interfaces\ILotSalesHandler.cs" />
     <Compile Include="Interfaces\IUserAccountOperationsHandler.cs" />
-    <Compile Include="IBidable.cs" />
+    <Compile Include="BidLogic\IBidable.cs" />
     <Compile Include="LogicDependencyResolver.cs" />
     <Compile Include="LogicHandlers\LotCommentOperationsHandler.cs" />
     <Compile Include="LogicHandlers\LotOperationsHandler.cs" />
@@ -66,7 +66,7 @@
     <Compile Include="Models\UserAccountInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="LogicHandlers\UserAccountOperationsHandler.cs" />
-    <Compile Include="RelativeSelldateBidPlacer.cs" />
+    <Compile Include="BidLogic\RelativeSelldateBidPlacer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

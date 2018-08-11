@@ -84,7 +84,7 @@ namespace BestLot.WebAPI.Controllers
             {
                 lotPhotosOperationsHandler.DeletePhoto(id, System.Web.Hosting.HostingEnvironment.MapPath(@"~"), Request.RequestUri.GetLeftPart(UriPartial.Authority));
             }
-            catch(ArgumentException ex)
+            catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
             }

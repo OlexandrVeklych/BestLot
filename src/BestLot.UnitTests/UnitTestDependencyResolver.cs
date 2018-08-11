@@ -13,7 +13,7 @@ namespace BestLot.UnitTests
     {
         public static IUnitOfWork ResolveUnitOfWork()
         {
-            return new UnitOfWork("UnitTestLotContext", "UnitTestLotArchiveContext"); ;
+            return new UnitOfWork("UnitTestLotContext", "UnitTestLotArchiveContext");
         }
 
         public static ILotSalesHandler ResolveLotSalesHandler(IUnitOfWork unitOfWork, double refreshTimeMillisecs, double checkTimeMillisecs, string hostingEnvironment, string requestUriLeftPart)

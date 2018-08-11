@@ -44,7 +44,8 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         }
 
         private ILotPhotoOperationsHandler lotPhotoOperationsHandler;
-        public ILotPhotoOperationsHandler LotPhotoOperationsHandler {
+        public ILotPhotoOperationsHandler LotPhotoOperationsHandler
+        {
             get
             {
                 return lotPhotoOperationsHandler;
@@ -196,7 +197,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             var result = await UoW.Lots.GetAllAsync();
             return (await UoW.Lots.GetAllAsync())
                 .Where(predicate = lot => lot.SellerUserId == userId)
-                .ProjectTo<Lot>(mapper.ConfigurationProvider);            
+                .ProjectTo<Lot>(mapper.ConfigurationProvider);
         }
 
         public void PlaceBid(int lotId, string buyerUserId, double price)
@@ -204,6 +205,9 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             if (UoW.UserAccounts.Get(buyerUserId) == null)
                 throw new ArgumentException("User id is incorrect");
             Lot lot = GetLot(lotId);
+            if (lot.SellerUserId == buyerUserId)
+                throw new ArgumentException("Placing bids for own lots is not allowed");
+
             lot.PlaceBid(buyerUserId, price);
 
             //private ChangeLot, without checking LotId

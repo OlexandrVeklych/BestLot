@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Net.Mail;
 using System.Timers;
 using BestLot.DataAccessLayer.UnitOfWork;
 using BestLot.DataAccessLayer.Entities;
@@ -34,7 +33,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             this.requestUriLeftPart = requestUriLeftPart;
         }
 
-        public LotSalesHandler(IUnitOfWork unitOfWork, ILotOperationsHandler lotOperationsHandler, IUserAccountOperationsHandler userAccountOperationsHandler, double refreshTimeMillisecs, double checkTimeMillisecs, string hostingEnvironment, string requestUriLeftPart) :this(refreshTimeMillisecs, checkTimeMillisecs, hostingEnvironment, requestUriLeftPart)
+        public LotSalesHandler(IUnitOfWork unitOfWork, ILotOperationsHandler lotOperationsHandler, IUserAccountOperationsHandler userAccountOperationsHandler, double refreshTimeMillisecs, double checkTimeMillisecs, string hostingEnvironment, string requestUriLeftPart) : this(refreshTimeMillisecs, checkTimeMillisecs, hostingEnvironment, requestUriLeftPart)
         {
             this.UoW = unitOfWork;
             this.lotOperationsHandler = lotOperationsHandler;
@@ -86,10 +85,10 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
 
         private void SellLot(int lotId)
         {
-            //Lot lotForSale = mapper.Map<Lot>(lotOperationsHandler.GetLot(lotId));
-            //lotForSale.SellerUser = userAccountOperationsHandler.GetSellerUser(lotId);
-            //UserAccountInfo buyerUser = mapper.Map<UserAccountInfo>(UoW.UserAccounts.Get(lotForSale.BuyerUserId));
-            //lotForSale.Sell(buyerUser);
+            Lot lotForSale = mapper.Map<Lot>(lotOperationsHandler.GetLot(lotId));
+            lotForSale.SellerUser = userAccountOperationsHandler.GetSellerUser(lotId);
+            UserAccountInfo buyerUser = mapper.Map<UserAccountInfo>(UoW.UserAccounts.Get(lotForSale.BuyerUserId));
+            lotForSale.Sell(buyerUser);
 
             lotsSellDate.Remove(lotId);
 

@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Net;
 using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
+using BestLot.BusinessLogicLayer.BidLogic;
 
 namespace BestLot.BusinessLogicLayer.Models
 {
@@ -34,7 +37,7 @@ namespace BestLot.BusinessLogicLayer.Models
             LotPhotos.Add(lotPhoto);
         }
 
-        public void PlaceBid(string buyerUserId, double price)
+        public virtual void PlaceBid(string buyerUserId, double price)
         {
             IBidPlacer bidPlacer = null;
             switch (BidPlacer)
@@ -52,42 +55,58 @@ namespace BestLot.BusinessLogicLayer.Models
             bidPlacer.PlaceBid(this, buyerUserId, price);
         }
 
-        public void Sell(UserAccountInfo buyerUser)
+        public virtual void Sell(UserAccountInfo buyerUser)
         {
             if (buyerUser != null)
             {
-                SmtpClient client = new SmtpClient
+                NetworkCredential login = new NetworkCredential("veklich99@gmail.com", "Veklich1999");
+                SmtpClient client = new SmtpClient()
                 {
-                    Port = 25,
-                    DeliveryMethod = SmtpDeliveryMethod.Network,
+                    Host = "smtp.gmail.com",
+                    Port = 587,
+                    EnableSsl = true,
                     UseDefaultCredentials = false,
-                    Host = "smtp.gmail.com"
+                    DeliveryMethod = SmtpDeliveryMethod.Network,
+                    Credentials = login
                 };
 
 
-                MailMessage buyerMail = new MailMessage("OlexandrVeklych@gmail.com", buyerUser.Email)
+                MailMessage buyerMail = new MailMessage(new MailAddress("veklich99@gmail.com", "BestLot", Encoding.UTF8), new MailAddress(buyerUser.Email))
                 {
                     Subject = "BestLot.com",
-                    Body = "Dear " + buyerUser.Name + " " + buyerUser.Surname + "," +
-                    "Your bet was highest and now you can buy lot \"" + Name + "\"" +
-                    "Please, contact seller on his email or telephone" +
-                    "Email: " + SellerUser.Email +
-                    "Telephone: " + SellerUser.TelephoneNumber
+                    Body = "Dear " + buyerUser.Name + " " + buyerUser.Surname + "\n" +
+                    "Your bet was highest and now you can buy lot \"" + Name + "\" for " + Price + "\n" +
+                    "Please, contact seller on his email or telephone\n" +
+                    "Email: " + SellerUser.Email + "\n" +
+                    "Telephone: " + SellerUser.TelephoneNumber,
+                    BodyEncoding = UTF8Encoding.UTF8,
+                    DeliveryNotificationOptions = DeliveryNotificationOptions.OnFailure
                 };
+                client.SendCompleted += new SendCompletedEventHandler(SendCompletedCallback);
                 client.Send(buyerMail);
 
 
-                MailMessage sellerMail = new MailMessage("OlexandrVeklych@gmail.com", SellerUser.Email)
+                MailMessage sellerMail = new MailMessage(new MailAddress("veklich99@gmail.com", "BestLot", Encoding.UTF8), new MailAddress(SellerUser.Email))
                 {
                     Subject = "BestLot.com",
-                    Body = "Dear " + SellerUser.Name + " " + SellerUser.Surname + "," +
-                    "Your lot \"" + Name + "\" was sold to " + buyerUser.Name + " " + buyerUser.Surname +
-                    "Please, contact buyer on his email or telephone" +
-                    "Email: " + buyerUser.Email +
-                    "Telephone: " + buyerUser.TelephoneNumber
+                    Body = "Dear " + SellerUser.Name + " " + SellerUser.Surname + ",\n" +
+                    "Your lot \"" + Name + "\" was sold to " + buyerUser.Name + " " + buyerUser.Surname + " for " + Price + "\n" +
+                    "Please, contact buyer on his email or telephone\n" +
+                    "Email: " + buyerUser.Email + "\n" +
+                    "Telephone: " + buyerUser.TelephoneNumber,
+                    BodyEncoding = UTF8Encoding.UTF8,
+                    DeliveryNotificationOptions = DeliveryNotificationOptions.OnFailure
                 };
                 client.Send(sellerMail);
             }
+        }
+
+        private void SendCompletedCallback(object sender, AsyncCompletedEventArgs e)
+        {
+            if (e.Cancelled)
+                throw new ArgumentException("Sending cancelled");
+            if (e.Error != null)
+                throw new ArgumentException(e.Error.Message);
         }
     }
 }
