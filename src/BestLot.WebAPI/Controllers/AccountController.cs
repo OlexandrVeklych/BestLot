@@ -345,7 +345,7 @@ namespace BestLot.WebAPI.Controllers
 
                 if (roleManager.FindByName(model.Role) == null)
                 {
-                    UserManager.Delete(user);
+                    await UserManager.DeleteAsync(user);
                     return BadRequest("Incorrect role");
                 }
             }
@@ -357,18 +357,18 @@ namespace BestLot.WebAPI.Controllers
 
             catch (Exception ex)
             {
-                UserManager.Delete(user);
+                await UserManager.DeleteAsync(user);
                 return BadRequest(ex.StackTrace);
             }
 
             try
             {
                 var userAccountOperationsHandler = LogicDependencyResolver.ResolveUserAccountOperationsHandler();
-                userAccountOperationsHandler.AddUserAccount(new BusinessLogicLayer.Models.UserAccountInfo { Email = model.Email, Name = model.Name, Surname = model.Surname, TelephoneNumber = model.TelephoneNumber });
+                await userAccountOperationsHandler.AddUserAccountAsync(new BusinessLogicLayer.Models.UserAccountInfo { Email = model.Email, Name = model.Name, Surname = model.Surname, TelephoneNumber = model.TelephoneNumber });
             }
             catch (ArgumentException ex)
             {
-                UserManager.Delete(user);
+                await UserManager.DeleteAsync(user);
                 return BadRequest(ex.Message);
             }
 

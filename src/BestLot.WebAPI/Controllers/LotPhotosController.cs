@@ -31,11 +31,13 @@ namespace BestLot.WebAPI.Controllers
 
         // GET api/<controller>
         [Route("api/lots/{lotId}/photos")]
-        public IHttpActionResult GetLotPhotos(int lotId)
+        public async System.Threading.Tasks.Task<IHttpActionResult> GetLotPhotosAsync(int lotId)
         {
             try
             {
-                return Ok(mapper.Map<IEnumerable<LotPhotoOutModel>>(lotPhotosOperationsHandler.GetLotPhotos(lotId).AsEnumerable()));
+                return Ok(mapper.Map<IEnumerable<LotPhotoOutModel>>((await lotPhotosOperationsHandler
+                    .GetLotPhotosAsync(lotId))
+                    .AsEnumerable()));
             }
             catch (ArgumentException ex)
             {
@@ -45,12 +47,12 @@ namespace BestLot.WebAPI.Controllers
 
         // GET api/<controller>/5
         [Route("api/lots/{lotId}/photos/{photoNumber}")]
-        public IHttpActionResult GetLotPhotoByNumber(int lotId, int photoNumber)
+        public async System.Threading.Tasks.Task<IHttpActionResult> GetLotPhotoByNumberAsync(int lotId, int photoNumber)
         {
             try
             {
-                return Ok(mapper.Map<LotPhotoOutModel>(lotPhotosOperationsHandler
-                    .GetLotPhotoByNumber(lotId, photoNumber)));
+                return Ok(mapper.Map<LotPhotoOutModel>(await lotPhotosOperationsHandler
+                    .GetLotPhotoByNumberAsync(lotId, photoNumber)));
             }
             catch (IndexOutOfRangeException)
             {
@@ -64,11 +66,11 @@ namespace BestLot.WebAPI.Controllers
 
         // POST api/<controller>
         [Route("api/lots/{lotId}/photos")]
-        public IHttpActionResult PostLotPhoto([FromUri] int lotId, [FromBody]LotPhotoInModel[] value)
+        public async System.Threading.Tasks.Task<IHttpActionResult> PostLotPhotoAsync([FromUri] int lotId, [FromBody]LotPhotoInModel[] value)
         {
             try
             {
-                lotPhotosOperationsHandler.AddPhotosToExistingLot(lotId, mapper.Map<LotPhoto[]>(value), System.Web.Hosting.HostingEnvironment.MapPath(@"~"), Request.RequestUri.GetLeftPart(UriPartial.Authority));
+                await lotPhotosOperationsHandler.AddPhotosToExistingLotAsync(lotId, mapper.Map<LotPhoto[]>(value), System.Web.Hosting.HostingEnvironment.MapPath(@"~"), Request.RequestUri.GetLeftPart(UriPartial.Authority));
             }
             catch (ArgumentException ex)
             {
@@ -78,11 +80,11 @@ namespace BestLot.WebAPI.Controllers
         }
 
         // DELETE api/<controller>/5
-        public IHttpActionResult DeleteLotPhoto(int id)
+        public async System.Threading.Tasks.Task<IHttpActionResult> DeleteLotPhotoAsync(int id)
         {
             try
             {
-                lotPhotosOperationsHandler.DeletePhoto(id, System.Web.Hosting.HostingEnvironment.MapPath(@"~"), Request.RequestUri.GetLeftPart(UriPartial.Authority));
+                await lotPhotosOperationsHandler.DeletePhotoAsync(id, System.Web.Hosting.HostingEnvironment.MapPath(@"~"), Request.RequestUri.GetLeftPart(UriPartial.Authority));
             }
             catch (ArgumentException ex)
             {

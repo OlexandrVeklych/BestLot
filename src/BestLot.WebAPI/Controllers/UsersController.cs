@@ -32,22 +32,22 @@ namespace BestLot.WebAPI.Controllers
         [Authorize(Roles = "Admin")]
         // GET api/<controller>
         [Route("api/users")]
-        public IHttpActionResult GetAllUsers(int page, int amount)
+        public async System.Threading.Tasks.Task<IHttpActionResult> GetAllUsersAsync(int page, int amount)
         {
-            return Ok(mapper.Map<IEnumerable<UserAccountInfoOutModel>>(userAccountOperationsHandler
-                .GetAllUserAccounts()
+            return Ok(mapper.Map<IEnumerable<UserAccountInfoOutModel>>((await userAccountOperationsHandler
+                .GetAllUserAccountsAsync())
                 .OrderBy(user => user.Email)
                 .Skip((page - 1) * amount)
                 .Take(amount).AsEnumerable()));
         }
 
         [Route("api/currentuser")]
-        public IHttpActionResult GetCurrentUser()
+        public async System.Threading.Tasks.Task<IHttpActionResult> GetCurrentUserAsync()
         {
             try
             {
-                return Ok(mapper.Map<UserAccountInfoOutModel>(userAccountOperationsHandler
-                    .GetUserAccount(User.Identity.Name)));
+                return Ok(mapper.Map<UserAccountInfoOutModel>((await userAccountOperationsHandler
+                    .GetUserAccountAsync(User.Identity.Name))));
             }
             catch (ArgumentException ex)
             {
@@ -58,13 +58,13 @@ namespace BestLot.WebAPI.Controllers
         // GET api/<controller>/5
         [Route("api/lots/{lotId}/selleruser")]
         [Route("api/lots/{lotId}/buyeruser")]
-        public IHttpActionResult GetLotRelatedUser(int lotId)
+        public async System.Threading.Tasks.Task<IHttpActionResult> GetLotRelatedUserAsync(int lotId)
         {
             if (Request.RequestUri.OriginalString.Contains("buyeruser"))
                 try
                 {
-                    return Ok(mapper.Map<UserAccountInfoOutModel>(userAccountOperationsHandler
-                        .GetBuyerUser(lotId)));
+                    return Ok(mapper.Map<UserAccountInfoOutModel>((await userAccountOperationsHandler
+                        .GetBuyerUserAsync(lotId))));
                 }
                 catch (ArgumentException ex)
                 {
@@ -72,8 +72,8 @@ namespace BestLot.WebAPI.Controllers
                 }
             try
             {
-                return Ok(mapper.Map<UserAccountInfoOutModel>(userAccountOperationsHandler
-                    .GetSellerUser(lotId)));
+                return Ok(mapper.Map<UserAccountInfoOutModel>((await userAccountOperationsHandler
+                    .GetSellerUserAsync(lotId))));
             }
             catch (ArgumentException ex)
             {
@@ -83,11 +83,12 @@ namespace BestLot.WebAPI.Controllers
 
         // GET api/<controller>/5
         [Route("api/users/{email}")]
-        public IHttpActionResult GetUser(string email)
+        public async System.Threading.Tasks.Task<IHttpActionResult> GetUserAsync(string email)
         {
             try
             {
-                return Ok(mapper.Map<UserAccountInfoOutModel>(userAccountOperationsHandler.GetUserAccount(email)));
+                return Ok(mapper.Map<UserAccountInfoOutModel>((await userAccountOperationsHandler
+                    .GetUserAccountAsync(email))));
             }
             catch (ArgumentException ex)
             {
@@ -104,7 +105,7 @@ namespace BestLot.WebAPI.Controllers
 
         // PUT api/<controller>/5
         [Route("api/users")]
-        public IHttpActionResult PutUser(string email, [FromBody]UserAccountInfoInModel value)
+        public async System.Threading.Tasks.Task<IHttpActionResult> PutUserAsync(string email, [FromBody]UserAccountInfoInModel value)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -112,7 +113,7 @@ namespace BestLot.WebAPI.Controllers
                 return BadRequest("Not allowed");
             try
             {
-                userAccountOperationsHandler.ChangeUserAccount(email, mapper.Map<UserAccountInfo>(value));
+                await userAccountOperationsHandler.ChangeUserAccountAsync(email, mapper.Map<UserAccountInfo>(value));
                 return Ok();
             }
             catch (ArgumentException ex)

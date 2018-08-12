@@ -27,26 +27,26 @@ namespace BestLot.WebAPI.Controllers
 
         // GET api/<controller>/5
         [Route("api/roles/{roleName}")]
-        public IHttpActionResult Get(string roleName)
+        public async System.Threading.Tasks.Task<IHttpActionResult> GetAsync(string roleName)
         {
             using (var context = new ApplicationDbContext())
             {
                 var roleStore = new RoleStore<IdentityRole>(context);
                 var roleManager = new RoleManager<IdentityRole>(roleStore);
 
-                return Ok(roleManager.FindByName(roleName));
+                return Ok(await roleManager.FindByNameAsync(roleName));
             }
         }
 
         // POST api/<controller>
-        public IHttpActionResult Post([FromBody]string roleName)
+        public async System.Threading.Tasks.Task<IHttpActionResult> PostAsync([FromBody]string roleName)
         {
             using (var context = new ApplicationDbContext())
             {
                 var roleStore = new RoleStore<IdentityRole>(context);
                 var roleManager = new RoleManager<IdentityRole>(roleStore);
 
-                roleManager.Create(new IdentityRole() { Name = roleName });
+                await roleManager.CreateAsync(new IdentityRole() { Name = roleName });
                 return Ok();
             }
         }
@@ -57,8 +57,17 @@ namespace BestLot.WebAPI.Controllers
         }
 
         // DELETE api/<controller>/5
-        public void Delete(int id)
+        public async System.Threading.Tasks.Task<IHttpActionResult> DeleteAsync(string roleName)
         {
+            using (var context = new ApplicationDbContext())
+            {
+                var roleStore = new RoleStore<IdentityRole>(context);
+                var roleManager = new RoleManager<IdentityRole>(roleStore);
+                var role = await roleManager.FindByNameAsync(roleName);
+
+                await roleManager.DeleteAsync(role);
+                return Ok();
+            }
         }
     }
 }

@@ -67,10 +67,14 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
 
         private void CheckLots(object sender, ElapsedEventArgs e)
         {
-            for (int i = 0; i < lotsSellDate.Count; i++)
+            List<int> keys = new List<int>(lotsSellDate.Keys);
+            foreach(int key in keys)
             {
-                if (lotsSellDate.Values.ElementAt(i).CompareTo(DateTime.Now) <= 0)
-                    SellLot(lotsSellDate.Keys.ElementAt(i));
+                if (lotsSellDate[key].CompareTo(DateTime.Now) <= 0)
+                {
+                    SellLot(key);
+                    lotsSellDate.Remove(key);
+                }
             }
         }
 
@@ -89,8 +93,6 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             lotForSale.SellerUser = userAccountOperationsHandler.GetSellerUser(lotId);
             UserAccountInfo buyerUser = mapper.Map<UserAccountInfo>(UoW.UserAccounts.Get(lotForSale.BuyerUserId));
             lotForSale.Sell(buyerUser);
-
-            lotsSellDate.Remove(lotId);
 
             UoW.LotArchive.Add(mapper.Map<ArchiveLotEntity>(UoW.Lots.Get(lotId)));
             lotOperationsHandler.DeleteLot(lotId, hostingEnvironment, requestUriLeftPart);

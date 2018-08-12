@@ -34,9 +34,9 @@ namespace BestLot.WebAPI.Controllers
 
         // GET api/<controller>
         [AllowAnonymous]
-        public IHttpActionResult GetAllLots(int page, int amount, string name = null, string category = null, double minPrice = 0, double maxPrice = 0)
+        public async System.Threading.Tasks.Task<IHttpActionResult> GetAllLotsAsync(int page, int amount, string name = null, string category = null, double minPrice = 0, double maxPrice = 0)
         {
-            IQueryable<Lot> result = lotOperationsHandler.GetAllLots();
+            IQueryable<Lot> result = await lotOperationsHandler.GetAllLotsAsync();
             Expression<Func<Lot, bool>> predicate = null;
             if (name != null && name != "null")
                 result = result.Where(predicate = lot => lot.Name.Contains(name));
@@ -61,9 +61,9 @@ namespace BestLot.WebAPI.Controllers
 
         [AllowAnonymous]
         [Route("api/users/{email}/lots")]
-        public IHttpActionResult GetUserLots(string email, int page, int amount, string name = null, string category = null, double minPrice = 0, double maxPrice = 0)
+        public async System.Threading.Tasks.Task<IHttpActionResult> GetUserLotsAsync(string email, int page, int amount, string name = null, string category = null, double minPrice = 0, double maxPrice = 0)
         {
-            IQueryable<Lot> result = lotOperationsHandler.GetUserLots(email);
+            IQueryable<Lot> result = await lotOperationsHandler.GetUserLotsAsync(email);
             Expression<Func<Lot, bool>> predicate = null;
             if (name != null && name != "null")
                 result = result.Where(predicate = lot => lot.Name.Contains(name));
@@ -87,14 +87,13 @@ namespace BestLot.WebAPI.Controllers
             }
         }
 
-
         // GET api/<controller>/5
         [AllowAnonymous]
-        public IHttpActionResult GetLot(int id)
+        public async System.Threading.Tasks.Task<IHttpActionResult> GetLotAsync(int id)
         {
             try
             {
-                return Ok(mapper.Map<LotOutModel>(lotOperationsHandler.GetLot(id)));
+                return Ok(mapper.Map<LotOutModel>(await lotOperationsHandler.GetLotAsync(id)));
             }
             catch (ArgumentException ex)
             {
@@ -103,13 +102,13 @@ namespace BestLot.WebAPI.Controllers
         }
 
         [Route("api/lots/{lotId}/bid")]
-        public IHttpActionResult PostBid([FromUri]int lotId, [FromBody]double value)
+        public async System.Threading.Tasks.Task<IHttpActionResult> PostBidAsync([FromUri]int lotId, [FromBody]double value)
         {
             if (!User.IsInRole("User"))
                 return BadRequest("Sorry, admins and moderators can`t place bids");
             try
             {
-                lotOperationsHandler.PlaceBid(lotId, User.Identity.Name, value);
+                await lotOperationsHandler.PlaceBidAsync(lotId, User.Identity.Name, value);
                 return Ok();
             }
             catch (ArgumentException ex)
@@ -120,14 +119,14 @@ namespace BestLot.WebAPI.Controllers
 
         [AllowAnonymous]
         [Route("api/lots/{lotId}/bid")]
-        public IHttpActionResult GetBidInfo([FromUri]int lotId)
+        public async System.Threading.Tasks.Task<IHttpActionResult> GetBidInfoAsync([FromUri]int lotId)
         {
             try
             {
-                LotOutModel lot = mapper.Map<LotOutModel>(lotOperationsHandler.GetLot(lotId));
+                LotOutModel lot =  mapper.Map<LotOutModel>(await lotOperationsHandler.GetLotAsync(lotId));
                 UserAccountInfoOutModel buyerUser = null;
                 if (lot.BuyerUserId != null)
-                    buyerUser = mapper.Map<UserAccountInfoOutModel>(userAccountOperationsHandler.GetUserAccount(lot.BuyerUserId));
+                    buyerUser = mapper.Map<UserAccountInfoOutModel>(await userAccountOperationsHandler.GetUserAccountAsync(lot.BuyerUserId));
                 if (lot.BidPlacer == 1)
                     return Ok(new { lot.Price, BuyerUser = buyerUser });
                 return Ok(new { lot.Price, lot.StartDate, lot.SellDate, BuyerUser = buyerUser });
@@ -145,7 +144,7 @@ namespace BestLot.WebAPI.Controllers
         }
 
         // POST api/<controller>
-        public IHttpActionResult PostLot([FromBody]LotInModel value)
+        public async System.Threading.Tasks.Task<IHttpActionResult> PostLotAsync([FromBody]LotInModel value)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -156,7 +155,7 @@ namespace BestLot.WebAPI.Controllers
             }
             try
             {
-                lotOperationsHandler.AddLot(mapper.Map<Lot>(value), System.Web.Hosting.HostingEnvironment.MapPath(@"~"), Request.RequestUri.GetLeftPart(UriPartial.Authority));
+                await lotOperationsHandler.AddLotAsync(mapper.Map<Lot>(value), System.Web.Hosting.HostingEnvironment.MapPath(@"~"), Request.RequestUri.GetLeftPart(UriPartial.Authority));
             }
             catch (ArgumentException ex)
             {
@@ -170,7 +169,7 @@ namespace BestLot.WebAPI.Controllers
         }
 
         // PUT api/<controller>/5
-        public IHttpActionResult PutLot(int id, [FromBody]LotInModel value)
+        public async System.Threading.Tasks.Task<IHttpActionResult> PutLotAsync(int id, [FromBody]LotInModel value)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -178,7 +177,7 @@ namespace BestLot.WebAPI.Controllers
                 return BadRequest("Not allowed");
             try
             {
-                lotOperationsHandler.ChangeLot(id, mapper.Map<Lot>(value), System.Web.Hosting.HostingEnvironment.MapPath(@"~"), Request.RequestUri.GetLeftPart(UriPartial.Authority));
+                await lotOperationsHandler.ChangeLotAsync(id, mapper.Map<Lot>(value), System.Web.Hosting.HostingEnvironment.MapPath(@"~"), Request.RequestUri.GetLeftPart(UriPartial.Authority));
             }
             catch (ArgumentException ex)
             {
@@ -188,13 +187,13 @@ namespace BestLot.WebAPI.Controllers
         }
 
         // DELETE api/<controller>/5
-        public IHttpActionResult DeleteLot(int id)
+        public async System.Threading.Tasks.Task<IHttpActionResult> DeleteLotAsync(int id)
         {
             if (lotOperationsHandler.GetLot(id).SellerUserId != User.Identity.Name && !User.IsInRole("Admin"))
                 return BadRequest("Not Allowed");
             try
             {
-                lotOperationsHandler.DeleteLot(id, System.Web.Hosting.HostingEnvironment.MapPath(@"~"), Request.RequestUri.GetLeftPart(UriPartial.Authority));
+                await lotOperationsHandler.DeleteLotAsync(id, System.Web.Hosting.HostingEnvironment.MapPath(@"~"), Request.RequestUri.GetLeftPart(UriPartial.Authority));
             }
             catch (ArgumentException ex)
             {

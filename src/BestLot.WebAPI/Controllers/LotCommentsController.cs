@@ -30,12 +30,12 @@ namespace BestLot.WebAPI.Controllers
 
         // GET api/<controller>
         [Route("api/lots/{lotId}/comments")]
-        public IHttpActionResult GetLotComments(int lotId, int page, int amount)
+        public async System.Threading.Tasks.Task<IHttpActionResult> GetLotCommentsAsync(int lotId, int page, int amount)
         {
             try
             {
-                return Ok(mapper.Map<IEnumerable<LotCommentOutModel>>(lotCommentsOperationsHandler
-                    .GetLotComments(lotId)
+                return Ok(mapper.Map<IEnumerable<LotCommentOutModel>>((await lotCommentsOperationsHandler
+                    .GetLotCommentsAsync(lotId))
                     .OrderBy(lotComment => lotComment.Id)
                     .Skip((page - 1) * amount)
                     .Take(amount).AsEnumerable()));
@@ -48,12 +48,12 @@ namespace BestLot.WebAPI.Controllers
 
         [Authorize(Roles = "Admin")]
         [Route("api/users/{email}/comments")]
-        public IHttpActionResult GetUserComments(string email, int page, int amount)
+        public async System.Threading.Tasks.Task<IHttpActionResult> GetUserCommentsAsync(string email, int page, int amount)
         {
             try
             {
-                return Ok(mapper.Map<IEnumerable<LotCommentOutModel>>(lotCommentsOperationsHandler
-                    .GetUserComments(email)
+                return Ok(mapper.Map<IEnumerable<LotCommentOutModel>>((await lotCommentsOperationsHandler
+                    .GetUserCommentsAsync(email))
                     .OrderBy(lotComment => lotComment.Id)
                     .Skip((page - 1) * amount)
                     .Take(amount).AsEnumerable()));
@@ -66,12 +66,12 @@ namespace BestLot.WebAPI.Controllers
 
         // GET api/<controller>/5
         [Route("api/lots/{lotId}/comments/{commentNumber}")]
-        public IHttpActionResult GetLotCommentByNumber(int lotId, int commentNumber)
+        public async System.Threading.Tasks.Task<IHttpActionResult> GetLotCommentByNumberAsync(int lotId, int commentNumber)
         {
             try
             {
-                return Ok(mapper.Map<LotCommentOutModel>(lotCommentsOperationsHandler
-                    .GetLotComments(lotId)
+                return Ok(mapper.Map<LotCommentOutModel>((await lotCommentsOperationsHandler
+                    .GetLotCommentsAsync(lotId))
                     .ToList()[commentNumber]));
             }
             catch (ArgumentException ex)
@@ -87,7 +87,7 @@ namespace BestLot.WebAPI.Controllers
         [Authorize]
         // POST api/<controller>
         [Route("api/lots/{lotId}/comments")]
-        public IHttpActionResult PostLotComment([FromUri]int lotId, [FromBody]LotCommentInModel value)
+        public async System.Threading.Tasks.Task<IHttpActionResult> PostLotCommentAsync([FromUri]int lotId, [FromBody]LotCommentInModel value)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -95,7 +95,7 @@ namespace BestLot.WebAPI.Controllers
             value.LotId = lotId;
             try
             {
-                lotCommentsOperationsHandler.AddComment(mapper.Map<LotComment>(value));
+                await lotCommentsOperationsHandler.AddCommentAsync(mapper.Map<LotComment>(value));
             }
             catch (ArgumentException ex)
             {

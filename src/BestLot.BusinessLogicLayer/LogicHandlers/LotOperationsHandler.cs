@@ -79,7 +79,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
                 lot.StartDate = DateTime.Now;
             lot.BuyerUserId = null;
             if (lot.LotPhotos != null && lot.LotPhotos.Any())
-                await lotPhotoOperationsHandler.AddPhotosToNewLotAsync(lot, hostingEnvironmentPath, requestUriLeftPart);
+                lotPhotoOperationsHandler.AddPhotosToNewLot(lot, hostingEnvironmentPath, requestUriLeftPart);
             UoW.Lots.Add(mapper.Map<LotEntity>(lot));
             await UoW.SaveChangesAsync();
         }
@@ -92,9 +92,14 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             {
                 Lot currentLot = mapper.Map<Lot>(UoW.Lots.Get(id));
                 if (currentLot.Id != newLot.Id
-                    || (currentLot.BuyerUserId != null && currentLot.Price != newLot.Price)
                     || currentLot.SellerUserId != newLot.SellerUserId
-                    || currentLot.BuyerUserId != newLot.BuyerUserId)
+                    || currentLot.BuyerUserId != newLot.BuyerUserId
+                    || (currentLot.BuyerUserId != null && 
+                    (currentLot.Price != newLot.Price
+                    || currentLot.StartDate != newLot.StartDate
+                    || currentLot.SellDate != newLot.SellDate
+                    || currentLot.MinStep != newLot.MinStep))
+                    || (currentLot.StartDate.CompareTo(DateTime.Now) >= 0 && currentLot.StartDate != newLot.StartDate))
                     throw new ArgumentException("No permission to change these properties");
                 UoW.Lots.Modify(newLot.Id, mapper.Map<LotEntity>(newLot));
                 UoW.SaveChanges();
@@ -219,6 +224,9 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             if (await UoW.UserAccounts.GetAsync(buyerUserId) == null)
                 throw new ArgumentException("User id is incorrect");
             Lot lot = await GetLotAsync(lotId);
+            if (lot.SellerUserId == buyerUserId)
+                throw new ArgumentException("Placing bids for own lots is not allowed");
+
             lot.PlaceBid(buyerUserId, price);
 
             //private ChangeLot, without checking LotId

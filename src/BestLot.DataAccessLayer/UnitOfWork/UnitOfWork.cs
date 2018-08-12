@@ -52,17 +52,23 @@ namespace BestLot.DataAccessLayer.UnitOfWork
 
         public void SaveChanges()
         {
-            LotContext.SaveChanges();
+            lock (LotContext)
+            {
+                LotContext.SaveChanges();
+            }
         }
 
         public async Task SaveChangesAsync()
         {
-            await Task.FromResult(LotContext.SaveChanges());
+            await LotContext.SaveChangesAsync();
         }
 
         public void SaveArchiveChanges()
         {
-            LotArchiveContext.SaveChanges();
+            lock (LotArchiveContext)
+            {
+                LotArchiveContext.SaveChanges();
+            }
         }
 
         private bool disposed = false;

@@ -78,7 +78,8 @@ namespace BestLot.BusinessLogicLayer.Models
                     "Your bet was highest and now you can buy lot \"" + Name + "\" for " + Price + "\n" +
                     "Please, contact seller on his email or telephone\n" +
                     "Email: " + SellerUser.Email + "\n" +
-                    "Telephone: " + SellerUser.TelephoneNumber,
+                    "Telephone: " + SellerUser.TelephoneNumber + "\n\n" +
+                    "Best regards, BestLot team",
                     BodyEncoding = UTF8Encoding.UTF8,
                     DeliveryNotificationOptions = DeliveryNotificationOptions.OnFailure
                 };
@@ -93,10 +94,37 @@ namespace BestLot.BusinessLogicLayer.Models
                     "Your lot \"" + Name + "\" was sold to " + buyerUser.Name + " " + buyerUser.Surname + " for " + Price + "\n" +
                     "Please, contact buyer on his email or telephone\n" +
                     "Email: " + buyerUser.Email + "\n" +
-                    "Telephone: " + buyerUser.TelephoneNumber,
+                    "Telephone: " + buyerUser.TelephoneNumber + "\n\n" +
+                    "Best regards, BestLot team",
                     BodyEncoding = UTF8Encoding.UTF8,
                     DeliveryNotificationOptions = DeliveryNotificationOptions.OnFailure
                 };
+                client.Send(sellerMail);
+            }
+            else
+            {
+                NetworkCredential login = new NetworkCredential("veklich99@gmail.com", "Veklich1999");
+                SmtpClient client = new SmtpClient()
+                {
+                    Host = "smtp.gmail.com",
+                    Port = 587,
+                    EnableSsl = true,
+                    UseDefaultCredentials = false,
+                    DeliveryMethod = SmtpDeliveryMethod.Network,
+                    Credentials = login
+                };
+
+                MailMessage sellerMail = new MailMessage(new MailAddress("veklich99@gmail.com", "BestLot", Encoding.UTF8), new MailAddress(SellerUser.Email))
+                {
+                    Subject = "BestLot.com",
+                    Body = "Dear " + SellerUser.Name + " " + SellerUser.Surname + ",\n" +
+                    "We tried to sell your lot \"" + Name + "\" but no bids were placed\n" +
+                    "Lot " + Name + " was moved to archive, so feel free to add same lot and sell it again\n\n" +
+                    "Best regards, BestLot team",
+                    BodyEncoding = UTF8Encoding.UTF8,
+                    DeliveryNotificationOptions = DeliveryNotificationOptions.OnFailure
+                };
+                client.SendCompleted += new SendCompletedEventHandler(SendCompletedCallback);
                 client.Send(sellerMail);
             }
         }
