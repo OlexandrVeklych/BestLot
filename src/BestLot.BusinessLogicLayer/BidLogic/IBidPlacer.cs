@@ -9,6 +9,6 @@ namespace BestLot.BusinessLogicLayer.BidLogic
 {
     public interface IBidPlacer
     {
-        void PlaceBid(IBidable bidable, string buyerUserId, double price);
+        void PlaceBid(Lot lot, string buyerUserId, double price);
     }
 }

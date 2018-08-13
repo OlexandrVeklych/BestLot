@@ -20,9 +20,9 @@ namespace BestLot.WebAPI.Controllers
         {
             mapper = new MapperConfiguration(cfg =>
             {
-                cfg.CreateMap<LotInModel, Lot>();
-                cfg.CreateMap<Lot, LotOutModel>();
-                cfg.CreateMap<LotPhotoInModel, LotPhoto>();
+                cfg.CreateMap<LotModel, Lot>();
+                cfg.CreateMap<Lot, LotModel>();
+                cfg.CreateMap<LotPhotoModel, LotPhoto>();
             }).CreateMapper();
             lotOperationsHandler = LogicDependencyResolver.ResolveLotOperationsHandler();
             userAccountOperationsHandler = LogicDependencyResolver.ResolveUserAccountOperationsHandler();
@@ -48,7 +48,7 @@ namespace BestLot.WebAPI.Controllers
                 result = result.Where(predicate = lot => lot.Price <= maxPrice);
             try
             {
-                return Ok(mapper.Map<IEnumerable<LotOutModel>>(result
+                return Ok(mapper.Map<IEnumerable<LotModel>>(result
                     .OrderBy(lot => lot.Id)
                     .Skip((page - 1) * amount)
                     .Take(amount).AsEnumerable()));
@@ -76,7 +76,7 @@ namespace BestLot.WebAPI.Controllers
 
             try
             {
-                return Ok(mapper.Map<IEnumerable<LotOutModel>>(result
+                return Ok(mapper.Map<IEnumerable<LotModel>>(result
                     .OrderBy(lot => lot.Id)
                     .Skip((page - 1) * amount)
                     .Take(amount).AsEnumerable()));
@@ -93,7 +93,7 @@ namespace BestLot.WebAPI.Controllers
         {
             try
             {
-                return Ok(mapper.Map<LotOutModel>(await lotOperationsHandler.GetLotAsync(id)));
+                return Ok(mapper.Map<LotModel>(await lotOperationsHandler.GetLotAsync(id)));
             }
             catch (ArgumentException ex)
             {
@@ -123,10 +123,10 @@ namespace BestLot.WebAPI.Controllers
         {
             try
             {
-                LotOutModel lot =  mapper.Map<LotOutModel>(await lotOperationsHandler.GetLotAsync(lotId));
-                UserAccountInfoOutModel buyerUser = null;
+                LotModel lot =  mapper.Map<LotModel>(await lotOperationsHandler.GetLotAsync(lotId));
+                UserAccountInfoModel buyerUser = null;
                 if (lot.BuyerUserId != null)
-                    buyerUser = mapper.Map<UserAccountInfoOutModel>(await userAccountOperationsHandler.GetUserAccountAsync(lot.BuyerUserId));
+                    buyerUser = mapper.Map<UserAccountInfoModel>(await userAccountOperationsHandler.GetUserAccountAsync(lot.BuyerUserId));
                 if (lot.BidPlacer == 1)
                     return Ok(new { lot.Price, BuyerUser = buyerUser });
                 return Ok(new { lot.Price, lot.StartDate, lot.SellDate, BuyerUser = buyerUser });
@@ -144,7 +144,7 @@ namespace BestLot.WebAPI.Controllers
         }
 
         // POST api/<controller>
-        public async System.Threading.Tasks.Task<IHttpActionResult> PostLotAsync([FromBody]LotInModel value)
+        public async System.Threading.Tasks.Task<IHttpActionResult> PostLotAsync([FromBody]LotModel value)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -169,7 +169,7 @@ namespace BestLot.WebAPI.Controllers
         }
 
         // PUT api/<controller>/5
-        public async System.Threading.Tasks.Task<IHttpActionResult> PutLotAsync(int id, [FromBody]LotInModel value)
+        public async System.Threading.Tasks.Task<IHttpActionResult> PutLotAsync(int id, [FromBody]LotModel value)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

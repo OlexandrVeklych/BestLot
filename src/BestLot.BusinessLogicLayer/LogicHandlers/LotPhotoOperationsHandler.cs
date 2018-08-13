@@ -20,16 +20,15 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         {
             mapper = new MapperConfiguration(cfg =>
             {
-                //MaxDepth(1) - to map User inside Lot without his Lots
-                //Lot.User.Name - ok
-                //Lot.User.Lots[n] - null reference
-                cfg.CreateMap<LotEntity, Lot>().MaxDepth(1);
-                cfg.CreateMap<Lot, LotEntity>();
-                //MaxDepth(1) - to map User inside Comment without his Lots
-                //LotComment.User.Name - ok
-                //LotComment.User.Lots[n] - null reference
-                cfg.CreateMap<LotCommentEntity, LotComment>().MaxDepth(1);
-                cfg.CreateMap<LotPhotoEntity, LotPhoto>().MaxDepth(1);
+                cfg.CreateMap<LotEntity, Lot>()
+                .ForAllMembers(opt => opt.Ignore());
+                cfg.CreateMap<UserAccountInfoEntity, UserAccountInfo>()
+                .ForAllMembers(opt => opt.Ignore());
+                cfg.CreateMap<LotPhotoEntity, LotPhoto>()
+                .ForMember(dest => dest.Lot, opt => opt.Ignore());
+                cfg.CreateMap<LotCommentEntity, LotComment>()
+                .ForAllMembers(opt => opt.Ignore());
+
                 cfg.CreateMap<LotPhoto, LotPhotoEntity>();
             }).CreateMapper();
         }
@@ -58,8 +57,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
 
         public void AddPhotosToExistingLot(int lotId, LotPhoto[] lotPhotos, string hostingEnvironmentPath, string requestUriLeftPart)
         {
-            Expression<Func<LotEntity, bool>> predicate = null;
-            Lot lot = mapper.Map<Lot>(UoW.Lots.GetAll().Where(predicate = l => l.Id == lotId).First());
+            Lot lot = lotOperationsHandler.GetLot(lotId);
             string currentDirectory = hostingEnvironmentPath + "\\Photos\\" + lot.SellerUserId;
             if (!Directory.Exists(currentDirectory))
                 Directory.CreateDirectory(currentDirectory);
@@ -200,7 +198,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
                 });
         }
 
-        public LotPhoto GetLotPhotoByNumber(int lotId, int photoNumber, params Expression<Func<Lot, object>>[] includeProperties)
+        public LotPhoto GetLotPhotoByNumber(int lotId, int photoNumber)
         {
             IQueryable<LotPhoto> lotPhotos;
             if ((lotPhotos = GetLotPhotos(lotId)) == null)
@@ -210,7 +208,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             return lotPhotos.ToList()[photoNumber];
         }
 
-        public async Task<LotPhoto> GetLotPhotoByNumberAsync(int lotId, int photoNumber, params Expression<Func<Lot, object>>[] includeProperties)
+        public async Task<LotPhoto> GetLotPhotoByNumberAsync(int lotId, int photoNumber)
         {
             IQueryable<LotPhoto> lotPhotos;
             if ((lotPhotos = await GetLotPhotosAsync(lotId)) == null)
@@ -220,16 +218,20 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             return lotPhotos.ToList()[photoNumber];
         }
 
-        public IQueryable<LotPhoto> GetLotPhotos(int lotId, params Expression<Func<Lot, object>>[] includeProperties)
+        public IQueryable<LotPhoto> GetLotPhotos(int lotId)
         {
             Expression<Func<LotPhotoEntity, bool>> predicate = null;
-            return UoW.LotPhotos.GetAll().Where(predicate = lotPhoto => lotPhoto.LotId == lotId).ProjectTo<LotPhoto>(mapper.ConfigurationProvider);
+            return UoW.LotPhotos.GetAll()
+                .Where(predicate = lotPhoto => lotPhoto.LotId == lotId)
+                .ProjectTo<LotPhoto>(mapper.ConfigurationProvider);
         }
 
-        public async Task<IQueryable<LotPhoto>> GetLotPhotosAsync(int lotId, params Expression<Func<Lot, object>>[] includeProperties)
+        public async Task<IQueryable<LotPhoto>> GetLotPhotosAsync(int lotId)
         {
             Expression<Func<LotPhotoEntity, bool>> predicate = null;
-            return (await UoW.LotPhotos.GetAllAsync()).Where(predicate = lotPhoto => lotPhoto.LotId == lotId).ProjectTo<LotPhoto>(mapper.ConfigurationProvider);
+            return (await UoW.LotPhotos.GetAllAsync())
+                .Where(predicate = lotPhoto => lotPhoto.LotId == lotId)
+                .ProjectTo<LotPhoto>(mapper.ConfigurationProvider);
         }
     }
 }

@@ -23,6 +23,6 @@ namespace BestLot.DataAccessLayer.Entities
         public DateTime SellDate { get; set; }
         public ICollection<LotPhotoEntity> LotPhotos { get; set; }
         public ICollection<LotCommentEntity> LotComments { get; set; }
-        public int BidPlacer { get; set; }
+        public string BidPlacer { get; set; }
     }
 }

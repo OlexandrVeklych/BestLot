@@ -42,7 +42,7 @@ namespace BestLot.UnitTests
             lotOperationsHandler.AddLot(lot, "", "");
 
             lotSalesHandler.RunSalesHandler();
-            Assert.That(() => lotSalesHandler.lotsSellDate.Count, Is.EqualTo(1).After(1700));
+            Assert.That(() => lotSalesHandler.LotId_SellDatePairs.Count, Is.EqualTo(1).After(1700));
         }
 
         [Test]
@@ -55,13 +55,13 @@ namespace BestLot.UnitTests
 
             lotSalesHandler.RunSalesHandler();
 
-            Assert.That(() => lotSalesHandler.lotsSellDate.Count, Is.EqualTo(2).After(1700));
+            Assert.That(() => lotSalesHandler.LotId_SellDatePairs.Count, Is.EqualTo(2).After(1800));
             Assert.AreEqual(0, unitOfWork.LotArchive.GetAll().Count());
             Assert.AreEqual(2, unitOfWork.Lots.GetAll().Count());
-            Assert.That(() => lotSalesHandler.lotsSellDate.Count, Is.EqualTo(1).After(500));
+            Assert.That(() => lotSalesHandler.LotId_SellDatePairs.Count, Is.EqualTo(1).After(500));
             Assert.AreEqual(1, unitOfWork.LotArchive.GetAll().Count());
             Assert.AreEqual(1, unitOfWork.Lots.GetAll().Count());
-            Assert.That(() => lotSalesHandler.lotsSellDate.Count, Is.EqualTo(0).After(8000));
+            Assert.That(() => lotSalesHandler.LotId_SellDatePairs.Count, Is.EqualTo(0).After(8000));
             Assert.AreEqual(2, unitOfWork.LotArchive.GetAll().Count());
             Assert.AreEqual(0, unitOfWork.Lots.GetAll().Count());
         }

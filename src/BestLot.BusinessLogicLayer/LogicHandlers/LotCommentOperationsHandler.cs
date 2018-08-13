@@ -19,21 +19,17 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         {
             mapper = new MapperConfiguration(cfg =>
             {
-                //MaxDepth(1) - to map User inside Lot without his Lots
-                //Lot.User.Name - ok
-                //Lot.User.Lots[n] - null reference
-                cfg.CreateMap<LotEntity, Lot>().MaxDepth(1);
-                cfg.CreateMap<Lot, LotEntity>();
-                //MaxDepth(1) - to map User inside Comment without his Lots
-                //LotComment.User.Name - ok
-                //LotComment.User.Lots[n] - null reference
-                cfg.CreateMap<LotCommentEntity, LotComment>().MaxDepth(1);
+                cfg.CreateMap<LotEntity, Lot>()
+                .ForAllMembers(opt => opt.Ignore());
+                cfg.CreateMap<UserAccountInfoEntity, UserAccountInfo>()
+                .ForMember(dest => dest.Lots, opt => opt.Ignore())
+                .ForMember(dest => dest.LotComments, opt => opt.Ignore());
+                cfg.CreateMap<LotPhotoEntity, LotPhoto>()
+                .ForAllMembers(opt => opt.Ignore());
+                cfg.CreateMap<LotCommentEntity, LotComment>();
+
                 cfg.CreateMap<LotComment, LotCommentEntity>();
-                cfg.CreateMap<LotPhotoEntity, LotPhoto>();
-                cfg.CreateMap<LotPhoto, LotPhotoEntity>();
-                cfg.CreateMap<UserAccountInfo, UserAccountInfoEntity>();
-                cfg.CreateMap<UserAccountInfoEntity, UserAccountInfo>();
-                cfg.CreateMap<Expression<Func<Lot, object>>[], Expression<Func<LotEntity, object>>[]>();
+
             }).CreateMapper();
         }
 
@@ -56,10 +52,11 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             Lot lot;
             if ((lot = lotOperationsHandler.GetLot(lotComment.LotId)) == null)
                 throw new ArgumentException("Lot id is incorrect");
+            lot.LotComments = GetLotComments(lot.Id).ToList();
             lot.AddComment(lotComment);
             UoW.LotComments.Add(mapper.Map<LotCommentEntity>(lotComment));
             UoW.SaveChanges();
-            //private ChangeLot, without checking LotId
+            //private ChangeLot, without checking Lot again
             lotOperationsHandler.ChangeLotUnsafe(lot);
         }
 
@@ -70,32 +67,33 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             Lot lot;
             if ((lot = await lotOperationsHandler.GetLotAsync(lotComment.LotId)) == null)
                 throw new ArgumentException("Lot id is incorrect");
+            lot.LotComments = (await GetLotCommentsAsync(lot.Id)).ToList();
             lot.AddComment(lotComment);
             UoW.LotComments.Add(mapper.Map<LotCommentEntity>(lotComment));
             await UoW.SaveChangesAsync();
-            //private ChangeLot, without checking LotId
+            //private ChangeLot, without checking Lot again
             await lotOperationsHandler.ChangeLotUnsafeAsync(lot);
         }
 
-        public IQueryable<LotComment> GetLotComments(int lotId, params Expression<Func<Lot, object>>[] includeProperties)
+        public IQueryable<LotComment> GetLotComments(int lotId)
         {
             Expression<Func<LotCommentEntity, bool>> predicate = null;
             return UoW.LotComments.GetAll().Where(predicate = lotComment => lotComment.LotId == lotId).ProjectTo<LotComment>(mapper.ConfigurationProvider);
         }
 
-        public async Task<IQueryable<LotComment>> GetLotCommentsAsync(int lotId, params Expression<Func<Lot, object>>[] includeProperties)
+        public async Task<IQueryable<LotComment>> GetLotCommentsAsync(int lotId)
         {
             Expression<Func<LotCommentEntity, bool>> predicate = null;
             return (await UoW.LotComments.GetAllAsync()).Where(predicate = lotComment => lotComment.LotId == lotId).ProjectTo<LotComment>(mapper.ConfigurationProvider);
         }
 
-        public IQueryable<LotComment> GetUserComments(string userId, params Expression<Func<Lot, object>>[] includeProperties)
+        public IQueryable<LotComment> GetUserComments(string userId)
         {
             Expression<Func<LotCommentEntity, bool>> predicate = null;
             return UoW.LotComments.GetAll().Where(predicate = lotComment => lotComment.UserId == userId).ProjectTo<LotComment>(mapper.ConfigurationProvider);
         }
 
-        public async Task<IQueryable<LotComment>> GetUserCommentsAsync(string userId, params Expression<Func<Lot, object>>[] includeProperties)
+        public async Task<IQueryable<LotComment>> GetUserCommentsAsync(string userId)
         {
             Expression<Func<LotCommentEntity, bool>> predicate = null;
             return (await UoW.LotComments.GetAllAsync()).Where(predicate = lotComment => lotComment.UserId == userId).ProjectTo<LotComment>(mapper.ConfigurationProvider);

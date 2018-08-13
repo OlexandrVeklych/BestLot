@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BestLot.BusinessLogicLayer.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,14 +7,15 @@ using System.Threading.Tasks;
 
 namespace BestLot.BusinessLogicLayer.BidLogic
 {
-    class DeterminedSelldateBidPlacer : IBidPlacer
+    //For lots that need to be sold at certain time, not depending on bids
+    class DeterminedSellDateBidPlacer : IBidPlacer
     {
-        public void PlaceBid(IBidable bidable, string buyerUserId, double price)
+        public void PlaceBid(Lot lot, string buyerUserId, double price)
         {
-            if (price < bidable.Price + bidable.MinStep)
-                throw new ArgumentException("Min. availible bid is " + (bidable.Price + bidable.MinStep));
-            bidable.Price = price;
-            bidable.BuyerUserId = buyerUserId;
+            if (price < lot.Price + lot.MinStep)
+                throw new ArgumentException("Min. availible bid is " + (lot.Price + lot.MinStep));
+            lot.Price = price;
+            lot.BuyerUserId = buyerUserId;
         }
     }
 }

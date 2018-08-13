@@ -21,21 +21,17 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         {
             mapper = new MapperConfiguration(cfg =>
             {
-                //MaxDepth(1) - to map User inside Lot without his Lots
-                //Lot.User.Name - ok
-                //Lot.User.Lots[n] - null reference
-                cfg.CreateMap<LotEntity, Lot>();
-                cfg.CreateMap<Lot, LotEntity>();
-                //MaxDepth(1) - to map User inside Comment without his Lots
-                //LotComment.User.Name - ok
-                //LotComment.User.Lots[n] - null reference
-                cfg.CreateMap<LotCommentEntity, LotComment>().MaxDepth(1);
-                cfg.CreateMap<LotComment, LotCommentEntity>();
-                cfg.CreateMap<LotPhotoEntity, LotPhoto>();
-                cfg.CreateMap<LotPhoto, LotPhotoEntity>();
+                cfg.CreateMap<LotEntity, Lot>()
+                .ForAllMembers(opt => opt.Ignore());
+                cfg.CreateMap<UserAccountInfoEntity, UserAccountInfo>()
+                .ForMember(dest => dest.Lots, opt => opt.Ignore())
+                .ForMember(dest => dest.LotComments, opt => opt.Ignore());
+                cfg.CreateMap<LotPhotoEntity, LotPhoto>()
+                .ForAllMembers(opt => opt.Ignore());
+                cfg.CreateMap<LotCommentEntity, LotComment>()
+                .ForAllMembers(opt => opt.Ignore());
+
                 cfg.CreateMap<UserAccountInfo, UserAccountInfoEntity>();
-                cfg.CreateMap<UserAccountInfoEntity, UserAccountInfo>();
-                cfg.CreateMap<Expression<Func<Lot, object>>[], Expression<Func<LotEntity, object>>[]>();
             }).CreateMapper();
         }
 
@@ -167,6 +163,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             UserAccountInfo user;
             if ((user = GetUserAccount(userAccountId)) == null)
                 throw new ArgumentException("UserAccount id is incorrect");
+            user.Lots = lotOperationsHandler.GetUserLots(user.Email).ToList();
             foreach (Lot lot in user.Lots)
                 lotOperationsHandler.DeleteLot(lot.Id, hostingEnvironmentPath, requestUriLeftPart);
             lotPhotoOperationsHandler.DeleteAllUserPhotos(userAccountId, hostingEnvironmentPath);
@@ -179,6 +176,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             UserAccountInfo user;
             if ((user = await GetUserAccountAsync(userAccountId)) == null)
                 throw new ArgumentException("UserAccount id is incorrect");
+            user.Lots = (await lotOperationsHandler.GetUserLotsAsync(user.Email)).ToList();
             foreach (Lot lot in user.Lots)
                 await lotOperationsHandler.DeleteLotAsync(lot.Id, hostingEnvironmentPath, requestUriLeftPart);
             await lotPhotoOperationsHandler.DeleteAllUserPhotosAsync(userAccountId, hostingEnvironmentPath);
@@ -186,7 +184,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             await UoW.SaveChangesAsync();
         }
 
-        public UserAccountInfo GetSellerUser(int lotId, params Expression<Func<UserAccountInfo, object>>[] includeProperties)
+        public UserAccountInfo GetSellerUser(int lotId)
         {
             Lot lot;
             if ((lot = lotOperationsHandler.GetLot(lotId)) == null)
@@ -194,7 +192,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             return GetUserAccount(lot.SellerUserId);
         }
 
-        public async Task<UserAccountInfo> GetSellerUserAsync(int lotId, params Expression<Func<UserAccountInfo, object>>[] includeProperties)
+        public async Task<UserAccountInfo> GetSellerUserAsync(int lotId)
         {
             Lot lot;
             if ((lot = await lotOperationsHandler.GetLotAsync(lotId)) == null)
@@ -202,7 +200,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             return await GetUserAccountAsync(lot.SellerUserId);
         }
 
-        public UserAccountInfo GetBuyerUser(int lotId, params Expression<Func<UserAccountInfo, object>>[] includeProperties)
+        public UserAccountInfo GetBuyerUser(int lotId)
         {
             Lot lot;
             if ((lot = lotOperationsHandler.GetLot(lotId)) == null)
@@ -217,7 +215,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             }
         }
 
-        public async Task<UserAccountInfo> GetBuyerUserAsync(int lotId, params Expression<Func<UserAccountInfo, object>>[] includeProperties)
+        public async Task<UserAccountInfo> GetBuyerUserAsync(int lotId)
         {
             Lot lot;
             if ((lot = await lotOperationsHandler.GetLotAsync(lotId)) == null)
@@ -232,31 +230,30 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             }
         }
 
-        public UserAccountInfo GetUserAccount(string userAccountId, params Expression<Func<UserAccountInfo, object>>[] includeProperties)
+        public UserAccountInfo GetUserAccount(string userAccountId)
         {
-            UserAccountInfo userAccountInfo = mapper.Map<UserAccountInfo>(UoW.UserAccounts.Get(userAccountId, mapper.Map<Expression<Func<UserAccountInfoEntity, object>>[]>(includeProperties)));
-            if (userAccountInfo == null)
+            UserAccountInfo userAccountInfo;
+            if ((userAccountInfo = mapper.Map<UserAccountInfo>(UoW.UserAccounts.Get(userAccountId))) == null)
                 throw new ArgumentException("UserAccount id is incorrect");
             return userAccountInfo;
         }
 
-        public async Task<UserAccountInfo> GetUserAccountAsync(string userAccountId, params Expression<Func<UserAccountInfo, object>>[] includeProperties)
+        public async Task<UserAccountInfo> GetUserAccountAsync(string userAccountId)
         {
-            UserAccountInfo userAccountInfo = mapper.Map<UserAccountInfo>(await UoW.UserAccounts.GetAsync(userAccountId, mapper.Map<Expression<Func<UserAccountInfoEntity, object>>[]>(includeProperties)));
-            if (userAccountInfo == null)
+            UserAccountInfo userAccountInfo;
+            if ((userAccountInfo = mapper.Map<UserAccountInfo>(await UoW.UserAccounts.GetAsync(userAccountId))) == null)
                 throw new ArgumentException("UserAccount id is incorrect");
             return userAccountInfo;
         }
 
-        public IQueryable<UserAccountInfo> GetAllUserAccounts(params Expression<Func<UserAccountInfo, object>>[] includeProperties)
+        public IQueryable<UserAccountInfo> GetAllUserAccounts()
         {
-            return UoW.UserAccounts.GetAll(mapper.Map<Expression<Func<UserAccountInfoEntity, object>>[]>(includeProperties)).ProjectTo<UserAccountInfo>(mapper.ConfigurationProvider);
+            return UoW.UserAccounts.GetAll().ProjectTo<UserAccountInfo>(mapper.ConfigurationProvider);
         }
 
-        public async Task<IQueryable<UserAccountInfo>> GetAllUserAccountsAsync(params Expression<Func<UserAccountInfo, object>>[] includeProperties)
+        public async Task<IQueryable<UserAccountInfo>> GetAllUserAccountsAsync()
         {
-            var result = await UoW.UserAccounts.GetAllAsync(mapper.Map<Expression<Func<UserAccountInfoEntity, object>>[]>(includeProperties));
-            return result.ProjectTo<UserAccountInfo>(mapper.ConfigurationProvider);
+            return (await UoW.UserAccounts.GetAllAsync()).ProjectTo<UserAccountInfo>(mapper.ConfigurationProvider);
         }
     }
 }

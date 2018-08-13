@@ -10,7 +10,7 @@ using BestLot.BusinessLogicLayer.BidLogic;
 
 namespace BestLot.BusinessLogicLayer.Models
 {
-    public class Lot : IBidable
+    public class Lot
     {
         public int Id { get; set; }
         public string Name { get; set; }
@@ -25,7 +25,7 @@ namespace BestLot.BusinessLogicLayer.Models
         public DateTime SellDate { get; set; }
         public List<LotPhoto> LotPhotos { get; set; }
         public List<LotComment> LotComments { get; set; }
-        public int BidPlacer { get; set; }
+        public string BidPlacer { get; set; }
 
         public void AddComment(LotComment lotComment)
         {
@@ -42,14 +42,14 @@ namespace BestLot.BusinessLogicLayer.Models
             IBidPlacer bidPlacer = null;
             switch (BidPlacer)
             {
-                case 1:
-                    bidPlacer = new DeterminedSelldateBidPlacer();
+                case "Determined":
+                    bidPlacer = new DeterminedSellDateBidPlacer();
                     break;
-                case 2:
-                    bidPlacer = new RelativeSelldateBidPlacer();
+                case "Relative":
+                    bidPlacer = new RelativeSellDateBidPlacer();
                     break;
                 default:
-                    bidPlacer = new DeterminedSelldateBidPlacer();
+                    bidPlacer = new DeterminedSellDateBidPlacer();
                     break;
             }
             bidPlacer.PlaceBid(this, buyerUserId, price);

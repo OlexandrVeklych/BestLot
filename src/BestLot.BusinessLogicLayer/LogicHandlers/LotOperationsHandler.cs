@@ -19,21 +19,17 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         {
             mapper = new MapperConfiguration(cfg =>
             {
-                //MaxDepth(1) - to map User inside Lot without his Lots
-                //Lot.User.Name - ok
-                //Lot.User.Lots[n] - null reference
-                cfg.CreateMap<LotEntity, Lot>().MaxDepth(1);
+                cfg.CreateMap<LotEntity, Lot>()
+                .ForMember(dest => dest.LotComments, opt => opt.Ignore())
+                .ForMember(dest => dest.LotPhotos, opt => opt.Ignore());
+                cfg.CreateMap<UserAccountInfoEntity, UserAccountInfo>()
+                .ForAllMembers(opt => opt.Ignore());
+                cfg.CreateMap<LotPhotoEntity, LotPhoto>()
+                .ForAllMembers(opt => opt.Ignore());
+                cfg.CreateMap<LotCommentEntity, LotComment>()
+                .ForAllMembers(opt => opt.Ignore());
+
                 cfg.CreateMap<Lot, LotEntity>();
-                //MaxDepth(1) - to map User inside Comment without his Lots
-                //LotComment.User.Name - ok
-                //LotComment.User.Lots[n] - null reference
-                cfg.CreateMap<LotCommentEntity, LotComment>().MaxDepth(1);
-                cfg.CreateMap<LotComment, LotCommentEntity>();
-                cfg.CreateMap<LotPhotoEntity, LotPhoto>().MaxDepth(1); ;
-                cfg.CreateMap<LotPhoto, LotPhotoEntity>();
-                cfg.CreateMap<UserAccountInfo, UserAccountInfoEntity>();
-                cfg.CreateMap<UserAccountInfoEntity, UserAccountInfo>().MaxDepth(1); ;
-                cfg.CreateMap<Expression<Func<Lot, object>>[], Expression<Func<LotEntity, object>>[]>();
             }).CreateMapper();
         }
 
@@ -55,15 +51,19 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
                 lotPhotoOperationsHandler = value;
             }
         }
+
         private IUnitOfWork UoW;
         private IMapper mapper;
 
         public void AddLot(Lot lot, string hostingEnvironmentPath, string requestUriLeftPart)
         {
+            if (lot.StartDate == null || lot.StartDate.Year < DateTime.Now.Year)
+                lot.StartDate = DateTime.Now;
+            if (lot.StartDate.CompareTo(lot.SellDate) >= 0)
+                throw new ArgumentException("Wrong sell date");
             if (UoW.UserAccounts.Get(lot.SellerUserId) == null)
                 throw new ArgumentException("Seller user id is incorrect");
-            if (lot.StartDate == null || lot.StartDate.Year < 2018)
-                lot.StartDate = DateTime.Now;
+
             lot.BuyerUserId = null;
             if (lot.LotPhotos != null && lot.LotPhotos.Any())
                 lotPhotoOperationsHandler.AddPhotosToNewLot(lot, hostingEnvironmentPath, requestUriLeftPart);
@@ -73,10 +73,12 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
 
         public async Task AddLotAsync(Lot lot, string hostingEnvironmentPath, string requestUriLeftPart)
         {
-            if (await UoW.UserAccounts.GetAsync(lot.SellerUserId) == null)
-                throw new ArgumentException("Seller user id is incorrect");
             if (lot.StartDate == null || lot.StartDate.Year < 2018)
                 lot.StartDate = DateTime.Now;
+            if (lot.StartDate.CompareTo(lot.SellDate) >= 0)
+                throw new ArgumentException("Wrong sell date");
+            if (await UoW.UserAccounts.GetAsync(lot.SellerUserId) == null)
+                throw new ArgumentException("Seller user id is incorrect");
             lot.BuyerUserId = null;
             if (lot.LotPhotos != null && lot.LotPhotos.Any())
                 lotPhotoOperationsHandler.AddPhotosToNewLot(lot, hostingEnvironmentPath, requestUriLeftPart);
@@ -123,14 +125,14 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             }
         }
 
-        //id of newLot is correct, don`t check it again
+        //=Lot is correct, don`t check it again
         public void ChangeLotUnsafe(Lot newLot)
         {
             UoW.Lots.Modify(newLot.Id, mapper.Map<LotEntity>(newLot));
             UoW.SaveChanges();
         }
 
-        //id of newLot is correct, don`t check it again
+        //=Lot is correct, don`t check it again
         public async Task ChangeLotUnsafeAsync(Lot newLot)
         {
             UoW.Lots.Modify(newLot.Id, mapper.Map<LotEntity>(newLot));
@@ -143,8 +145,8 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             if ((lot = mapper.Map<Lot>(UoW.Lots.Get(lotId))) == null)
                 throw new ArgumentException("Lot id is incorrect");
             lotPhotoOperationsHandler.DeleteAllLotPhotos(lot.Id, hostingEnvironmentPath, requestUriLeftPart);
-            foreach (LotComment lotComment in lot.LotComments)
-                UoW.LotComments.Delete(lotComment.Id); UoW.Lots.Delete(lotId);
+            //foreach (LotComment lotComment in lot.LotComments)
+            //    UoW.LotComments.Delete(lotComment.Id);
             UoW.Lots.Delete(lotId);
             UoW.SaveChanges();
         }
@@ -155,40 +157,39 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             if ((lot = mapper.Map<Lot>(await UoW.Lots.GetAsync(lotId))) == null)
                 throw new ArgumentException("Lot id is incorrect");
             await lotPhotoOperationsHandler.DeleteAllLotPhotosAsync(lot.Id, hostingEnvironmentPath, requestUriLeftPart);
-            foreach (LotComment lotComment in lot.LotComments)
-                UoW.LotComments.Delete(lotComment.Id);
+            //foreach (LotComment lotComment in lot.LotComments)
+            //    UoW.LotComments.Delete(lotComment.Id);
             UoW.Lots.Delete(lotId);
             await UoW.SaveChangesAsync();
         }
 
-        public Lot GetLot(int lotId, params Expression<Func<Lot, object>>[] includeProperties)
+        public Lot GetLot(int lotId)
         {
-            Lot lot = mapper.Map<Lot>(UoW.Lots.Get(lotId, mapper.Map<Expression<Func<LotEntity, object>>[]>(includeProperties)));
-            if (lot == null)
+            Lot lot;
+            if ((lot = mapper.Map<Lot>(UoW.Lots.Get(lotId))) == null)
                 throw new ArgumentException("Lot id is incorrect");
             return lot;
         }
 
-        public async Task<Lot> GetLotAsync(int lotId, params Expression<Func<Lot, object>>[] includeProperties)
+        public async Task<Lot> GetLotAsync(int lotId)
         {
-            Lot lot = mapper.Map<Lot>(await UoW.Lots.GetAsync(lotId, mapper.Map<Expression<Func<LotEntity, object>>[]>(includeProperties)));
-            if (lot == null)
+            Lot lot;
+            if ((lot = mapper.Map<Lot>(await UoW.Lots.GetAsync(lotId))) == null)
                 throw new ArgumentException("Lot id is incorrect");
             return lot;
         }
 
-        public IQueryable<Lot> GetAllLots(params Expression<Func<Lot, object>>[] includeProperties)
+        public IQueryable<Lot> GetAllLots()
         {
-            return UoW.Lots.GetAll(mapper.Map<Expression<Func<LotEntity, object>>[]>(includeProperties)).ProjectTo<Lot>(mapper.ConfigurationProvider);
+            return UoW.Lots.GetAll().ProjectTo<Lot>(mapper.ConfigurationProvider);
         }
 
-        public async Task<IQueryable<Lot>> GetAllLotsAsync(params Expression<Func<Lot, object>>[] includeProperties)
+        public async Task<IQueryable<Lot>> GetAllLotsAsync()
         {
-            var result = await UoW.Lots.GetAllAsync(mapper.Map<Expression<Func<LotEntity, object>>[]>(includeProperties));
-            return result.ProjectTo<Lot>(mapper.ConfigurationProvider);
+            return (await UoW.Lots.GetAllAsync()).ProjectTo<Lot>(mapper.ConfigurationProvider);
         }
 
-        public IQueryable<Lot> GetUserLots(string userId, params Expression<Func<Lot, object>>[] includeProperties)
+        public IQueryable<Lot> GetUserLots(string userId)
         {
             Expression<Func<LotEntity, bool>> predicate = null;
             return UoW.Lots.GetAll()
@@ -196,7 +197,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
                 .ProjectTo<Lot>(mapper.ConfigurationProvider);
         }
 
-        public async Task<IQueryable<Lot>> GetUserLotsAsync(string userId, params Expression<Func<Lot, object>>[] includeProperties)
+        public async Task<IQueryable<Lot>> GetUserLotsAsync(string userId)
         {
             Expression<Func<LotEntity, bool>> predicate = null;
             var result = await UoW.Lots.GetAllAsync();
@@ -207,29 +208,32 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
 
         public void PlaceBid(int lotId, string buyerUserId, double price)
         {
-            if (UoW.UserAccounts.Get(buyerUserId) == null)
-                throw new ArgumentException("User id is incorrect");
-            Lot lot = GetLot(lotId);
+            Lot lot;
+            if ((lot = GetLot(lotId)) == null)
+                throw new ArgumentException("Lot id is incorrect");
             if (lot.SellerUserId == buyerUserId)
                 throw new ArgumentException("Placing bids for own lots is not allowed");
-
+            if (UoW.UserAccounts.Get(buyerUserId) == null)
+                throw new ArgumentException("User id is incorrect");
             lot.PlaceBid(buyerUserId, price);
 
-            //private ChangeLot, without checking LotId
+            //private ChangeLot, without checking Lot
             ChangeLotUnsafe(lot);
         }
 
         public async Task PlaceBidAsync(int lotId, string buyerUserId, double price)
         {
-            if (await UoW.UserAccounts.GetAsync(buyerUserId) == null)
-                throw new ArgumentException("User id is incorrect");
-            Lot lot = await GetLotAsync(lotId);
+            Lot lot;
+            if ((lot = await GetLotAsync(lotId)) == null)
+                throw new ArgumentException("Lot id is incorrect");
             if (lot.SellerUserId == buyerUserId)
                 throw new ArgumentException("Placing bids for own lots is not allowed");
+            if (await UoW.UserAccounts.GetAsync(buyerUserId) == null)
+                throw new ArgumentException("User id is incorrect");
 
             lot.PlaceBid(buyerUserId, price);
 
-            //private ChangeLot, without checking LotId
+            //private ChangeLot, without checking Lot
             await ChangeLotUnsafeAsync(lot);
         }
 

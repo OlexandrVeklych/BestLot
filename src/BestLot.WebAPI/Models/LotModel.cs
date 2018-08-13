@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BestLot.WebAPI.Models
 {
-    public class LotInModel
+    public class LotModel
     {
         public int Id { get; set; }
 
@@ -23,7 +23,7 @@ namespace BestLot.WebAPI.Models
         public string Category { get; set; }
 
         public string SellerUserId { get; set; }
-        public UserAccountInfoInModel SellerUser { get; set; }
+        public UserAccountInfoModel SellerUser { get; set; }
         public string BuyerUserId { get; set; }
 
         [Required]
@@ -38,8 +38,8 @@ namespace BestLot.WebAPI.Models
         [DataType(DataType.DateTime)]
         public DateTime SellDate { get; set; }
 
-        public List<LotPhotoInModel> LotPhotos { get; set; }
-        public List<LotCommentInModel> LotComments { get; set; }
+        public List<LotPhotoModel> LotPhotos { get; set; }
+        public List<LotCommentModel> LotComments { get; set; }
 
         [Required]
         public int BidPlacer { get; set; }

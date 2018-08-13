@@ -37,7 +37,7 @@ namespace BestLot.UnitTests
         [Test]
         public async Task AddCommentAsync_ValidInput_AddsComment()
         {
-            var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now, Name = "Name1" };
+            var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now.AddDays(1), Name = "Name1" };
             await lotOperationsHandler.AddLotAsync(lot, "", "");
 
             var lotComment = new LotComment { Message = "Comment1", UserId = "veklich99@mail.ru", LotId = 1 };
@@ -45,7 +45,7 @@ namespace BestLot.UnitTests
             var lotComment2 = new LotComment { Message = "Comment2", UserId = "veklich99@mail.ru", LotId = 1 };
             await lotCommentOperationsHandler.AddCommentAsync(lotComment2);
 
-            var resultLot = await lotOperationsHandler.GetLotAsync(1, l => l.LotComments, l => l.SellerUser);
+            var resultLot = await lotOperationsHandler.GetLotAsync(1);
             resultLot.LotComments = lotCommentOperationsHandler.GetLotComments(resultLot.Id).ToList();
             var resultUser = await userAccountOperationsHandler.GetUserAccountAsync("veklich99@mail.ru");
             resultUser.LotComments = lotCommentOperationsHandler.GetUserComments(resultUser.Email).ToList();
@@ -62,7 +62,7 @@ namespace BestLot.UnitTests
         [Test]
         public async Task AddCommentAsync_InvalidInput_ThrowsArgumentException()
         {
-            var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now, Name = "Name1" };
+            var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now.AddDays(1), Name = "Name1" };
             await lotOperationsHandler.AddLotAsync(lot, "", "");
             await userAccountOperationsHandler.AddUserAccountAsync(new UserAccountInfo { Name = "Commenter", Email = "veklich99@gmail.com" });
             var invalidUserIdComment = new LotComment { Message = "Comment1", UserId = "veklich98@gmail.com", LotId = 1 };

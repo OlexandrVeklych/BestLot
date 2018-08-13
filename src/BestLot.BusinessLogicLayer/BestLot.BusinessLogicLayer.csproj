@@ -54,7 +54,6 @@
     <Compile Include="Interfaces\ILotPhotoOperationsHandler.cs" />
     <Compile Include="Interfaces\ILotSalesHandler.cs" />
     <Compile Include="Interfaces\IUserAccountOperationsHandler.cs" />
-    <Compile Include="BidLogic\IBidable.cs" />
     <Compile Include="LogicDependencyResolver.cs" />
     <Compile Include="LogicHandlers\LotCommentOperationsHandler.cs" />
     <Compile Include="LogicHandlers\LotOperationsHandler.cs" />

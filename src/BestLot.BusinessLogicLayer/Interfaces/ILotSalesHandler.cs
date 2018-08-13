@@ -10,6 +10,6 @@ namespace BestLot.BusinessLogicLayer.Interfaces
     {
         void RunSalesHandler();
         void StopSalesHandler();
-        Dictionary<int, DateTime> lotsSellDate { get; }
+        Dictionary<int, DateTime> LotId_SellDatePairs { get; }
     }
 }

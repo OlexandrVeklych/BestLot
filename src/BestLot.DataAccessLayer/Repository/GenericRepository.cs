@@ -21,7 +21,7 @@ namespace BestLot.DataAccessLayer.Repository
 
         public void Delete(object id)
         {
-            Context.Entry(DbSet.Find(id)).State = EntityState.Deleted;
+            DbSet.Remove(DbSet.Find(id));
         }
 
         public void Add(T item)
@@ -35,28 +35,24 @@ namespace BestLot.DataAccessLayer.Repository
             Context.Entry(DbSet.Find(id)).State = EntityState.Modified;
         }
 
-        public T Get(object id, params Expression<Func<T, object>>[] includeProperties)
+        public T Get(object id)
         {
-            IQueryable<T> query = new List<T> { DbSet.Find(id) }.AsQueryable();
-            return includeProperties.Aggregate(query, (current, includeProperty) => current.Include(includeProperty)).First();
+            return DbSet.Find(id);
         }
 
-        public async Task<T> GetAsync(object id, params Expression<Func<T, object>>[] includeProperties)
+        public async Task<T> GetAsync(object id)
         {
-            IQueryable<T> query = new List<T> { DbSet.Find(id) }.AsQueryable();
-            return await Task.FromResult(includeProperties.Aggregate(query, (current, includeProperty) => current.Include(includeProperty)).First());
+            return await Task.FromResult(DbSet.Find(id));
         }
 
-        public IQueryable<T> GetAll(params Expression<Func<T, object>>[] includeProperties)
+        public IQueryable<T> GetAll()
         {
-            IQueryable<T> query = DbSet;
-            return includeProperties.Aggregate(query, (current, includeProperty) => current.Include(includeProperty));
+            return DbSet;
         }
 
-        public async Task<IQueryable<T>> GetAllAsync(params Expression<Func<T, object>>[] includeProperties)
+        public async Task<IQueryable<T>> GetAllAsync()
         {
-            IQueryable<T> query = DbSet;
-            return await Task.FromResult(includeProperties.Aggregate(query, (current, includeProperty) => current.Include(includeProperty)));
+            return await Task.FromResult(DbSet);
         }
 
         private bool disposed = false;

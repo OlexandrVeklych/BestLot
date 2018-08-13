@@ -18,8 +18,8 @@ namespace BestLot.WebAPI.Controllers
         {
             mapper = new MapperConfiguration(cfg =>
             {
-                cfg.CreateMap<UserAccountInfoInModel, UserAccountInfo>();
-                cfg.CreateMap<UserAccountInfo, UserAccountInfoOutModel>();
+                cfg.CreateMap<UserAccountInfoModel, UserAccountInfo>();
+                cfg.CreateMap<UserAccountInfo, UserAccountInfoModel>();
             }).CreateMapper();
             userAccountOperationsHandler = LogicDependencyResolver.ResolveUserAccountOperationsHandler();
             lotOperationsHandler = LogicDependencyResolver.ResolveLotOperationsHandler();
@@ -34,7 +34,7 @@ namespace BestLot.WebAPI.Controllers
         [Route("api/users")]
         public async System.Threading.Tasks.Task<IHttpActionResult> GetAllUsersAsync(int page, int amount)
         {
-            return Ok(mapper.Map<IEnumerable<UserAccountInfoOutModel>>((await userAccountOperationsHandler
+            return Ok(mapper.Map<IEnumerable<UserAccountInfoModel>>((await userAccountOperationsHandler
                 .GetAllUserAccountsAsync())
                 .OrderBy(user => user.Email)
                 .Skip((page - 1) * amount)
@@ -46,7 +46,7 @@ namespace BestLot.WebAPI.Controllers
         {
             try
             {
-                return Ok(mapper.Map<UserAccountInfoOutModel>((await userAccountOperationsHandler
+                return Ok(mapper.Map<UserAccountInfoModel>((await userAccountOperationsHandler
                     .GetUserAccountAsync(User.Identity.Name))));
             }
             catch (ArgumentException ex)
@@ -63,7 +63,7 @@ namespace BestLot.WebAPI.Controllers
             if (Request.RequestUri.OriginalString.Contains("buyeruser"))
                 try
                 {
-                    return Ok(mapper.Map<UserAccountInfoOutModel>((await userAccountOperationsHandler
+                    return Ok(mapper.Map<UserAccountInfoModel>((await userAccountOperationsHandler
                         .GetBuyerUserAsync(lotId))));
                 }
                 catch (ArgumentException ex)
@@ -72,7 +72,7 @@ namespace BestLot.WebAPI.Controllers
                 }
             try
             {
-                return Ok(mapper.Map<UserAccountInfoOutModel>((await userAccountOperationsHandler
+                return Ok(mapper.Map<UserAccountInfoModel>((await userAccountOperationsHandler
                     .GetSellerUserAsync(lotId))));
             }
             catch (ArgumentException ex)
@@ -87,7 +87,7 @@ namespace BestLot.WebAPI.Controllers
         {
             try
             {
-                return Ok(mapper.Map<UserAccountInfoOutModel>((await userAccountOperationsHandler
+                return Ok(mapper.Map<UserAccountInfoModel>((await userAccountOperationsHandler
                     .GetUserAccountAsync(email))));
             }
             catch (ArgumentException ex)
@@ -98,14 +98,14 @@ namespace BestLot.WebAPI.Controllers
 
         // POST api/<controller>
         [Route("api/users")]
-        public IHttpActionResult PostUser([FromBody]UserAccountInfoInModel value)
+        public IHttpActionResult PostUser([FromBody]UserAccountInfoModel value)
         {
             return BadRequest("Use registration to add user");
         }
 
         // PUT api/<controller>/5
         [Route("api/users")]
-        public async System.Threading.Tasks.Task<IHttpActionResult> PutUserAsync(string email, [FromBody]UserAccountInfoInModel value)
+        public async System.Threading.Tasks.Task<IHttpActionResult> PutUserAsync(string email, [FromBody]UserAccountInfoModel value)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

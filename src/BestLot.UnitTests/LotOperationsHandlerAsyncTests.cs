@@ -36,7 +36,7 @@ namespace BestLot.UnitTests
         [Test]
         public async Task AddLotAsync_ValidInput_AddsLotToDB()
         {
-            var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now, StartDate = DateTime.Now };
+            var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now.AddDays(1), StartDate = DateTime.Now };
 
             await lotOperationsHandler.AddLotAsync(lot, "", "");
 
@@ -46,7 +46,7 @@ namespace BestLot.UnitTests
         [Test]
         public void AddLotAsync_InvalidInput_ThrowsArgumentException()
         {
-            var lot = new Lot { SellerUserId = "veklich99@gmail.com", SellDate = DateTime.Now, StartDate = DateTime.Now };
+            var lot = new Lot { SellerUserId = "veklich99@gmail.com", SellDate = DateTime.Now.AddDays(1), StartDate = DateTime.Now };
 
             Assert.ThrowsAsync<ArgumentException>(async () => await lotOperationsHandler.AddLotAsync(lot, "", ""));
         }
@@ -54,8 +54,8 @@ namespace BestLot.UnitTests
         [Test]
         public async Task GetLotAsync_GetWithId2WithoutInclude_ReturnsCorrectElem()
         {
-            var lot1 = new Lot { SellerUserId = "veklich99@mail.ru", Name = "Name1", SellDate = DateTime.Now, StartDate = DateTime.Now };
-            var lot2 = new Lot { SellerUserId = "veklich99@mail.ru", Name = "Name2", SellDate = DateTime.Now, StartDate = DateTime.Now };
+            var lot1 = new Lot { SellerUserId = "veklich99@mail.ru", Name = "Name1", SellDate = DateTime.Now.AddDays(1), StartDate = DateTime.Now };
+            var lot2 = new Lot { SellerUserId = "veklich99@mail.ru", Name = "Name2", SellDate = DateTime.Now.AddDays(1), StartDate = DateTime.Now };
             await lotOperationsHandler.AddLotAsync(lot1, "", "");
             await lotOperationsHandler.AddLotAsync(lot2, "", "");
 
@@ -67,12 +67,14 @@ namespace BestLot.UnitTests
         [Test]
         public async Task GetLotAsync_GetWithId2WithInclude_ReturnsCorrectElem()
         {
-            var lot1 = new Lot { SellerUserId = "veklich99@mail.ru", Name = "Name1", SellDate = DateTime.Now, LotComments = new List<LotComment> { new LotComment { LotId = 1, UserId = "veklich99@mail.ru", Message = "Message1" } } };
-            var lot2 = new Lot { SellerUserId = "veklich99@mail.ru", Name = "Name2", SellDate = DateTime.Now, LotComments = new List<LotComment> { new LotComment { LotId = 1, UserId = "veklich99@mail.ru", Message = "Message2" } } };
+            var lot1 = new Lot { SellerUserId = "veklich99@mail.ru", Name = "Name1", SellDate = DateTime.Now.AddDays(1), LotComments = new List<LotComment> { new LotComment { LotId = 1, UserId = "veklich99@mail.ru", Message = "Message1" } } };
+            var lot2 = new Lot { SellerUserId = "veklich99@mail.ru", Name = "Name2", SellDate = DateTime.Now.AddDays(1), LotComments = new List<LotComment> { new LotComment { LotId = 1, UserId = "veklich99@mail.ru", Message = "Message2" } } };
             await lotOperationsHandler.AddLotAsync(lot1, "", "");
             await lotOperationsHandler.AddLotAsync(lot2, "", "");
 
-            var resultLot = await lotOperationsHandler.GetLotAsync(2, l => l.LotComments, l => l.SellerUser);
+            var resultLot = await lotOperationsHandler.GetLotAsync(2);
+            resultLot.SellerUser = await userAccountOperationsHandler.GetSellerUserAsync(2);
+            resultLot.LotComments = (await lotCommentOperationsHandler.GetLotCommentsAsync(2)).ToList();
 
             Assert.AreEqual("DefaultUser", resultLot.SellerUser.Name);
             Assert.AreEqual("Name2", resultLot.Name);
@@ -82,7 +84,7 @@ namespace BestLot.UnitTests
         [Test]
         public async Task GetLotAsync_InvalidId_ThrowsArgumentException()
         {
-            var lot = new Lot { SellerUserId = "veklich99@mail.ru", Name = "Name1", SellDate = DateTime.Now, LotComments = new List<LotComment> { new LotComment { LotId = 1, UserId = "veklich99@mail.ru", Message = "Message1" } } };
+            var lot = new Lot { SellerUserId = "veklich99@mail.ru", Name = "Name1", SellDate = DateTime.Now.AddDays(1), LotComments = new List<LotComment> { new LotComment { LotId = 1, UserId = "veklich99@mail.ru", Message = "Message1" } } };
             await lotOperationsHandler.AddLotAsync(lot, "", "");
 
             Assert.ThrowsAsync<ArgumentException>(async () => await lotOperationsHandler.GetLotAsync(2));
@@ -91,7 +93,7 @@ namespace BestLot.UnitTests
         [Test]
         public async Task GetAllLotsAsync_DBContains1Elem_CountReturns1Elem()
         {
-            var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now, StartDate = DateTime.Now };
+            var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now.AddDays(1), StartDate = DateTime.Now };
             await lotOperationsHandler.AddLotAsync(lot, "", "");
 
             var resultLots = await lotOperationsHandler.GetAllLotsAsync();
@@ -100,43 +102,20 @@ namespace BestLot.UnitTests
         }
 
         [Test]
-        public async Task GetAllLotsAsync_WithInclude_ReturnsObjectWithInnerProperties()
-        {
-            var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now, LotComments = new List<LotComment> { new LotComment { LotId = 1, UserId = "veklich99@mail.ru", Message = "Message1" } } };
-            await lotOperationsHandler.AddLotAsync(lot, "", "");
-
-            var resultLots = await lotOperationsHandler.GetAllLotsAsync(l => l.LotComments);
-
-            Assert.AreEqual("Message1", resultLots.ToList()[0].LotComments[0].Message);
-        }
-
-        [Test]
-        public async Task GetAllLotsAsync_WithIncludeAndFilter_ReturnsFilteredObjectWithInnerProperties()
-        {
-            var lot1 = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now, LotComments = new List<LotComment> { new LotComment { LotId = 1, UserId = "veklich99@mail.ru", Message = "Message1" } } };
-            var lot2 = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now, LotComments = new List<LotComment> { new LotComment { LotId = 1, UserId = "veklich99@mail.ru", Message = "Message2" } } };
-            await lotOperationsHandler.AddLotAsync(lot1, "", "");
-            await lotOperationsHandler.AddLotAsync(lot2, "", "");
-
-            var resultLots = (await lotOperationsHandler.GetAllLotsAsync(l => l.LotComments)).Where(l => l.LotComments.Where(c => c.Message == "Message2").Count() > 0);
-
-            Assert.AreEqual(1, resultLots.Count());
-            Assert.AreEqual("Message2", resultLots.ToList()[0].LotComments[0].Message);
-        }
-
-        [Test]
         public async Task ChangeLotAsync_ChangedNameAndComments_NameChangedCommentsNotChanged()
         {
-            var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now, Name = "Name1", LotComments = new List<LotComment> { new LotComment { Message = "Message1", LotId = 1, UserId = "veklich99@mail.ru" } } };
+            var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now.AddDays(1), Name = "Name1", LotComments = new List<LotComment> { new LotComment { Message = "Message1", LotId = 1, UserId = "veklich99@mail.ru" } } };
             await lotOperationsHandler.AddLotAsync(lot, "", "");
 
             var lotComment = new LotComment { Message = "Message2", LotId = 1, UserId = "veklich99@mail.ru" };
-            var modifiedLot = await lotOperationsHandler.GetLotAsync(1, l => l.LotComments, l => l.LotPhotos, l => l.SellerUser);
-            modifiedLot.LotComments.Add(lotComment); //List was initialized because of Automapper
+            var modifiedLot = await lotOperationsHandler.GetLotAsync(1);
+            modifiedLot.LotComments = new List<LotComment> { lotComment };
             modifiedLot.Name = "Name2";
             await lotOperationsHandler.ChangeLotAsync(1, modifiedLot, "", "");
 
-            var resultLot = await lotOperationsHandler.GetLotAsync(1, l => l.LotComments);
+            var resultLot = await lotOperationsHandler.GetLotAsync(1);
+            resultLot.LotComments = (await lotCommentOperationsHandler.GetLotCommentsAsync(1)).ToList();
+
             Assert.AreEqual(1, lotOperationsHandler.GetAllLots().Count());
             Assert.AreEqual(1, resultLot.LotComments.Count());
             Assert.AreEqual("Name2", resultLot.Name);
@@ -146,10 +125,10 @@ namespace BestLot.UnitTests
         [Test]
         public async Task ChangeLotAsync_InvalidLot_ThrowsArgumentException()
         {
-            var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now, Name = "Name1" };
+            var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now.AddDays(1), Name = "Name1" };
             await lotOperationsHandler.AddLotAsync(lot, "", "");
 
-            var modifiedLot = await lotOperationsHandler.GetLotAsync(1, l => l.LotComments, l => l.LotPhotos, l => l.SellerUser);
+            var modifiedLot = await lotOperationsHandler.GetLotAsync(1);
             modifiedLot.Id = 2;
 
             Assert.ThrowsAsync<ArgumentException>(async () => await lotOperationsHandler.ChangeLotAsync(1, modifiedLot, "", ""));
@@ -166,7 +145,7 @@ namespace BestLot.UnitTests
         [Test]
         public async Task DeleteLotAsync_ValidId_DeletesInDB()
         {
-            var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now, Name = "Name1" };
+            var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now.AddDays(1), Name = "Name1" };
             await lotOperationsHandler.AddLotAsync(lot, "", "");
             await lotCommentOperationsHandler.AddCommentAsync(new LotComment { Message = "Comment1", LotId = 1, UserId = "veklich99@mail.ru" });
             await lotOperationsHandler.DeleteLotAsync(1, "", "");
@@ -178,7 +157,7 @@ namespace BestLot.UnitTests
         [Test]
         public async Task DeleteLotAsync_InvalidId_ThrowsArgumentException()
         {
-            var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now, Name = "Name1" };
+            var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now.AddDays(1), Name = "Name1" };
             await lotOperationsHandler.AddLotAsync(lot, "", "");
 
             Assert.ThrowsAsync<ArgumentException>(() => lotOperationsHandler.DeleteLotAsync(2, "", ""));
@@ -187,7 +166,7 @@ namespace BestLot.UnitTests
         [Test]
         public async Task PlaceBidAsync_ValidInput_ChangesPriceAndBuyerUserId()
         {
-            var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now, Name = "Name1" };
+            var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now.AddDays(1), Name = "Name1" };
             var user = new UserAccountInfo { Name = "SecondUser", Email = "veklich98@mail.ru" };
             await lotOperationsHandler.AddLotAsync(lot, "", "");
             await userAccountOperationsHandler.AddUserAccountAsync(user);
@@ -203,7 +182,7 @@ namespace BestLot.UnitTests
         [Test]
         public async Task PlaceBidAsync_InvalidInput_ThrowsArgumentException()
         {
-            var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now, Name = "Name1" };
+            var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now.AddDays(1), Name = "Name1" };
             await lotOperationsHandler.AddLotAsync(lot, "", "");
 
             Assert.ThrowsAsync<ArgumentException>(() => lotOperationsHandler.PlaceBidAsync(1, "veklich98@gmail.com", 15));

@@ -85,7 +85,7 @@ namespace BestLot.UnitTests
             var user = new UserAccountInfo { Name = "User1", Email = "veklich99@mail.ru" };
             var comment1 = new LotComment { Message = "Message1", UserId = "veklich99@mail.ru", LotId = 1 };
             var comment2 = new LotComment { Message = "Message2", UserId = "veklich99@mail.ru", LotId = 1 };
-            var lot = new Lot { SellerUserId = "veklich99@mail.ru", StartDate = DateTime.Now, SellDate = DateTime.Now, };
+            var lot = new Lot { SellerUserId = "veklich99@mail.ru", StartDate = DateTime.Now, SellDate = DateTime.Now.AddDays(1), };
             await userAccountOperationsHandler.AddUserAccountAsync(user);
             await lotOperationsHandler.AddLotAsync(lot, "", "");
             await lotCommentOperationsHandler.AddCommentAsync(comment1);
@@ -118,7 +118,9 @@ namespace BestLot.UnitTests
             changedUser.Name = "User2";
             await userAccountOperationsHandler.ChangeUserAccountAsync("veklich99@mail.ru", changedUser);
 
-            var resultUser = await userAccountOperationsHandler.GetUserAccountAsync("veklich99@mail.ru", u => u.LotComments, u => u.Lots);
+            var resultUser = await userAccountOperationsHandler.GetUserAccountAsync("veklich99@mail.ru");
+            resultUser.LotComments = (await lotCommentOperationsHandler.GetUserCommentsAsync("veklich99@mail.ru")).ToList();
+
             Assert.AreEqual("User2", resultUser.Name);
             Assert.AreEqual(0, resultUser.LotComments.Count());
         }
@@ -144,36 +146,6 @@ namespace BestLot.UnitTests
             var resultUsers = await userAccountOperationsHandler.GetAllUserAccountsAsync();
 
             Assert.AreEqual(1, resultUsers.Count());
-        }
-
-        [Test]
-        public async Task GetAllUserAccountsAsync_WithInclude_ReturnsObjectWithInnerProperties()
-        {
-            var user = new UserAccountInfo { Name = "User1", Email = "veklich99@mail.ru" };
-            await userAccountOperationsHandler.AddUserAccountAsync(user);
-            var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now, LotComments = new List<LotComment> { new LotComment { Message = "Message1", LotId = 1, UserId = "veklich99@mail.ru" } } };
-            await lotOperationsHandler.AddLotAsync(lot, "", "");
-
-            var resultUsers = await userAccountOperationsHandler.GetAllUserAccountsAsync(u => u.LotComments);
-
-            Assert.AreEqual("Message1", resultUsers.ToList()[0].LotComments[0].Message);
-        }
-
-        [Test]
-        public async Task GetAllUserAccountsAsync_WithIncludeAndFilter_ReturnsFilteredObjectWithInnerProperties()
-        {
-            var user = new UserAccountInfo { Name = "User1", Email = "veklich99@mail.ru" };
-            await userAccountOperationsHandler.AddUserAccountAsync(user);
-            var user2 = new UserAccountInfo { Name = "User2", Email = "veklich99@gmail.com" };
-            await userAccountOperationsHandler.AddUserAccountAsync(user2);
-            var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now, LotComments = new List<LotComment> { new LotComment { Message = "Message1", LotId = 1, UserId = "veklich99@mail.ru" } } };
-            await lotOperationsHandler.AddLotAsync(lot, "", "");
-            await lotCommentOperationsHandler.AddCommentAsync(new LotComment { Message = "Message2", LotId = 1, UserId = "veklich99@gmail.com" });
-
-            var resultUsers = (await userAccountOperationsHandler.GetAllUserAccountsAsync(u => u.LotComments)).Where(u => u.LotComments.Where(c => c.Message == "Message2").Count() > 0);
-
-            Assert.AreEqual(1, resultUsers.Count());
-            Assert.AreEqual("Message2", resultUsers.ToList()[0].LotComments[0].Message);
         }
     }
 }

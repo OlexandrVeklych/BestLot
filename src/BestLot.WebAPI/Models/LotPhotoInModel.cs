@@ -12,6 +12,6 @@ namespace BestLot.WebAPI.Models
         public string Path { get; set; }
         public string Description { get; set; }
         public int LotId { get; set; }
-        public LotInModel Lot { get; set; }
+        public LotModel Lot { get; set; }
     }
 }

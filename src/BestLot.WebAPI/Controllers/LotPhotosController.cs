@@ -20,8 +20,8 @@ namespace BestLot.WebAPI.Controllers
             mapper = new MapperConfiguration(cfg =>
             {
 
-                cfg.CreateMap<LotPhotoInModel, LotPhoto>();
-                cfg.CreateMap<LotPhoto, LotPhotoOutModel>();
+                cfg.CreateMap<LotPhotoModel, LotPhoto>();
+                cfg.CreateMap<LotPhoto, LotPhotoModel>();
             }).CreateMapper();
             lotPhotosOperationsHandler = LogicDependencyResolver.ResolveLotPhotoOperationsHandler();
         }
@@ -35,7 +35,7 @@ namespace BestLot.WebAPI.Controllers
         {
             try
             {
-                return Ok(mapper.Map<IEnumerable<LotPhotoOutModel>>((await lotPhotosOperationsHandler
+                return Ok(mapper.Map<IEnumerable<LotPhotoModel>>((await lotPhotosOperationsHandler
                     .GetLotPhotosAsync(lotId))
                     .AsEnumerable()));
             }
@@ -51,7 +51,7 @@ namespace BestLot.WebAPI.Controllers
         {
             try
             {
-                return Ok(mapper.Map<LotPhotoOutModel>(await lotPhotosOperationsHandler
+                return Ok(mapper.Map<LotPhotoModel>(await lotPhotosOperationsHandler
                     .GetLotPhotoByNumberAsync(lotId, photoNumber)));
             }
             catch (IndexOutOfRangeException)
@@ -66,7 +66,7 @@ namespace BestLot.WebAPI.Controllers
 
         // POST api/<controller>
         [Route("api/lots/{lotId}/photos")]
-        public async System.Threading.Tasks.Task<IHttpActionResult> PostLotPhotoAsync([FromUri] int lotId, [FromBody]LotPhotoInModel[] value)
+        public async System.Threading.Tasks.Task<IHttpActionResult> PostLotPhotoAsync([FromUri] int lotId, [FromBody]LotPhotoModel[] value)
         {
             try
             {

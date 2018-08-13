@@ -18,11 +18,9 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         {
             mapper = new MapperConfiguration(cfg =>
             {
-                cfg.CreateMap<LotEntity, Lot>();
                 cfg.CreateMap<LotEntity, ArchiveLotEntity>();
-                cfg.CreateMap<UserAccountInfoEntity, UserAccountInfo>();
             }).CreateMapper();
-            lotsSellDate = new Dictionary<int, DateTime>();
+            LotId_SellDatePairs = new Dictionary<int, DateTime>();
             refreshTimer = new Timer(refreshTimeMillisecs);
             refreshTimer.AutoReset = true;
             refreshTimer.Elapsed += RefreshLots;
@@ -49,7 +47,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         private IMapper mapper;
         private string hostingEnvironment;
         private string requestUriLeftPart;
-        public Dictionary<int, DateTime> lotsSellDate { get; private set; }
+        public Dictionary<int, DateTime> LotId_SellDatePairs { get; private set; }
 
         public void StopSalesHandler()
         {
@@ -65,34 +63,36 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             checkTimer.Start();
         }
 
+        //Checks sell dates in dictionary in memory
         private void CheckLots(object sender, ElapsedEventArgs e)
         {
-            List<int> keys = new List<int>(lotsSellDate.Keys);
+            List<int> keys = new List<int>(LotId_SellDatePairs.Keys);
             foreach(int key in keys)
             {
-                if (lotsSellDate[key].CompareTo(DateTime.Now) <= 0)
+                if (LotId_SellDatePairs[key].CompareTo(DateTime.Now) <= 0)
                 {
                     SellLot(key);
-                    lotsSellDate.Remove(key);
+                    LotId_SellDatePairs.Remove(key);
                 }
             }
         }
 
+        //Loads lots sell dates into dictionary
         private void RefreshLots(object sender, ElapsedEventArgs e)
         {
-            lotsSellDate.Clear();
+            LotId_SellDatePairs.Clear();
             foreach (Lot lot in lotOperationsHandler.GetAllLots())
             {
-                lotsSellDate.Add(lot.Id, lot.SellDate);
+                LotId_SellDatePairs.Add(lot.Id, lot.SellDate);
             }
         }
 
         private void SellLot(int lotId)
         {
-            Lot lotForSale = mapper.Map<Lot>(lotOperationsHandler.GetLot(lotId));
-            lotForSale.SellerUser = userAccountOperationsHandler.GetSellerUser(lotId);
-            UserAccountInfo buyerUser = mapper.Map<UserAccountInfo>(UoW.UserAccounts.Get(lotForSale.BuyerUserId));
-            lotForSale.Sell(buyerUser);
+            //Lot lotForSale = lotOperationsHandler.GetLot(lotId);
+            //lotForSale.SellerUser = userAccountOperationsHandler.GetSellerUser(lotId);
+            //UserAccountInfo buyerUser = mapper.Map<UserAccountInfo>(UoW.UserAccounts.Get(lotForSale.BuyerUserId));
+            //lotForSale.Sell(buyerUser);
 
             UoW.LotArchive.Add(mapper.Map<ArchiveLotEntity>(UoW.Lots.Get(lotId)));
             lotOperationsHandler.DeleteLot(lotId, hostingEnvironment, requestUriLeftPart);

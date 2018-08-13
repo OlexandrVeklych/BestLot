@@ -19,8 +19,8 @@ namespace BestLot.WebAPI.Controllers
         {
             mapper = new MapperConfiguration(cfg =>
             {
-                cfg.CreateMap<LotCommentInModel, LotComment>();
-                cfg.CreateMap<LotComment, LotCommentOutModel>();
+                cfg.CreateMap<LotCommentModel, LotComment>();
+                cfg.CreateMap<LotComment, LotCommentModel>();
             }).CreateMapper();
             lotCommentsOperationsHandler = LogicDependencyResolver.ResolveLotCommentOperationsHandler();
         }
@@ -34,7 +34,7 @@ namespace BestLot.WebAPI.Controllers
         {
             try
             {
-                return Ok(mapper.Map<IEnumerable<LotCommentOutModel>>((await lotCommentsOperationsHandler
+                return Ok(mapper.Map<IEnumerable<LotCommentModel>>((await lotCommentsOperationsHandler
                     .GetLotCommentsAsync(lotId))
                     .OrderBy(lotComment => lotComment.Id)
                     .Skip((page - 1) * amount)
@@ -52,7 +52,7 @@ namespace BestLot.WebAPI.Controllers
         {
             try
             {
-                return Ok(mapper.Map<IEnumerable<LotCommentOutModel>>((await lotCommentsOperationsHandler
+                return Ok(mapper.Map<IEnumerable<LotCommentModel>>((await lotCommentsOperationsHandler
                     .GetUserCommentsAsync(email))
                     .OrderBy(lotComment => lotComment.Id)
                     .Skip((page - 1) * amount)
@@ -70,7 +70,7 @@ namespace BestLot.WebAPI.Controllers
         {
             try
             {
-                return Ok(mapper.Map<LotCommentOutModel>((await lotCommentsOperationsHandler
+                return Ok(mapper.Map<LotCommentModel>((await lotCommentsOperationsHandler
                     .GetLotCommentsAsync(lotId))
                     .ToList()[commentNumber]));
             }
@@ -87,7 +87,7 @@ namespace BestLot.WebAPI.Controllers
         [Authorize]
         // POST api/<controller>
         [Route("api/lots/{lotId}/comments")]
-        public async System.Threading.Tasks.Task<IHttpActionResult> PostLotCommentAsync([FromUri]int lotId, [FromBody]LotCommentInModel value)
+        public async System.Threading.Tasks.Task<IHttpActionResult> PostLotCommentAsync([FromUri]int lotId, [FromBody]LotCommentModel value)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

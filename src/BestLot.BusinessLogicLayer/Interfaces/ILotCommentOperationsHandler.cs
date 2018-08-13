@@ -12,9 +12,9 @@ namespace BestLot.BusinessLogicLayer.Interfaces
     {
         void AddComment(LotComment lotComment);
         Task AddCommentAsync(LotComment lotComment);
-        IQueryable<LotComment> GetLotComments(int lotId, params Expression<Func<Lot, object>>[] includeProperties);
-        Task<IQueryable<LotComment>> GetLotCommentsAsync(int lotId, params Expression<Func<Lot, object>>[] includeProperties);
-        IQueryable<LotComment> GetUserComments(string userId, params Expression<Func<Lot, object>>[] includeProperties);
-        Task<IQueryable<LotComment>> GetUserCommentsAsync(string userId, params Expression<Func<Lot, object>>[] includeProperties);
+        IQueryable<LotComment> GetLotComments(int lotId);
+        Task<IQueryable<LotComment>> GetLotCommentsAsync(int lotId);
+        IQueryable<LotComment> GetUserComments(string userId);
+        Task<IQueryable<LotComment>> GetUserCommentsAsync(string userId);
     }
 }

@@ -16,13 +16,13 @@ namespace BestLot.BusinessLogicLayer.Interfaces
         Task ChangeUserAccountAsync(string id, UserAccountInfo newUserAccount);
         void DeleteUserAccount(string userAccountId, string hostingEnvironmentPath, string requestUriLeftPart);
         Task DeleteUserAccountAsync(string userAccountId, string hostingEnvironmentPath, string requestUriLeftPart);
-        UserAccountInfo GetUserAccount(string userAccountId, params Expression<Func<UserAccountInfo, object>>[] includeProperties);
-        Task<UserAccountInfo> GetUserAccountAsync(string userAccountId, params Expression<Func<UserAccountInfo, object>>[] includeProperties);
-        UserAccountInfo GetSellerUser(int lotId, params Expression<Func<UserAccountInfo, object>>[] includeProperties);
-        Task<UserAccountInfo> GetSellerUserAsync(int lotId, params Expression<Func<UserAccountInfo, object>>[] includeProperties);
-        UserAccountInfo GetBuyerUser(int lotId, params Expression<Func<UserAccountInfo, object>>[] includeProperties);
-        Task<UserAccountInfo> GetBuyerUserAsync(int lotId, params Expression<Func<UserAccountInfo, object>>[] includeProperties);
-        IQueryable<UserAccountInfo> GetAllUserAccounts(params Expression<Func<UserAccountInfo, object>>[] includeProperties);
-        Task<IQueryable<UserAccountInfo>> GetAllUserAccountsAsync(params Expression<Func<UserAccountInfo, object>>[] includeProperties);
+        UserAccountInfo GetUserAccount(string userAccountId);
+        Task<UserAccountInfo> GetUserAccountAsync(string userAccountId);
+        UserAccountInfo GetSellerUser(int lotId);
+        Task<UserAccountInfo> GetSellerUserAsync(int lotId);
+        UserAccountInfo GetBuyerUser(int lotId);
+        Task<UserAccountInfo> GetBuyerUserAsync(int lotId);
+        IQueryable<UserAccountInfo> GetAllUserAccounts();
+        Task<IQueryable<UserAccountInfo>> GetAllUserAccountsAsync();
     }
 }

@@ -46,7 +46,7 @@ namespace BestLot.DataAccessLayer.Contexts
 
             modelBuilder.Entity<UserAccountInfoEntity>()
                .HasMany(user => user.LotComments)
-               .WithRequired(comment => comment.User)
+               .WithOptional(comment => comment.User)
                .HasForeignKey(comment => comment.UserId)
                .WillCascadeOnDelete(false);
 

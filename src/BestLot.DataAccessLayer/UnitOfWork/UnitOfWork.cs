@@ -81,8 +81,6 @@ namespace BestLot.DataAccessLayer.UnitOfWork
                 {
                     LotContext.Dispose();
                     LotArchiveContext.Dispose();
-                    _lots.Dispose();
-                    _lotArchive.Dispose();
                 }
             }
             disposed = true;
