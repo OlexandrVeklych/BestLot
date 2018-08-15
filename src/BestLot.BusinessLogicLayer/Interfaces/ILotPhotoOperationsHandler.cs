@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace BestLot.BusinessLogicLayer.Interfaces
 {
-    public interface ILotPhotoOperationsHandler
+    public interface ILotPhotoOperationsHandler : IDisposable
     {
         //For dependency injection into property
         ILotOperationsHandler LotOperationsHandler { get; set; }

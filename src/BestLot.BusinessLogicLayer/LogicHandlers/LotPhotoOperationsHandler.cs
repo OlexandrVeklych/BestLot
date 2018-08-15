@@ -55,9 +55,12 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         private IUnitOfWork UoW;
         private IMapper mapper;
 
+        //hostingEnvironmentPath - physical path to WebAPI folder
+        //requestUriLeftPart - URL
         public void AddPhotosToExistingLot(int lotId, LotPhoto[] lotPhotos, string hostingEnvironmentPath, string requestUriLeftPart)
         {
             Lot lot = lotOperationsHandler.GetLot(lotId);
+            lot.LotPhotos = GetLotPhotos(lotId).ToList();
             string currentDirectory = hostingEnvironmentPath + "\\Photos\\" + lot.SellerUserId;
             if (!Directory.Exists(currentDirectory))
                 Directory.CreateDirectory(currentDirectory);
@@ -75,10 +78,12 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             lotOperationsHandler.ChangeLotUnsafe(lot);
         }
 
+        //hostingEnvironmentPath - physical path to WebAPI folder
+        //requestUriLeftPart - URL
         public async Task AddPhotosToExistingLotAsync(int lotId, LotPhoto[] lotPhotos, string hostingEnvironmentPath, string requestUriLeftPart)
         {
-            Expression<Func<LotEntity, bool>> predicate = null;
-            Lot lot = mapper.Map<Lot>((await UoW.Lots.GetAllAsync()).Where(predicate = l => l.Id == lotId).First());
+            Lot lot = LotOperationsHandler.GetLot(lotId);
+            lot.LotPhotos = (await GetLotPhotosAsync(lotId)).ToList();
             string currentDirectory = hostingEnvironmentPath + "\\Photos\\" + lot.SellerUserId;
             if (!Directory.Exists(currentDirectory))
                 Directory.CreateDirectory(currentDirectory);
@@ -96,6 +101,8 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             await lotOperationsHandler.ChangeLotUnsafeAsync(lot);
         }
 
+        //hostingEnvironmentPath - physical path to WebAPI folder
+        //requestUriLeftPart - URL
         public void AddPhotosToNewLot(Lot lot, string hostingEnvironmentPath, string requestUriLeftPart)
         {
             string currentDirectory = hostingEnvironmentPath + "\\Photos\\" + lot.SellerUserId;
@@ -110,6 +117,8 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             }
         }
 
+        //hostingEnvironmentPath - physical path to WebAPI folder
+        //requestUriLeftPart - URL
         public async Task AddPhotosToNewLotAsync(Lot lot, string hostingEnvironmentPath, string requestUriLeftPart)
         {
             await new Task(() =>
@@ -127,6 +136,8 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             });
         }
 
+        //hostingEnvironmentPath - physical path to WebAPI folder
+        //requestUriLeftPart - URL
         public void DeletePhoto(int photoId, string hostingEnvironmentPath, string requestUriLeftPart)
         {
             LotPhoto lotPhoto;
@@ -137,6 +148,8 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             UoW.SaveChanges();
         }
 
+        //hostingEnvironmentPath - physical path to WebAPI folder
+        //requestUriLeftPart - URL
         public async Task DeletePhotoAsync(int photoId, string hostingEnvironmentPath, string requestUriLeftPart)
         {
             LotPhoto lotPhoto;
@@ -147,6 +160,8 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             await UoW.SaveChangesAsync();
         }
 
+        //hostingEnvironmentPath - physical path to WebAPI folder
+        //requestUriLeftPart - URL
         public void DeleteAllLotPhotos(int lotId, string hostingEnvironmentPath, string requestUriLeftPart)
         {
             Expression<Func<LotPhotoEntity, bool>> predicate = null;
@@ -163,6 +178,8 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             UoW.SaveChanges();
         }
 
+        //hostingEnvironmentPath - physical path to WebAPI folder
+        //requestUriLeftPart - URL
         public async Task DeleteAllLotPhotosAsync(int lotId, string hostingEnvironmentPath, string requestUriLeftPart)
         {
             Expression<Func<LotPhotoEntity, bool>> predicate = null;
@@ -179,6 +196,8 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             await UoW.SaveChangesAsync();
         }
 
+        //hostingEnvironmentPath - physical path to WebAPI folder
+        //requestUriLeftPart - URL
         public void DeleteAllUserPhotos(string userAccountId, string hostingEnvironmentPath)
         {
             if (Directory.Exists(hostingEnvironmentPath + "\\Photos\\" + userAccountId))
@@ -196,6 +215,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
 
         public LotPhoto GetLotPhotoByNumber(int lotId, int photoNumber)
         {
+            //This will throw exception if lotId is wrong
             IQueryable<LotPhoto> lotPhotos = GetLotPhotos(lotId);
             if (photoNumber >= lotPhotos.Count())
                 return null;
@@ -204,6 +224,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
 
         public async Task<LotPhoto> GetLotPhotoByNumberAsync(int lotId, int photoNumber)
         {
+            //This will throw exception if lotId is wrong
             IQueryable<LotPhoto> lotPhotos = await GetLotPhotosAsync(lotId);
             if (photoNumber >= lotPhotos.Count())
                 return null;
@@ -228,6 +249,26 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             return (await UoW.LotPhotos.GetAllAsync())
                 .Where(predicate = lotPhoto => lotPhoto.LotId == lotId)
                 .ProjectTo<LotPhoto>(mapper.ConfigurationProvider);
+        }
+
+        private bool disposed = false;
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    UoW.Dispose();
+                }
+            }
+            disposed = true;
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }

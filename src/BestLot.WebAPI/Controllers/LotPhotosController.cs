@@ -121,5 +121,17 @@ namespace BestLot.WebAPI.Controllers
             }
             return Ok();
         }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (lotPhotosOperationsHandler != null)
+                {
+                    lotPhotosOperationsHandler.Dispose();
+                }
+            }
+            base.Dispose(disposing);
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using BestLot.BusinessLogicLayer.Models;
+﻿using BestLot.BusinessLogicLayer.Exceptions;
+using BestLot.BusinessLogicLayer.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,7 @@ namespace BestLot.BusinessLogicLayer.BidLogic
         public void PlaceBid(Lot lot, string buyerUserId, double price)
         {
             if (price < lot.Price + lot.MinStep)
-                throw new ArgumentException("Min. availible bid is " + (lot.Price + lot.MinStep));
+                throw new WrongModelException("Min. availible bid is " + (lot.Price + lot.MinStep));
             lot.Price = price;
             lot.BuyerUserId = buyerUserId;
         }

@@ -100,7 +100,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             if (userAccount.TelephoneNumber != null)
             {
                 //If user isn`t new and didn`t change telephone number, don`t check it
-                if (oldUserAccount != null && oldUserAccount.TelephoneNumber != null  && userAccount.TelephoneNumber == oldUserAccount.TelephoneNumber)
+                if (oldUserAccount != null && oldUserAccount.TelephoneNumber != null && userAccount.TelephoneNumber == oldUserAccount.TelephoneNumber)
                     return;
                 if (!Regex.IsMatch(userAccount.TelephoneNumber, @"^\+380[0-9]{9}$"))
                     throw new WrongModelException("Incorrect telephone number format");
@@ -142,6 +142,8 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             //No exception - userAccount is correct
         }
 
+        //hostingEnvironmentPath - physical path to WebAPI folder
+        //requestUriLeftPart - URL
         public void DeleteUserAccount(string userEmail, string hostingEnvironmentPath, string requestUriLeftPart)
         {
             UserAccountInfo user = GetUserAccount(userEmail);
@@ -150,6 +152,8 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             UoW.SaveChanges();
         }
 
+        //hostingEnvironmentPath - physical path to WebAPI folder
+        //requestUriLeftPart - URL
         public async Task DeleteUserAccountAsync(string userEmail, string hostingEnvironmentPath, string requestUriLeftPart)
         {
             UserAccountInfo user = await GetUserAccountAsync(userEmail);
@@ -216,6 +220,26 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         public async Task<IQueryable<UserAccountInfo>> GetAllUserAccountsAsync()
         {
             return (await UoW.UserAccounts.GetAllAsync()).ProjectTo<UserAccountInfo>(mapper.ConfigurationProvider);
+        }
+
+        private bool disposed = false;
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    UoW.Dispose();
+                }
+            }
+            disposed = true;
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }

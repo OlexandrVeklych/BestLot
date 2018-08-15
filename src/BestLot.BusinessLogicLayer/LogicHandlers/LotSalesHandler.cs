@@ -14,11 +14,13 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
 {
     public class LotSalesHandler : ILotSalesHandler, IDisposable
     {
+        //hostingEnvironmentPath - physical path to WebAPI folder
+        //requestUriLeftPart - URL
         private LotSalesHandler(double refreshTimeMillisecs, double checkTimeMillisecs, string hostingEnvironment, string requestUriLeftPart)
         {
             mapper = new MapperConfiguration(cfg =>
             {
-                cfg.CreateMap<LotEntity, ArchiveLotEntity>();
+                cfg.CreateMap<LotEntity, LotArchiveEntity>();
             }).CreateMapper();
             LotId_SellDatePairs = new Dictionary<int, DateTime>();
             refreshTimer = new Timer(refreshTimeMillisecs);
@@ -31,7 +33,14 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             this.requestUriLeftPart = requestUriLeftPart;
         }
 
-        public LotSalesHandler(IUnitOfWork unitOfWork, ILotOperationsHandler lotOperationsHandler, IUserAccountOperationsHandler userAccountOperationsHandler, double refreshTimeMillisecs, double checkTimeMillisecs, string hostingEnvironment, string requestUriLeftPart) : this(refreshTimeMillisecs, checkTimeMillisecs, hostingEnvironment, requestUriLeftPart)
+        public LotSalesHandler(IUnitOfWork unitOfWork,
+            ILotOperationsHandler lotOperationsHandler,
+            IUserAccountOperationsHandler userAccountOperationsHandler,
+            double refreshTimeMillisecs,
+            double checkTimeMillisecs,
+            string hostingEnvironment,
+            string requestUriLeftPart)
+            : this(refreshTimeMillisecs, checkTimeMillisecs, hostingEnvironment, requestUriLeftPart)
         {
             this.UoW = unitOfWork;
             this.lotOperationsHandler = lotOperationsHandler;
@@ -69,7 +78,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             if (!LotId_SellDatePairs.Any())
                 return;
             List<int> keys = new List<int>(LotId_SellDatePairs.Keys);
-            foreach(int key in keys)
+            foreach (int key in keys)
             {
                 if (LotId_SellDatePairs[key].CompareTo(DateTime.Now) <= 0)
                 {
@@ -96,7 +105,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             //UserAccountInfo buyerUser = mapper.Map<UserAccountInfo>(UoW.UserAccounts.Get(lotForSale.BuyerUserId));
             //lotForSale.Sell(buyerUser);
 
-            UoW.LotArchive.Add(mapper.Map<ArchiveLotEntity>(UoW.Lots.Get(lotId)));
+            UoW.LotArchive.Add(mapper.Map<LotArchiveEntity>(UoW.Lots.Get(lotId)));
             lotOperationsHandler.DeleteLot(lotId, hostingEnvironment, requestUriLeftPart);
             UoW.SaveArchiveChanges();
         }

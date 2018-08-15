@@ -8,13 +8,13 @@ using System.Threading.Tasks;
 
 namespace BestLot.BusinessLogicLayer.Interfaces
 {
-    public interface ILotCommentOperationsHandler
+    public interface ILotCommentOperationsHandler : IDisposable
     {
         void AddComment(LotComment lotComment);
         Task AddCommentAsync(LotComment lotComment);
         IQueryable<LotComment> GetLotComments(int lotId);
         Task<IQueryable<LotComment>> GetLotCommentsAsync(int lotId);
-        IQueryable<LotComment> GetUserComments(string userId);
-        Task<IQueryable<LotComment>> GetUserCommentsAsync(string userId);
+        IQueryable<LotComment> GetUserComments(string userEmail);
+        Task<IQueryable<LotComment>> GetUserCommentsAsync(string userEmail);
     }
 }

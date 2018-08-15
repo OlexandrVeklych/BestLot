@@ -33,12 +33,14 @@ namespace BestLot.UnitTests
             lotSalesHandler.StopSalesHandler();
             unitOfWork.RecreateDB();
             unitOfWork.RecreateArchive();
+            lotOperationsHandler.Dispose();
+            userAccountOperationsHandler.Dispose();
         }
 
         [Test]
         public void RefreshLots_Timer1700Millisec_AddsAllLotsToDictionary()
         {
-            var lot = new Lot { SellDate = DateTime.Now.AddSeconds(2), SellerUserId = "veklich99@mail.ru", BuyerUserId = "veklich99@gmail.com" };
+            var lot = new Lot { SellDate = DateTime.Now.AddSeconds(2), StartDate = DateTime.Now, SellerUserId = "veklich99@mail.ru", BuyerUserId = "veklich99@gmail.com" };
             lotOperationsHandler.AddLot(lot, "", "");
 
             lotSalesHandler.RunSalesHandler();
@@ -48,9 +50,9 @@ namespace BestLot.UnitTests
         [Test]
         public void Timers_DBContains2Lots_TimersWorkRight()
         {
-            var lot = new Lot { SellDate = DateTime.Now.AddSeconds(2), SellerUserId = "veklich99@mail.ru", BuyerUserId = "veklich99@gmail.com" };
+            var lot = new Lot { SellDate = DateTime.Now.AddSeconds(2), StartDate = DateTime.Now, SellerUserId = "veklich99@mail.ru", BuyerUserId = "veklich99@gmail.com" };
             lotOperationsHandler.AddLot(lot, "", "");
-            var lot2 = new Lot { SellDate = DateTime.Now.AddSeconds(10), SellerUserId = "veklich99@mail.ru", BuyerUserId = "veklich99@gmail.com" };
+            var lot2 = new Lot { SellDate = DateTime.Now.AddSeconds(10), StartDate = DateTime.Now, SellerUserId = "veklich99@mail.ru", BuyerUserId = "veklich99@gmail.com" };
             lotOperationsHandler.AddLot(lot2, "", "");
 
             lotSalesHandler.RunSalesHandler();

@@ -30,7 +30,6 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
                 cfg.CreateMap<LotCommentEntity, LotComment>();
 
                 cfg.CreateMap<LotComment, LotCommentEntity>();
-
             }).CreateMapper();
         }
 
@@ -47,7 +46,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         private IMapper mapper;
 
         public void AddComment(LotComment lotComment)
-        {            
+        {
             //Don`t check id`s, because
             //This will throw exception if UserId is wrong
             userAccountOperationsHandler.GetUserAccount(lotComment.UserId);
@@ -88,16 +87,36 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             return (await UoW.LotComments.GetAllAsync()).Where(predicate = lotComment => lotComment.LotId == lotId).ProjectTo<LotComment>(mapper.ConfigurationProvider);
         }
 
-        public IQueryable<LotComment> GetUserComments(string userId)
+        public IQueryable<LotComment> GetUserComments(string userEmail)
         {
             Expression<Func<LotCommentEntity, bool>> predicate = null;
-            return UoW.LotComments.GetAll().Where(predicate = lotComment => lotComment.UserId == userId).ProjectTo<LotComment>(mapper.ConfigurationProvider);
+            return UoW.LotComments.GetAll().Where(predicate = lotComment => lotComment.UserId == userEmail).ProjectTo<LotComment>(mapper.ConfigurationProvider);
         }
 
-        public async Task<IQueryable<LotComment>> GetUserCommentsAsync(string userId)
+        public async Task<IQueryable<LotComment>> GetUserCommentsAsync(string userEmail)
         {
             Expression<Func<LotCommentEntity, bool>> predicate = null;
-            return (await UoW.LotComments.GetAllAsync()).Where(predicate = lotComment => lotComment.UserId == userId).ProjectTo<LotComment>(mapper.ConfigurationProvider);
+            return (await UoW.LotComments.GetAllAsync()).Where(predicate = lotComment => lotComment.UserId == userEmail).ProjectTo<LotComment>(mapper.ConfigurationProvider);
+        }
+
+        private bool disposed = false;
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    UoW.Dispose();
+                }
+            }
+            disposed = true;
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }

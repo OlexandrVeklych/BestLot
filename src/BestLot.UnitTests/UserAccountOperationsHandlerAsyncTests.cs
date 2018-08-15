@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BestLot.BusinessLogicLayer.Exceptions;
 using BestLot.BusinessLogicLayer.Interfaces;
 using BestLot.BusinessLogicLayer.Models;
 using BestLot.DataAccessLayer.UnitOfWork;
@@ -29,6 +30,9 @@ namespace BestLot.UnitTests
         public void TearDown()
         {
             unitOfWork.RecreateDB();
+            lotOperationsHandler.Dispose();
+            userAccountOperationsHandler.Dispose();
+            lotCommentOperationsHandler.Dispose();
         }
 
         [Test]
@@ -44,39 +48,39 @@ namespace BestLot.UnitTests
         }
 
         [Test]
-        public void AddUserAccountAsync_InvalidEmailFormat_ThrowsArgumentException()
+        public void AddUserAccountAsync_InvalidEmailFormat_ThrowsWrongModelException()
         {
             var user = new UserAccountInfo { Name = "User1", Email = "Kek" };
 
-            Assert.ThrowsAsync<ArgumentException>(() => userAccountOperationsHandler.AddUserAccountAsync(user));
+            Assert.ThrowsAsync<WrongModelException>(() => userAccountOperationsHandler.AddUserAccountAsync(user));
         }
 
         [Test]
-        public void AddUserAccountAsync_InvalidTelephoneNumberFormat_ThrowsArgumentException()
+        public void AddUserAccountAsync_InvalidTelephoneNumberFormat_ThrowsWrongModelException()
         {
             var user = new UserAccountInfo { Name = "User1", TelephoneNumber = "+388", Email = "veklich99@mail.ru" };
 
-            Assert.ThrowsAsync<ArgumentException>(() => userAccountOperationsHandler.AddUserAccountAsync(user));
+            Assert.ThrowsAsync<WrongModelException>(() => userAccountOperationsHandler.AddUserAccountAsync(user));
         }
 
         [Test]
-        public async Task AddUserAccountAsync_RepeatedEmail_ThrowsArgumentException()
+        public async Task AddUserAccountAsync_RepeatedEmail_ThrowsWrongModelException()
         {
             var user = new UserAccountInfo { Name = "User1", Email = "veklich99@mail.ru" };
             await userAccountOperationsHandler.AddUserAccountAsync(user);
             var user2 = new UserAccountInfo { Name = "User1", Email = "veklich99@mail.ru" };
 
-            Assert.ThrowsAsync<ArgumentException>(() => userAccountOperationsHandler.AddUserAccountAsync(user2));
+            Assert.ThrowsAsync<WrongModelException>(() => userAccountOperationsHandler.AddUserAccountAsync(user2));
         }
 
         [Test]
-        public async Task AddUserAccountAsync_RepeatedTelephoneNumber_ThrowsArgumentException()
+        public async Task AddUserAccountAsync_RepeatedTelephoneNumber_ThrowsWrongModelException()
         {
             var user = new UserAccountInfo { Name = "User1", TelephoneNumber = "+380678522221", Email = "veklich99@mail.ru" };
             await userAccountOperationsHandler.AddUserAccountAsync(user);
             var user2 = new UserAccountInfo { Name = "User1", TelephoneNumber = "+380678522221", Email = "veklich99@mail.ru" };
 
-            Assert.ThrowsAsync<ArgumentException>(() => userAccountOperationsHandler.AddUserAccountAsync(user2));
+            Assert.ThrowsAsync<WrongModelException>(() => userAccountOperationsHandler.AddUserAccountAsync(user2));
         }
 
         [Test]
@@ -95,16 +99,16 @@ namespace BestLot.UnitTests
 
             Assert.AreEqual(0, (await userAccountOperationsHandler.GetAllUserAccountsAsync()).Count());
             //Lot was deleted together with user, so lot with Id = 1 doesn`t exist
-            Assert.ThrowsAsync<ArgumentException>(() => lotOperationsHandler.GetLotAsync(1));
+            Assert.ThrowsAsync<WrongIdException>(() => lotOperationsHandler.GetLotAsync(1));
         }
 
         [Test]
-        public async Task DeleteUserAccountAsync_InvalidId_ThrowsArgumentException()
+        public async Task DeleteUserAccountAsync_InvalidId_ThrowsWrongIdException()
         {
             var user = new UserAccountInfo { Name = "User1", Email = "veklich99@mail.ru" };
             await userAccountOperationsHandler.AddUserAccountAsync(user);
 
-            Assert.ThrowsAsync<ArgumentException>(() => userAccountOperationsHandler.DeleteUserAccountAsync("veklich99@gmail.com", "", ""));
+            Assert.ThrowsAsync<WrongIdException>(() => userAccountOperationsHandler.DeleteUserAccountAsync("veklich99@gmail.com", "", ""));
         }
 
         [Test]
@@ -126,7 +130,7 @@ namespace BestLot.UnitTests
         }
 
         [Test]
-        public async Task ChangeUserAccountAsync_InvalidUser_ThrowsArgumentException()
+        public async Task ChangeUserAccountAsync_InvalidUser_ThrowsExceptions()
         {
             var user = new UserAccountInfo { Name = "User1", Email = "veklich99@mail.ru" };
             await userAccountOperationsHandler.AddUserAccountAsync(user);
@@ -134,8 +138,8 @@ namespace BestLot.UnitTests
             var changedUser = await userAccountOperationsHandler.GetUserAccountAsync("veklich99@mail.ru");
             changedUser.Email = "changedEmail";
 
-            Assert.ThrowsAsync<ArgumentException>(() => userAccountOperationsHandler.ChangeUserAccountAsync("veklich99@gmail.com", changedUser));//Invalid email
-            Assert.ThrowsAsync<ArgumentException>(() => userAccountOperationsHandler.ChangeUserAccountAsync("veklich99@mail.com", changedUser));//Changed email
+            Assert.ThrowsAsync<WrongIdException>(() => userAccountOperationsHandler.ChangeUserAccountAsync("veklich99@gmail.com", changedUser));//Invalid email
+            Assert.ThrowsAsync<WrongModelException>(() => userAccountOperationsHandler.ChangeUserAccountAsync("veklich99@mail.ru", changedUser));//Changed email
         }
 
         [Test]

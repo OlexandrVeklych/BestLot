@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using BestLot.BusinessLogicLayer.Exceptions;
 using BestLot.BusinessLogicLayer.Interfaces;
 using BestLot.BusinessLogicLayer.Models;
 using BestLot.DataAccessLayer.UnitOfWork;
@@ -28,6 +29,9 @@ namespace BestLot.UnitTests
         public void TearDown()
         {
             unitOfWork.RecreateDB();
+            lotOperationsHandler.Dispose();
+            userAccountOperationsHandler.Dispose();
+            lotCommentOperationsHandler.Dispose();
         }
 
         [Test]
@@ -43,39 +47,39 @@ namespace BestLot.UnitTests
         }
 
         [Test]
-        public void AddUserAccount_InvalidEmailFormat_ThrowsArgumentException()
+        public void AddUserAccount_InvalidEmailFormat_ThrowsWrongModelException()
         {
             var user = new UserAccountInfo { Name = "User1", Email = "Kek" };
 
-            Assert.Throws<ArgumentException>(() => userAccountOperationsHandler.AddUserAccount(user));
+            Assert.Throws<WrongModelException>(() => userAccountOperationsHandler.AddUserAccount(user));
         }
 
         [Test]
-        public void AddUserAccount_InvalidTelephoneNumberFormat_ThrowsArgumentException()
+        public void AddUserAccount_InvalidTelephoneNumberFormat_ThrowsWrongModelException()
         {
             var user = new UserAccountInfo { Name = "User1", TelephoneNumber = "+388", Email = "veklich99@mail.ru" };
 
-            Assert.Throws<ArgumentException>(() => userAccountOperationsHandler.AddUserAccount(user));
+            Assert.Throws<WrongModelException>(() => userAccountOperationsHandler.AddUserAccount(user));
         }
 
         [Test]
-        public void AddUserAccount_RepeatedEmail_ThrowsArgumentException()
+        public void AddUserAccount_RepeatedEmail_ThrowsWrongModelException()
         {
             var user = new UserAccountInfo { Name = "User1", Email = "veklich99@mail.ru" };
             userAccountOperationsHandler.AddUserAccount(user);
             var user2 = new UserAccountInfo { Name = "User1", Email = "veklich99@mail.ru" };
 
-            Assert.Throws<ArgumentException>(() => userAccountOperationsHandler.AddUserAccount(user2));
+            Assert.Throws<WrongModelException>(() => userAccountOperationsHandler.AddUserAccount(user2));
         }
 
         [Test]
-        public void AddUserAccount_RepeatedTelephoneNumber_ThrowsArgumentException()
+        public void AddUserAccount_RepeatedTelephoneNumber_ThrowsWrongModelException()
         {
             var user = new UserAccountInfo { Name = "User1", TelephoneNumber = "+380678522221", Email = "veklich99@mail.ru" };
             userAccountOperationsHandler.AddUserAccount(user);
             var user2 = new UserAccountInfo { Name = "User1", TelephoneNumber = "+380678522221", Email = "veklich99@mail.ru" };
 
-            Assert.Throws<ArgumentException>(() => userAccountOperationsHandler.AddUserAccount(user2));
+            Assert.Throws<WrongModelException>(() => userAccountOperationsHandler.AddUserAccount(user2));
         }
 
         [Test]
@@ -94,16 +98,16 @@ namespace BestLot.UnitTests
 
             Assert.AreEqual(0, userAccountOperationsHandler.GetAllUserAccounts().Count());
             //Lot was deleted together with user, so lot with Id = 1 doesn`t exist
-            Assert.Throws<ArgumentException>(() => lotOperationsHandler.GetLot(1));
+            Assert.Throws<WrongIdException>(() => lotOperationsHandler.GetLot(1));
         }
 
         [Test]
-        public void DeleteUserAccount_InvalidId_ThrowsArgumentException()
+        public void DeleteUserAccount_InvalidId_ThrowsWrongIdException()
         {
             var user = new UserAccountInfo { Name = "User1", Email = "veklich99@mail.ru" };
             userAccountOperationsHandler.AddUserAccount(user);
 
-            Assert.Throws<ArgumentException>(() => userAccountOperationsHandler.DeleteUserAccount("veklich99@gmail.com", "", ""));
+            Assert.Throws<WrongIdException>(() => userAccountOperationsHandler.DeleteUserAccount("veklich99@gmail.com", "", ""));
         }
 
         [Test]
@@ -125,17 +129,17 @@ namespace BestLot.UnitTests
         }
 
         [Test]
-        public void ChangeUserAccount_InvalidUser_ThrowsArgumentException()
+        public void ChangeUserAccount_InvalidUser_ThrowsExceptions()
         {
             var user = new UserAccountInfo { Name = "User1", Email = "veklich99@mail.ru" };
             userAccountOperationsHandler.AddUserAccount(user);
 
             var changedUser = userAccountOperationsHandler.GetUserAccount("veklich99@mail.ru");
-            changedUser.Name = "User2";
+            changedUser.Email = "changedEmail";
 
 
-            Assert.Throws<ArgumentException>(() => userAccountOperationsHandler.ChangeUserAccount("veklich99@gmail.com", changedUser));//Invalid email
-            Assert.Throws<ArgumentException>(() => userAccountOperationsHandler.ChangeUserAccount("veklich99@mail.com", changedUser));//Changed email
+            Assert.Throws<WrongIdException>(() => userAccountOperationsHandler.ChangeUserAccount("veklich99@gmail.com", changedUser));//Invalid email
+            Assert.Throws<WrongModelException>(() => userAccountOperationsHandler.ChangeUserAccount("veklich99@mail.ru", changedUser));//Changed email
         }
 
         [Test]

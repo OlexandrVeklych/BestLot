@@ -11,7 +11,7 @@ namespace BestLot.DataAccessLayer.UnitOfWork
     public interface IUnitOfWork : IDisposable
     {
         IRepository<LotEntity> Lots { get; }
-        IRepository<ArchiveLotEntity> LotArchive { get; }
+        IRepository<LotArchiveEntity> LotArchive { get; }
         IRepository<LotCommentEntity> LotComments { get; }
         IRepository<LotPhotoEntity> LotPhotos { get; }
         IRepository<UserAccountInfoEntity> UserAccounts { get; }

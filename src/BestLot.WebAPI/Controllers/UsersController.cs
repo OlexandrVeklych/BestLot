@@ -153,5 +153,21 @@ namespace BestLot.WebAPI.Controllers
                 return InternalServerError(ex);
             }
         }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (lotOperationsHandler != null)
+                {
+                    lotOperationsHandler.Dispose();
+                }
+                if (userAccountOperationsHandler != null)
+                {
+                    userAccountOperationsHandler.Dispose();
+                }
+            }
+            base.Dispose(disposing);
+        }
     }
 }

@@ -47,5 +47,10 @@ namespace BestLot.BusinessLogicLayer
         {
             return new LotPhotoOperationsHandler(ResolveUnitOfWork(), lotOperationsHandler);
         }
+
+        public static ILotArchiveOperationsHandler ResolveLotArchiveOperationsHandler()
+        {
+            return new LotArchiveOperationsHandler(ResolveUnitOfWork());
+        }
     }
 }

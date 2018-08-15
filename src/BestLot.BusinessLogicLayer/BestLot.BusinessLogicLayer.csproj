@@ -51,12 +51,14 @@
     <Compile Include="BidLogic\IBidPlacer.cs" />
     <Compile Include="Exceptions\WrongIdException.cs" />
     <Compile Include="Exceptions\WrongModelException.cs" />
+    <Compile Include="Interfaces\ILotArchiveOperationsHandler.cs" />
     <Compile Include="Interfaces\ILotCommentOperationsHandler.cs" />
     <Compile Include="Interfaces\ILotOperationsHandler.cs" />
     <Compile Include="Interfaces\ILotPhotoOperationsHandler.cs" />
     <Compile Include="Interfaces\ILotSalesHandler.cs" />
     <Compile Include="Interfaces\IUserAccountOperationsHandler.cs" />
     <Compile Include="LogicDependencyResolver.cs" />
+    <Compile Include="LogicHandlers\LotArchiveOperationsHandler.cs" />
     <Compile Include="LogicHandlers\LotCommentOperationsHandler.cs" />
     <Compile Include="LogicHandlers\LotOperationsHandler.cs" />
     <Compile Include="LogicHandlers\LotPhotoOperationsHandler.cs" />

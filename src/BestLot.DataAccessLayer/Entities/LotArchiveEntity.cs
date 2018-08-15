@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BestLot.DataAccessLayer.Entities
 {
-    public class ArchiveLotEntity
+    public class LotArchiveEntity
     {
         public int Id { get; set; }
         public string Name { get; set; }

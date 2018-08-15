@@ -21,13 +21,13 @@ namespace BestLot.DataAccessLayer.UnitOfWork
         private LotArchiveContext LotArchiveContext;
 
         private IRepository<LotEntity> _lots;
-        private IRepository<ArchiveLotEntity> _lotArchive;
+        private IRepository<LotArchiveEntity> _lotArchive;
         private IRepository<UserAccountInfoEntity> _userAccounts;
         private IRepository<LotCommentEntity> _lotComments;
         private IRepository<LotPhotoEntity> _lotPhotos;
 
         public IRepository<LotEntity> Lots { get { if (_lots == null) _lots = new GenericRepository<LotEntity>(LotContext); return _lots; } }
-        public IRepository<ArchiveLotEntity> LotArchive { get { if (_lotArchive == null) _lotArchive = new GenericRepository<ArchiveLotEntity>(LotArchiveContext); return _lotArchive; } }
+        public IRepository<LotArchiveEntity> LotArchive { get { if (_lotArchive == null) _lotArchive = new GenericRepository<LotArchiveEntity>(LotArchiveContext); return _lotArchive; } }
         public IRepository<UserAccountInfoEntity> UserAccounts { get { if (_userAccounts == null) _userAccounts = new GenericRepository<UserAccountInfoEntity>(LotContext); return _userAccounts; } }
         public IRepository<LotCommentEntity> LotComments { get { if (_lotComments == null) _lotComments = new GenericRepository<LotCommentEntity>(LotContext); return _lotComments; } }
         public IRepository<LotPhotoEntity> LotPhotos { get { if (_lotPhotos == null) _lotPhotos = new GenericRepository<LotPhotoEntity>(LotContext); return _lotPhotos; } }

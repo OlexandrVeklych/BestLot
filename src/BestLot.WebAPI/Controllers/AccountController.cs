@@ -402,6 +402,11 @@ namespace BestLot.WebAPI.Controllers
             {
                 return InternalServerError(ex);
             }
+            finally
+            {
+                userAccountOperationsHandler.Dispose();
+            }
+
             return Ok();
         }
 

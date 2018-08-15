@@ -50,7 +50,7 @@
   <ItemGroup>
     <Compile Include="Contexts\LotArchiveContext.cs" />
     <Compile Include="Contexts\LotContext.cs" />
-    <Compile Include="Entities\ArchiveLotEntity.cs" />
+    <Compile Include="Entities\LotArchiveEntity.cs" />
     <Compile Include="Entities\LotCommentEntity.cs" />
     <Compile Include="Entities\LotEntity.cs" />
     <Compile Include="Entities\LotPhotoEntity.cs" />

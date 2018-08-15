@@ -8,16 +8,16 @@ using BestLot.BusinessLogicLayer.Models;
 
 namespace BestLot.BusinessLogicLayer.Interfaces
 {
-    public interface IUserAccountOperationsHandler
+    public interface IUserAccountOperationsHandler : IDisposable
     {
         void AddUserAccount(UserAccountInfo userAccount);
         Task AddUserAccountAsync(UserAccountInfo userAccount);
-        void ChangeUserAccount(string id, UserAccountInfo newUserAccount);
-        Task ChangeUserAccountAsync(string id, UserAccountInfo newUserAccount);
-        void DeleteUserAccount(string userAccountId, string hostingEnvironmentPath, string requestUriLeftPart);
-        Task DeleteUserAccountAsync(string userAccountId, string hostingEnvironmentPath, string requestUriLeftPart);
-        UserAccountInfo GetUserAccount(string userAccountId);
-        Task<UserAccountInfo> GetUserAccountAsync(string userAccountId);
+        void ChangeUserAccount(string userEmail, UserAccountInfo newUserAccount);
+        Task ChangeUserAccountAsync(string userEmail, UserAccountInfo newUserAccount);
+        void DeleteUserAccount(string userEmail, string hostingEnvironmentPath, string requestUriLeftPart);
+        Task DeleteUserAccountAsync(string userEmail, string hostingEnvironmentPath, string requestUriLeftPart);
+        UserAccountInfo GetUserAccount(string userEmail);
+        Task<UserAccountInfo> GetUserAccountAsync(string userEmail);
         UserAccountInfo GetSellerUser(int lotId);
         Task<UserAccountInfo> GetSellerUserAsync(int lotId);
         UserAccountInfo GetBuyerUser(int lotId);

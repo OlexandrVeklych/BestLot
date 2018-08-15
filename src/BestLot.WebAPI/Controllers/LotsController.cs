@@ -202,7 +202,7 @@ namespace BestLot.WebAPI.Controllers
                 return BadRequest("Not allowed");
             try
             {
-                await lotOperationsHandler.ChangeLotAsync(id, mapper.Map<Lot>(value), System.Web.Hosting.HostingEnvironment.MapPath(@"~"), Request.RequestUri.GetLeftPart(UriPartial.Authority));
+                await lotOperationsHandler.ChangeLotAsync(id, mapper.Map<Lot>(value));
             }
             catch (WrongIdException ex)
             {
@@ -237,6 +237,22 @@ namespace BestLot.WebAPI.Controllers
                 return InternalServerError(ex);
             }
             return Ok();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (lotOperationsHandler != null)
+                {
+                    lotOperationsHandler.Dispose();
+                }
+                if (userAccountOperationsHandler != null)
+                {
+                    userAccountOperationsHandler.Dispose();
+                }
+            }
+            base.Dispose(disposing);
         }
     }
 }

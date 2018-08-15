@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BestLot.DataAccessLayer.Repository
 {
-    public interface IRepository<T> : IDisposable
+    public interface IRepository<T>
     {
         void Delete(object id);
         void Add(T item);

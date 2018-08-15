@@ -54,26 +54,5 @@ namespace BestLot.DataAccessLayer.Repository
         {
             return await Task.FromResult(DbSet);
         }
-
-        private bool disposed = false;
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposed)
-            {
-                if (disposing)
-                {
-                    Context.Dispose();
-                    DbSet = null;
-                }
-            }
-            disposed = true;
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
     }
 }
