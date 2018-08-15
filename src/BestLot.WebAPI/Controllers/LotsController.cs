@@ -10,6 +10,7 @@ using BestLot.BusinessLogicLayer;
 using BestLot.WebAPI.Models;
 using AutoMapper;
 using System.Linq.Expressions;
+using BestLot.BusinessLogicLayer.Exceptions;
 
 namespace BestLot.WebAPI.Controllers
 {
@@ -53,9 +54,9 @@ namespace BestLot.WebAPI.Controllers
                     .Skip((page - 1) * amount)
                     .Take(amount).AsEnumerable()));
             }
-            catch (ArgumentException ex)
+            catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return InternalServerError(ex);
             }
         }
 
@@ -81,9 +82,13 @@ namespace BestLot.WebAPI.Controllers
                     .Skip((page - 1) * amount)
                     .Take(amount).AsEnumerable()));
             }
-            catch (ArgumentException ex)
+            catch (WrongIdException ex)
             {
-                return BadRequest(ex.Message);
+                return Content(HttpStatusCode.NotFound, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
             }
         }
 
@@ -95,9 +100,13 @@ namespace BestLot.WebAPI.Controllers
             {
                 return Ok(mapper.Map<LotModel>(await lotOperationsHandler.GetLotAsync(id)));
             }
-            catch (ArgumentException ex)
+            catch (WrongIdException ex)
             {
-                return BadRequest(ex.Message);
+                return Content(HttpStatusCode.NotFound, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
             }
         }
 
@@ -111,9 +120,17 @@ namespace BestLot.WebAPI.Controllers
                 await lotOperationsHandler.PlaceBidAsync(lotId, User.Identity.Name, value);
                 return Ok();
             }
-            catch (ArgumentException ex)
+            catch (WrongIdException ex)
+            {
+                return Content(HttpStatusCode.NotFound, ex.Message);
+            }
+            catch (WrongModelException ex)
             {
                 return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
             }
         }
 
@@ -127,7 +144,7 @@ namespace BestLot.WebAPI.Controllers
                 UserAccountInfoModel buyerUser = null;
                 if (lot.BuyerUserId != null)
                     buyerUser = mapper.Map<UserAccountInfoModel>(await userAccountOperationsHandler.GetUserAccountAsync(lot.BuyerUserId));
-                if (lot.BidPlacer == 1)
+                if (lot.BidPlacer == "Determined")
                     return Ok(new { lot.Price, BuyerUser = buyerUser });
                 return Ok(new { lot.Price, lot.StartDate, lot.SellDate, BuyerUser = buyerUser });
                 //return Ok(new {
@@ -137,9 +154,17 @@ namespace BestLot.WebAPI.Controllers
                 //    BuyerUser = userAccountOperationsHandler.GetBuyerUser(lotId)
                 //});
             }
-            catch (ArgumentException ex)
+            catch (WrongIdException ex)
+            {
+                return Content(HttpStatusCode.NotFound, ex.Message);
+            }
+            catch (WrongModelException ex)
             {
                 return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
             }
         }
 
@@ -149,21 +174,21 @@ namespace BestLot.WebAPI.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
             value.SellerUserId = User.Identity.Name;
-            if (value.BidPlacer == 2)
-            {
-                value.SellDate = value.StartDate.Add(value.SellDate.Subtract(value.StartDate));
-            }
             try
             {
                 await lotOperationsHandler.AddLotAsync(mapper.Map<Lot>(value), System.Web.Hosting.HostingEnvironment.MapPath(@"~"), Request.RequestUri.GetLeftPart(UriPartial.Authority));
             }
-            catch (ArgumentException ex)
+            catch (WrongIdException ex)
+            {
+                return Content(HttpStatusCode.NotFound, ex.Message);
+            }
+            catch (WrongModelException ex)
             {
                 return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return InternalServerError(ex);
             }
             return Ok();
         }
@@ -179,9 +204,17 @@ namespace BestLot.WebAPI.Controllers
             {
                 await lotOperationsHandler.ChangeLotAsync(id, mapper.Map<Lot>(value), System.Web.Hosting.HostingEnvironment.MapPath(@"~"), Request.RequestUri.GetLeftPart(UriPartial.Authority));
             }
-            catch (ArgumentException ex)
+            catch (WrongIdException ex)
+            {
+                return Content(HttpStatusCode.NotFound, ex.Message);
+            }
+            catch (WrongModelException ex)
             {
                 return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
             }
             return Ok();
         }
@@ -190,14 +223,18 @@ namespace BestLot.WebAPI.Controllers
         public async System.Threading.Tasks.Task<IHttpActionResult> DeleteLotAsync(int id)
         {
             if (lotOperationsHandler.GetLot(id).SellerUserId != User.Identity.Name && !User.IsInRole("Admin"))
-                return BadRequest("Not Allowed");
+                return BadRequest("Not allowed");
             try
             {
                 await lotOperationsHandler.DeleteLotAsync(id, System.Web.Hosting.HostingEnvironment.MapPath(@"~"), Request.RequestUri.GetLeftPart(UriPartial.Authority));
             }
-            catch (ArgumentException ex)
+            catch (WrongIdException ex)
             {
-                return BadRequest(ex.Message);
+                return Content(HttpStatusCode.NotFound, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
             }
             return Ok();
         }

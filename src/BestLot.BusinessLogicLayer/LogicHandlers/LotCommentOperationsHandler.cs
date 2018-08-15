@@ -8,6 +8,7 @@ using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using BestLot.BusinessLogicLayer.Interfaces;
 using BestLot.BusinessLogicLayer.Models;
+using BestLot.BusinessLogicLayer.Exceptions;
 using BestLot.DataAccessLayer.Entities;
 using BestLot.DataAccessLayer.UnitOfWork;
 
@@ -46,12 +47,12 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         private IMapper mapper;
 
         public void AddComment(LotComment lotComment)
-        {
-            if (userAccountOperationsHandler.GetUserAccount(lotComment.UserId) == null)
-                throw new ArgumentException("User id is incorrect");
-            Lot lot;
-            if ((lot = lotOperationsHandler.GetLot(lotComment.LotId)) == null)
-                throw new ArgumentException("Lot id is incorrect");
+        {            
+            //Don`t check id`s, because
+            //This will throw exception if UserId is wrong
+            userAccountOperationsHandler.GetUserAccount(lotComment.UserId);
+            //This will throw exception if LotId if wrong
+            Lot lot = lotOperationsHandler.GetLot(lotComment.LotId);
             lot.LotComments = GetLotComments(lot.Id).ToList();
             lot.AddComment(lotComment);
             UoW.LotComments.Add(mapper.Map<LotCommentEntity>(lotComment));
@@ -62,11 +63,11 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
 
         public async Task AddCommentAsync(LotComment lotComment)
         {
-            if (await userAccountOperationsHandler.GetUserAccountAsync(lotComment.UserId) == null)
-                throw new ArgumentException("User id is incorrect");
-            Lot lot;
-            if ((lot = await lotOperationsHandler.GetLotAsync(lotComment.LotId)) == null)
-                throw new ArgumentException("Lot id is incorrect");
+            //Don`t check id`s, because
+            //This will throw exception if UserId is wrong
+            await userAccountOperationsHandler.GetUserAccountAsync(lotComment.UserId);
+            //This will throw exception if LotId if wrong
+            Lot lot = await lotOperationsHandler.GetLotAsync(lotComment.LotId);
             lot.LotComments = (await GetLotCommentsAsync(lot.Id)).ToList();
             lot.AddComment(lotComment);
             UoW.LotComments.Add(mapper.Map<LotCommentEntity>(lotComment));

@@ -132,9 +132,10 @@ namespace BestLot.UnitTests
             await userAccountOperationsHandler.AddUserAccountAsync(user);
 
             var changedUser = await userAccountOperationsHandler.GetUserAccountAsync("veklich99@mail.ru");
-            changedUser.Name = "User2";
+            changedUser.Email = "changedEmail";
 
-            Assert.ThrowsAsync<ArgumentException>(() => userAccountOperationsHandler.ChangeUserAccountAsync("veklich99@gmail.com", changedUser));
+            Assert.ThrowsAsync<ArgumentException>(() => userAccountOperationsHandler.ChangeUserAccountAsync("veklich99@gmail.com", changedUser));//Invalid email
+            Assert.ThrowsAsync<ArgumentException>(() => userAccountOperationsHandler.ChangeUserAccountAsync("veklich99@mail.com", changedUser));//Changed email
         }
 
         [Test]

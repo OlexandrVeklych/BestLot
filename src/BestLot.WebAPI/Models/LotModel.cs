@@ -42,6 +42,6 @@ namespace BestLot.WebAPI.Models
         public List<LotCommentModel> LotComments { get; set; }
 
         [Required]
-        public int BidPlacer { get; set; }
+        public string BidPlacer { get; set; }
     }
 }

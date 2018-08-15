@@ -9,6 +9,7 @@ using BestLot.BusinessLogicLayer.Models;
 using BestLot.BusinessLogicLayer;
 using BestLot.WebAPI.Models;
 using AutoMapper;
+using BestLot.BusinessLogicLayer.Exceptions;
 
 namespace BestLot.WebAPI.Controllers
 {
@@ -34,11 +35,18 @@ namespace BestLot.WebAPI.Controllers
         [Route("api/users")]
         public async System.Threading.Tasks.Task<IHttpActionResult> GetAllUsersAsync(int page, int amount)
         {
-            return Ok(mapper.Map<IEnumerable<UserAccountInfoModel>>((await userAccountOperationsHandler
-                .GetAllUserAccountsAsync())
-                .OrderBy(user => user.Email)
-                .Skip((page - 1) * amount)
-                .Take(amount).AsEnumerable()));
+            try
+            {
+                return Ok(mapper.Map<IEnumerable<UserAccountInfoModel>>((await userAccountOperationsHandler
+                    .GetAllUserAccountsAsync())
+                    .OrderBy(user => user.Email)
+                    .Skip((page - 1) * amount)
+                    .Take(amount).AsEnumerable()));
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
         }
 
         [Route("api/currentuser")]
@@ -49,9 +57,13 @@ namespace BestLot.WebAPI.Controllers
                 return Ok(mapper.Map<UserAccountInfoModel>((await userAccountOperationsHandler
                     .GetUserAccountAsync(User.Identity.Name))));
             }
-            catch (ArgumentException ex)
+            catch (WrongIdException ex)
             {
-                return BadRequest(ex.Message);
+                return Content(HttpStatusCode.NotFound, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
             }
         }
 
@@ -66,18 +78,26 @@ namespace BestLot.WebAPI.Controllers
                     return Ok(mapper.Map<UserAccountInfoModel>((await userAccountOperationsHandler
                         .GetBuyerUserAsync(lotId))));
                 }
-                catch (ArgumentException ex)
+                catch (WrongIdException ex)
                 {
-                    return BadRequest(ex.Message);
+                    return Content(HttpStatusCode.NotFound, ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    return InternalServerError(ex);
                 }
             try
             {
                 return Ok(mapper.Map<UserAccountInfoModel>((await userAccountOperationsHandler
                     .GetSellerUserAsync(lotId))));
             }
-            catch (ArgumentException ex)
+            catch (WrongIdException ex)
             {
-                return BadRequest(ex.Message);
+                return Content(HttpStatusCode.NotFound, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
             }
         }
 
@@ -90,9 +110,13 @@ namespace BestLot.WebAPI.Controllers
                 return Ok(mapper.Map<UserAccountInfoModel>((await userAccountOperationsHandler
                     .GetUserAccountAsync(email))));
             }
-            catch (ArgumentException ex)
+            catch (WrongIdException ex)
             {
-                return BadRequest(ex.Message);
+                return Content(HttpStatusCode.NotFound, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
             }
         }
 
@@ -116,9 +140,17 @@ namespace BestLot.WebAPI.Controllers
                 await userAccountOperationsHandler.ChangeUserAccountAsync(email, mapper.Map<UserAccountInfo>(value));
                 return Ok();
             }
-            catch (ArgumentException ex)
+            catch (WrongIdException ex)
+            {
+                return Content(HttpStatusCode.NotFound, ex.Message);
+            }
+            catch (WrongModelException ex)
             {
                 return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
             }
         }
     }

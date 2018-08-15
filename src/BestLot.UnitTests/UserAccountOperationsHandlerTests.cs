@@ -133,7 +133,9 @@ namespace BestLot.UnitTests
             var changedUser = userAccountOperationsHandler.GetUserAccount("veklich99@mail.ru");
             changedUser.Name = "User2";
 
-            Assert.Throws<ArgumentException>(() => userAccountOperationsHandler.ChangeUserAccount("veklich99@gmail.com", changedUser));
+
+            Assert.Throws<ArgumentException>(() => userAccountOperationsHandler.ChangeUserAccount("veklich99@gmail.com", changedUser));//Invalid email
+            Assert.Throws<ArgumentException>(() => userAccountOperationsHandler.ChangeUserAccount("veklich99@mail.com", changedUser));//Changed email
         }
 
         [Test]

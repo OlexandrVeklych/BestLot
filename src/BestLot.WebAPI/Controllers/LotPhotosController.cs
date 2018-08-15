@@ -10,6 +10,7 @@ using BestLot.BusinessLogicLayer;
 using BestLot.WebAPI.Models;
 using AutoMapper;
 using System.Linq.Expressions;
+using BestLot.BusinessLogicLayer.Exceptions;
 
 namespace BestLot.WebAPI.Controllers
 {
@@ -39,9 +40,17 @@ namespace BestLot.WebAPI.Controllers
                     .GetLotPhotosAsync(lotId))
                     .AsEnumerable()));
             }
-            catch (ArgumentException ex)
+            catch (WrongIdException ex)
+            {
+                return Content(HttpStatusCode.NotFound, ex.Message);
+            }
+            catch (WrongModelException ex)
             {
                 return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
             }
         }
 
@@ -54,13 +63,17 @@ namespace BestLot.WebAPI.Controllers
                 return Ok(mapper.Map<LotPhotoModel>(await lotPhotosOperationsHandler
                     .GetLotPhotoByNumberAsync(lotId, photoNumber)));
             }
-            catch (IndexOutOfRangeException)
+            catch (WrongIdException ex)
             {
-                return BadRequest("Wrong number of photo");
+                return Content(HttpStatusCode.NotFound, ex.Message);
             }
-            catch (ArgumentException ex)
+            catch (WrongModelException ex)
             {
                 return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
             }
         }
 
@@ -72,9 +85,17 @@ namespace BestLot.WebAPI.Controllers
             {
                 await lotPhotosOperationsHandler.AddPhotosToExistingLotAsync(lotId, mapper.Map<LotPhoto[]>(value), System.Web.Hosting.HostingEnvironment.MapPath(@"~"), Request.RequestUri.GetLeftPart(UriPartial.Authority));
             }
-            catch (ArgumentException ex)
+            catch (WrongIdException ex)
+            {
+                return Content(HttpStatusCode.NotFound, ex.Message);
+            }
+            catch (WrongModelException ex)
             {
                 return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
             }
             return Ok();
         }
@@ -86,9 +107,17 @@ namespace BestLot.WebAPI.Controllers
             {
                 await lotPhotosOperationsHandler.DeletePhotoAsync(id, System.Web.Hosting.HostingEnvironment.MapPath(@"~"), Request.RequestUri.GetLeftPart(UriPartial.Authority));
             }
-            catch (ArgumentException ex)
+            catch (WrongIdException ex)
+            {
+                return Content(HttpStatusCode.NotFound, ex.Message);
+            }
+            catch (WrongModelException ex)
             {
                 return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
             }
             return Ok();
         }

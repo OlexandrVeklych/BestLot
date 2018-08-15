@@ -150,13 +150,11 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         public void DeleteAllLotPhotos(int lotId, string hostingEnvironmentPath, string requestUriLeftPart)
         {
             Expression<Func<LotPhotoEntity, bool>> predicate = null;
-            List<LotPhoto> lotPhotos;
-            if ((lotPhotos = UoW.LotPhotos
+            List<LotPhoto> lotPhotos = UoW.LotPhotos
                 .GetAll()
                 .Where(predicate = photo => photo.LotId == lotId)
                 .ProjectTo<LotPhoto>(mapper.ConfigurationProvider)
-                .ToList()) == null)
-                throw new ArgumentException("Photo id is incorrect");
+                .ToList();
             foreach (LotPhoto lotPhoto in lotPhotos)
             {
                 File.Delete(lotPhoto.Path.Replace(requestUriLeftPart, hostingEnvironmentPath));
@@ -168,13 +166,11 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         public async Task DeleteAllLotPhotosAsync(int lotId, string hostingEnvironmentPath, string requestUriLeftPart)
         {
             Expression<Func<LotPhotoEntity, bool>> predicate = null;
-            List<LotPhoto> lotPhotos;
-            if ((lotPhotos = (await UoW.LotPhotos
+            List<LotPhoto> lotPhotos = (await UoW.LotPhotos
                 .GetAllAsync())
                 .Where(predicate = photo => photo.LotId == lotId)
                 .ProjectTo<LotPhoto>(mapper.ConfigurationProvider)
-                .ToList()) == null)
-                throw new ArgumentException("Photo id is incorrect");
+                .ToList();
             foreach (LotPhoto lotPhoto in lotPhotos)
             {
                 File.Delete(lotPhoto.Path.Replace(requestUriLeftPart, hostingEnvironmentPath));
@@ -200,9 +196,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
 
         public LotPhoto GetLotPhotoByNumber(int lotId, int photoNumber)
         {
-            IQueryable<LotPhoto> lotPhotos;
-            if ((lotPhotos = GetLotPhotos(lotId)) == null)
-                throw new ArgumentException("Wrong lot id");
+            IQueryable<LotPhoto> lotPhotos = GetLotPhotos(lotId);
             if (photoNumber >= lotPhotos.Count())
                 return null;
             return lotPhotos.ToList()[photoNumber];
@@ -210,9 +204,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
 
         public async Task<LotPhoto> GetLotPhotoByNumberAsync(int lotId, int photoNumber)
         {
-            IQueryable<LotPhoto> lotPhotos;
-            if ((lotPhotos = await GetLotPhotosAsync(lotId)) == null)
-                throw new ArgumentException("Wrong lot id");
+            IQueryable<LotPhoto> lotPhotos = await GetLotPhotosAsync(lotId);
             if (photoNumber >= lotPhotos.Count())
                 return null;
             return lotPhotos.ToList()[photoNumber];
@@ -220,6 +212,8 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
 
         public IQueryable<LotPhoto> GetLotPhotos(int lotId)
         {
+            //This will throw exception if lotId is wrong
+            lotOperationsHandler.GetLot(lotId);
             Expression<Func<LotPhotoEntity, bool>> predicate = null;
             return UoW.LotPhotos.GetAll()
                 .Where(predicate = lotPhoto => lotPhoto.LotId == lotId)
@@ -228,6 +222,8 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
 
         public async Task<IQueryable<LotPhoto>> GetLotPhotosAsync(int lotId)
         {
+            //This will throw exception if lotId is wrong
+            await lotOperationsHandler.GetLotAsync(lotId);
             Expression<Func<LotPhotoEntity, bool>> predicate = null;
             return (await UoW.LotPhotos.GetAllAsync())
                 .Where(predicate = lotPhoto => lotPhoto.LotId == lotId)

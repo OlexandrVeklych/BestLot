@@ -45,13 +45,15 @@ namespace BestLot.UnitTests
         [Test]
         public void AddLot_InvalidInput_ThrowsArgumentException()
         {
-            var lot = new Lot { SellerUserId = "veklich99@gmail.com", SellDate = DateTime.Now.AddDays(1), StartDate = DateTime.Now };
+            var invalidEmailLot = new Lot { SellerUserId = "veklich99@gmail.com", SellDate = DateTime.Now.AddDays(1), StartDate = DateTime.Now };
+            var invalidDatesLot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now, StartDate = DateTime.Now.AddDays(1) };
 
-            Assert.Throws<ArgumentException>(() => lotOperationsHandler.AddLot(lot, "", ""));
+            Assert.ThrowsAsync<ArgumentException>(() => lotOperationsHandler.AddLotAsync(invalidEmailLot, "", ""));
+            Assert.ThrowsAsync<ArgumentException>(() => lotOperationsHandler.AddLotAsync(invalidDatesLot, "", ""));
         }
 
         [Test]
-        public void GetLotWithoutInclude_GetWithId2_ReturnsCorrectElem()
+        public void GetLot_GetWithId2_ReturnsCorrectElem()
         {
             var lot1 = new Lot { SellerUserId = "veklich99@mail.ru", Name = "Name1", SellDate = DateTime.Now.AddDays(1), StartDate = DateTime.Now };
             var lot2 = new Lot { SellerUserId = "veklich99@mail.ru", Name = "Name2", SellDate = DateTime.Now.AddDays(1), StartDate = DateTime.Now };
@@ -61,23 +63,6 @@ namespace BestLot.UnitTests
             var resultLot = lotOperationsHandler.GetLot(2);
 
             Assert.AreEqual("Name2", resultLot.Name);
-        }
-
-        [Test]
-        public void GetLotWithInclude_GetWithId2_ReturnsCorrectElem()
-        {
-            var lot1 = new Lot { SellerUserId = "veklich99@mail.ru", Name = "Name1", SellDate = DateTime.Now.AddDays(1), LotComments = new List<LotComment> { new LotComment { LotId = 1, UserId = "veklich99@mail.ru", Message = "Message1" } } };
-            var lot2 = new Lot { SellerUserId = "veklich99@mail.ru", Name = "Name2", SellDate = DateTime.Now.AddDays(1), LotComments = new List<LotComment> { new LotComment { LotId = 1, UserId = "veklich99@mail.ru", Message = "Message2" } } };
-            lotOperationsHandler.AddLot(lot1, "", "");
-            lotOperationsHandler.AddLot(lot2, "", "");
-
-            var resultLot = lotOperationsHandler.GetLot(2);
-            resultLot.SellerUser = userAccountOperationsHandler.GetSellerUser(2);
-            resultLot.LotComments = lotCommentOperationsHandler.GetLotComments(2).ToList();
-
-            Assert.AreEqual("DefaultUser", resultLot.SellerUser.Name);
-            Assert.AreEqual("Name2", resultLot.Name);
-            Assert.AreEqual("Message2", resultLot.LotComments[0].Message);
         }
 
         [Test]
@@ -122,20 +107,32 @@ namespace BestLot.UnitTests
         }
 
         [Test]
+        public void ChangeLotAsync_LotNotExits_AddsLot()
+        {
+            var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now.AddDays(1), Name = "Name1" };
+            lotOperationsHandler.ChangeLot(1, lot, "", "");
+
+            Assert.AreEqual(1, lotOperationsHandler.GetAllLots().Count());
+        }
+
+        [Test]
         public void ChangeLot_InvalidLot_ThrowsArgumentException()
         {
             var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now.AddDays(1), Name = "Name1" };
             lotOperationsHandler.AddLot(lot, "", "");
 
             var modifiedLot = lotOperationsHandler.GetLot(1);
-            modifiedLot.Id = 2;
 
+            //Change id - not allowed
+            modifiedLot.Id = 2;
             Assert.Throws<ArgumentException>(() => lotOperationsHandler.ChangeLot(1, modifiedLot, "", ""));
 
+            //Reset id, change seller user - not allowed
             modifiedLot.Id = 1;
             modifiedLot.SellerUserId = "veklich99@gmail.com";
             Assert.Throws<ArgumentException>(() => lotOperationsHandler.ChangeLot(1, modifiedLot, "", ""));
 
+            //Reset seller user, change buyer user - not allowed
             modifiedLot.SellerUserId = "veklich99@mail.ru";
             modifiedLot.BuyerUserId = "veklich99@mail.ru";
             Assert.Throws<ArgumentException>(() => lotOperationsHandler.ChangeLot(1, modifiedLot, "", ""));
@@ -180,11 +177,46 @@ namespace BestLot.UnitTests
         [Test]
         public void PlaceBid_InvalidInput_ThrowsArgumentException()
         {
-            var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now.AddDays(1), Name = "Name1" };
+            var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now.AddDays(1), Name = "Name1", Price = 10, MinStep = 10 };
+            lotOperationsHandler.AddLot(lot, "", "");
+            var user = new UserAccountInfo { Name = "SecondUser", Email = "veklich98@mail.ru" };
+            userAccountOperationsHandler.AddUserAccount(user);
+
+            Assert.Throws<ArgumentException>(() => lotOperationsHandler.PlaceBid(1, "veklich98@mail.ru", 15));//price < price + step
+            Assert.Throws<ArgumentException>(() => lotOperationsHandler.PlaceBid(1, "veklich99@mail.ru", 15));//Bid for own lot
+            Assert.Throws<ArgumentException>(() => lotOperationsHandler.PlaceBid(1, "veklich98@gmail.com", 15));//Invalid email
+            Assert.Throws<ArgumentException>(() => lotOperationsHandler.PlaceBid(3, "veklich98@mail.ru", 15));//Invalid lot id
+        }
+
+        [Test]
+        public void PlaceBidAsync_RelativeBidplacer_ChangesPriceAndBuyerUserId()
+        {
+            var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now.AddDays(1), Name = "Name1", BidPlacer = "Relative" };
+            var user = new UserAccountInfo { Name = "SecondUser", Email = "veklich98@mail.ru" };
+            lotOperationsHandler.AddLot(lot, "", "");
+            userAccountOperationsHandler.AddUserAccount(user);
+
+            lotOperationsHandler.PlaceBid(1, "veklich98@mail.ru", 15);
+
+            var resultLot = lotOperationsHandler.GetLot(1);
+
+            Assert.AreEqual(1, lotOperationsHandler.GetAllLots().Count());
+            Assert.AreEqual(15, resultLot.Price);
+            Assert.AreEqual("veklich98@mail.ru", resultLot.BuyerUserId);
+            Assert.AreEqual(-1, lot.StartDate.CompareTo(resultLot.StartDate));//Start date moved forward
+            Assert.AreEqual(-1, lot.SellDate.CompareTo(resultLot.SellDate));//Sell date moved forward
+        }
+
+        [Test]
+        public void PlaceBid_RelativeBidplacer_ThrowsArgumentException()
+        {
+            var lot = new Lot { SellerUserId = "veklich99@mail.ru", SellDate = DateTime.Now.AddDays(1), Name = "Name1", BidPlacer = "Relative" };
             lotOperationsHandler.AddLot(lot, "", "");
 
-            Assert.Throws<ArgumentException>(() => lotOperationsHandler.PlaceBid(1, "veklich98@gmail.com", 15));
-            Assert.Throws<ArgumentException>(() => lotOperationsHandler.PlaceBid(3, "veklich99@mail.ru", 15));
+            Assert.Throws<ArgumentException>(() => lotOperationsHandler.PlaceBid(1, "veklich98@mail.ru", 15));//price < price + step
+            Assert.Throws<ArgumentException>(() => lotOperationsHandler.PlaceBid(1, "veklich99@mail.ru", 15));//Bid for own lot
+            Assert.Throws<ArgumentException>(() => lotOperationsHandler.PlaceBid(1, "veklich98@gmail.com", 15));//Invalid email
+            Assert.Throws<ArgumentException>(() => lotOperationsHandler.PlaceBid(3, "veklich99@mail.ru", 15));//Invalid lot id
         }
     }
 }

@@ -17,10 +17,10 @@ namespace BestLot.BusinessLogicLayer.BidLogic
             lot.Price = price;
             lot.BuyerUserId = buyerUserId;
             DateTime now = DateTime.Now;
-            //Here start date is actually date of last bid
-            lot.StartDate = now;
             //Sell date is calculated, so period from last bid to selling stays the same
             lot.SellDate = now.Add(lot.SellDate.Subtract(lot.StartDate));
+            //Here start date is actually date of last bid
+            lot.StartDate = now;
         }
     }
 }

@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 using BestLot.DataAccessLayer.UnitOfWork;
 using BestLot.DataAccessLayer.Entities;
 using BestLot.BusinessLogicLayer.Models;
+using BestLot.BusinessLogicLayer.Exceptions;
 using AutoMapper;
-using System.Linq.Expressions;
 using AutoMapper.QueryableExtensions;
 using System.Net.Mail;
-using System.IO;
 using BestLot.BusinessLogicLayer.Interfaces;
 
 namespace BestLot.BusinessLogicLayer.LogicHandlers
@@ -61,31 +60,26 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             await UoW.SaveChangesAsync();
         }
 
-        public void ChangeUserAccount(string id, UserAccountInfo newUserAccount)
+        public void ChangeUserAccount(string userEmail, UserAccountInfo newUserAccount)
         {
-            UserAccountInfo currentUser = mapper.Map<UserAccountInfo>(UoW.UserAccounts.Get(id));
-            if (currentUser == null)
-                throw new ArgumentException("User email is incorrect");
+            UserAccountInfo currentUser = GetUserAccount(userEmail);
             if (currentUser.Email != newUserAccount.Email)
-                throw new ArgumentException("No permission to change Email");
+                throw new WrongModelException("No permission to change Email");
             ValidateUser(newUserAccount, currentUser, false);
-            UoW.UserAccounts.Modify(id, mapper.Map<UserAccountInfoEntity>(newUserAccount));
+            UoW.UserAccounts.Modify(userEmail, mapper.Map<UserAccountInfoEntity>(newUserAccount));
             UoW.SaveChanges();
         }
 
-        public async Task ChangeUserAccountAsync(string id, UserAccountInfo newUserAccount)
+        public async Task ChangeUserAccountAsync(string userEmail, UserAccountInfo newUserAccount)
         {
-            UserAccountInfo currentUser = mapper.Map<UserAccountInfo>(await UoW.UserAccounts.GetAsync(id));
-            if (currentUser == null)
-                throw new ArgumentException("User email is incorrect");
+            UserAccountInfo currentUser = await GetUserAccountAsync(userEmail);
             if (currentUser.Email != newUserAccount.Email)
-                throw new ArgumentException("No permission to change Email");
+                throw new WrongModelException("No permission to change Email");
             await ValidateUserAsync(newUserAccount, currentUser, false);
-            UoW.UserAccounts.Modify(id, mapper.Map<UserAccountInfoEntity>(newUserAccount));
+            UoW.UserAccounts.Modify(userEmail, mapper.Map<UserAccountInfoEntity>(newUserAccount));
             await UoW.SaveChangesAsync();
         }
 
-        //if !newUser, don`t check email
         private void ValidateUser(UserAccountInfo userAccount, UserAccountInfo oldUserAccount = null, bool newUser = true)
         {
             if (newUser)
@@ -96,52 +90,29 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
                 }
                 catch (FormatException)
                 {
-                    throw new ArgumentException("Incorrect email format");
+                    throw new WrongModelException("Incorrect email format");
                 }
                 var userAccountsEmails = GetAllUserAccounts().Select(user => user.Email);
                 if (userAccountsEmails.Contains(userAccount.Email))
-                    throw new ArgumentException("Email is already occupied");
-                if (userAccount.TelephoneNumber != null)
-                {
-                    if (!Regex.IsMatch(userAccount.TelephoneNumber, @"^\+380[0-9]{9}$"))
-                        throw new ArgumentException("Incorrect telephone number format");
-                    var userAccountsTelephones = UoW.UserAccounts.GetAll().Select(user => user.TelephoneNumber);
-                    if (userAccountsTelephones.Contains(userAccount.TelephoneNumber))
-                        throw new ArgumentException("Telephone number is already occupied");
-                }
+                    throw new WrongModelException("Email is already occupied");
             }
-            else
-            {
-                if (userAccount.TelephoneNumber != null)
-                {
-                    if (userAccount.TelephoneNumber != oldUserAccount.TelephoneNumber)
-                    {
-                        if (!Regex.IsMatch(userAccount.TelephoneNumber, @"^\+380[0-9]{9}$"))
-                            throw new ArgumentException("Incorrect telephone number format");
-                        var userAccountsTelephones = UoW.UserAccounts.GetAll().Select(user => user.TelephoneNumber);
-                        if (userAccountsTelephones.Contains(userAccount.TelephoneNumber))
-                            throw new ArgumentException("Telephone number is already occupied");
-                    }
-                }
-            }
-
-        }
-
-        //if !newUser, don`t check email
-        private async Task ValidateUserAsync(UserAccountInfo userAccount, UserAccountInfo oldUserAccount = null, bool newUser = true)
-        {
+            //if !newUser, don`t check email because it can`t be changed
             if (userAccount.TelephoneNumber != null)
             {
+                //If user isn`t new and didn`t change telephone number, don`t check it
+                if (oldUserAccount != null && oldUserAccount.TelephoneNumber != null  && userAccount.TelephoneNumber == oldUserAccount.TelephoneNumber)
+                    return;
                 if (!Regex.IsMatch(userAccount.TelephoneNumber, @"^\+380[0-9]{9}$"))
-                    throw new ArgumentException("Incorrect telephone number format");
-                if (!newUser)
-                    if (userAccount.TelephoneNumber != oldUserAccount.TelephoneNumber)
-                    {
-                        var userAccountsTelephones = (await GetAllUserAccountsAsync()).Select(user => user.TelephoneNumber);
-                        if (userAccountsTelephones.Contains(userAccount.TelephoneNumber))
-                            throw new ArgumentException("Telephone number is already occupied");
-                    }
+                    throw new WrongModelException("Incorrect telephone number format");
+                var userAccountsTelephones = GetAllUserAccounts().Select(user => user.TelephoneNumber);
+                if (userAccountsTelephones.Contains(userAccount.TelephoneNumber))
+                    throw new WrongModelException("Telephone number is already occupied");
             }
+            //No exception - userAccount is correct
+        }
+
+        private async Task ValidateUserAsync(UserAccountInfo userAccount, UserAccountInfo oldUserAccount = null, bool newUser = true)
+        {
             if (newUser)
             {
                 try
@@ -150,66 +121,63 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
                 }
                 catch (FormatException)
                 {
-                    throw new ArgumentException("Incorrect email format");
+                    throw new WrongModelException("Incorrect email format");
                 }
                 var userAccountsEmails = (await GetAllUserAccountsAsync()).Select(user => user.Email);
                 if (userAccountsEmails.Contains(userAccount.Email))
-                    throw new ArgumentException("Email is already occupied");
+                    throw new WrongModelException("Email is already occupied");
             }
+            //if !newUser, don`t check email because it can`t be changed
+            if (userAccount.TelephoneNumber != null)
+            {
+                //If user isn`t new and didn`t change telephone number, don`t check it
+                if (oldUserAccount != null && userAccount.TelephoneNumber == oldUserAccount.TelephoneNumber)
+                    return;
+                if (!Regex.IsMatch(userAccount.TelephoneNumber, @"^\+380[0-9]{9}$"))
+                    throw new WrongModelException("Incorrect telephone number format");
+                var userAccountsTelephones = GetAllUserAccounts().Select(user => user.TelephoneNumber);
+                if (userAccountsTelephones.Contains(userAccount.TelephoneNumber))
+                    throw new WrongModelException("Telephone number is already occupied");
+            }
+            //No exception - userAccount is correct
         }
 
-        public void DeleteUserAccount(string userAccountId, string hostingEnvironmentPath, string requestUriLeftPart)
+        public void DeleteUserAccount(string userEmail, string hostingEnvironmentPath, string requestUriLeftPart)
         {
-            UserAccountInfo user;
-            if ((user = GetUserAccount(userAccountId)) == null)
-                throw new ArgumentException("UserAccount id is incorrect");
-            user.Lots = lotOperationsHandler.GetUserLots(user.Email).ToList();
-            foreach (Lot lot in user.Lots)
-                lotOperationsHandler.DeleteLot(lot.Id, hostingEnvironmentPath, requestUriLeftPart);
-            lotPhotoOperationsHandler.DeleteAllUserPhotos(userAccountId, hostingEnvironmentPath);
-            UoW.UserAccounts.Delete(userAccountId);
+            UserAccountInfo user = GetUserAccount(userEmail);
+            lotPhotoOperationsHandler.DeleteAllUserPhotos(userEmail, hostingEnvironmentPath);
+            UoW.UserAccounts.Delete(userEmail);
             UoW.SaveChanges();
         }
 
-        public async Task DeleteUserAccountAsync(string userAccountId, string hostingEnvironmentPath, string requestUriLeftPart)
+        public async Task DeleteUserAccountAsync(string userEmail, string hostingEnvironmentPath, string requestUriLeftPart)
         {
-            UserAccountInfo user;
-            if ((user = await GetUserAccountAsync(userAccountId)) == null)
-                throw new ArgumentException("UserAccount id is incorrect");
-            user.Lots = (await lotOperationsHandler.GetUserLotsAsync(user.Email)).ToList();
-            foreach (Lot lot in user.Lots)
-                await lotOperationsHandler.DeleteLotAsync(lot.Id, hostingEnvironmentPath, requestUriLeftPart);
-            await lotPhotoOperationsHandler.DeleteAllUserPhotosAsync(userAccountId, hostingEnvironmentPath);
-            UoW.UserAccounts.Delete(userAccountId);
+            UserAccountInfo user = await GetUserAccountAsync(userEmail);
+            await lotPhotoOperationsHandler.DeleteAllUserPhotosAsync(userEmail, hostingEnvironmentPath);
+            UoW.UserAccounts.Delete(userEmail);
             await UoW.SaveChangesAsync();
         }
 
         public UserAccountInfo GetSellerUser(int lotId)
         {
-            Lot lot;
-            if ((lot = lotOperationsHandler.GetLot(lotId)) == null)
-                throw new ArgumentException("Wrong lot id");
+            Lot lot = lotOperationsHandler.GetLot(lotId);
             return GetUserAccount(lot.SellerUserId);
         }
 
         public async Task<UserAccountInfo> GetSellerUserAsync(int lotId)
         {
-            Lot lot;
-            if ((lot = await lotOperationsHandler.GetLotAsync(lotId)) == null)
-                throw new ArgumentException("Wrong lot id");
+            Lot lot = await lotOperationsHandler.GetLotAsync(lotId);
             return await GetUserAccountAsync(lot.SellerUserId);
         }
 
         public UserAccountInfo GetBuyerUser(int lotId)
         {
-            Lot lot;
-            if ((lot = lotOperationsHandler.GetLot(lotId)) == null)
-                throw new ArgumentException("Wrong lot id");
+            Lot lot = lotOperationsHandler.GetLot(lotId);
             try
             {
                 return GetUserAccount(lot.BuyerUserId);
             }
-            catch (ArgumentException)
+            catch (WrongIdException)
             {
                 return null;
             }
@@ -217,33 +185,27 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
 
         public async Task<UserAccountInfo> GetBuyerUserAsync(int lotId)
         {
-            Lot lot;
-            if ((lot = await lotOperationsHandler.GetLotAsync(lotId)) == null)
-                throw new ArgumentException("Wrong lot id");
+            Lot lot = await lotOperationsHandler.GetLotAsync(lotId);
             try
             {
                 return await GetUserAccountAsync(lot.BuyerUserId);
             }
-            catch (ArgumentException)
+            catch (WrongIdException)
             {
                 return null;
             }
         }
 
-        public UserAccountInfo GetUserAccount(string userAccountId)
+        public UserAccountInfo GetUserAccount(string userEmail)
         {
-            UserAccountInfo userAccountInfo;
-            if ((userAccountInfo = mapper.Map<UserAccountInfo>(UoW.UserAccounts.Get(userAccountId))) == null)
-                throw new ArgumentException("UserAccount id is incorrect");
-            return userAccountInfo;
+            UserAccountInfoEntity userAccountInfo = UoW.UserAccounts.Get(userEmail) ?? throw new WrongIdException("UserAccount");
+            return mapper.Map<UserAccountInfo>(userAccountInfo);
         }
 
-        public async Task<UserAccountInfo> GetUserAccountAsync(string userAccountId)
+        public async Task<UserAccountInfo> GetUserAccountAsync(string userEmail)
         {
-            UserAccountInfo userAccountInfo;
-            if ((userAccountInfo = mapper.Map<UserAccountInfo>(await UoW.UserAccounts.GetAsync(userAccountId))) == null)
-                throw new ArgumentException("UserAccount id is incorrect");
-            return userAccountInfo;
+            UserAccountInfoEntity userAccountInfo = await UoW.UserAccounts.GetAsync(userEmail) ?? throw new WrongIdException("UserAccount");
+            return mapper.Map<UserAccountInfo>(userAccountInfo);
         }
 
         public IQueryable<UserAccountInfo> GetAllUserAccounts()

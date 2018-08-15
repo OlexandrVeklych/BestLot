@@ -10,6 +10,7 @@ using BestLot.BusinessLogicLayer.Models;
 using BestLot.BusinessLogicLayer;
 using BestLot.WebAPI.Models;
 using AutoMapper;
+using BestLot.BusinessLogicLayer.Exceptions;
 
 namespace BestLot.WebAPI.Controllers
 {
@@ -40,9 +41,17 @@ namespace BestLot.WebAPI.Controllers
                     .Skip((page - 1) * amount)
                     .Take(amount).AsEnumerable()));
             }
-            catch (ArgumentException ex)
+            catch (WrongIdException ex)
+            {
+                return Content(HttpStatusCode.NotFound, ex.Message);
+            }
+            catch (WrongModelException ex)
             {
                 return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
             }
         }
 
@@ -58,9 +67,17 @@ namespace BestLot.WebAPI.Controllers
                     .Skip((page - 1) * amount)
                     .Take(amount).AsEnumerable()));
             }
-            catch (ArgumentException ex)
+            catch (WrongIdException ex)
+            {
+                return Content(HttpStatusCode.NotFound, ex.Message);
+            }
+            catch (WrongModelException ex)
             {
                 return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
             }
         }
 
@@ -74,13 +91,17 @@ namespace BestLot.WebAPI.Controllers
                     .GetLotCommentsAsync(lotId))
                     .ToList()[commentNumber]));
             }
-            catch (ArgumentException ex)
+            catch (WrongIdException ex)
+            {
+                return Content(HttpStatusCode.NotFound, ex.Message);
+            }
+            catch (WrongModelException ex)
             {
                 return BadRequest(ex.Message);
             }
-            catch (IndexOutOfRangeException)
+            catch (Exception ex)
             {
-                return BadRequest("Wrong number of comment");
+                return InternalServerError(ex);
             }
         }
 
@@ -97,9 +118,17 @@ namespace BestLot.WebAPI.Controllers
             {
                 await lotCommentsOperationsHandler.AddCommentAsync(mapper.Map<LotComment>(value));
             }
-            catch (ArgumentException ex)
+            catch (WrongIdException ex)
+            {
+                return Content(HttpStatusCode.NotFound, ex.Message);
+            }
+            catch (WrongModelException ex)
             {
                 return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
             }
             return Ok();
         }

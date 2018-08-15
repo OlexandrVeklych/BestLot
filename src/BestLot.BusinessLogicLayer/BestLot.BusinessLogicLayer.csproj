@@ -49,6 +49,8 @@
   <ItemGroup>
     <Compile Include="BidLogic\DeterminedSelldateBidPlacer.cs" />
     <Compile Include="BidLogic\IBidPlacer.cs" />
+    <Compile Include="Exceptions\WrongIdException.cs" />
+    <Compile Include="Exceptions\WrongModelException.cs" />
     <Compile Include="Interfaces\ILotCommentOperationsHandler.cs" />
     <Compile Include="Interfaces\ILotOperationsHandler.cs" />
     <Compile Include="Interfaces\ILotPhotoOperationsHandler.cs" />

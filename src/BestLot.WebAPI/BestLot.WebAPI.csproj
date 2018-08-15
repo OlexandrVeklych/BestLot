@@ -241,6 +241,7 @@
     <Compile Include="Controllers\LotCommentsController.cs" />
     <Compile Include="Controllers\LotPhotosController.cs" />
     <Compile Include="Controllers\LotsController.cs" />
+    <Compile Include="Controllers\NotFoundWithMessageApiController.cs" />
     <Compile Include="Controllers\RolesController.cs" />
     <Compile Include="Controllers\UsersController.cs" />
     <Compile Include="Global.asax.cs">

@@ -16,6 +16,7 @@ using BestLot.WebAPI.Models;
 using BestLot.WebAPI.Providers;
 using BestLot.WebAPI.Results;
 using BestLot.BusinessLogicLayer;
+using BestLot.BusinessLogicLayer.Exceptions;
 
 namespace BestLot.WebAPI.Controllers
 {
@@ -328,16 +329,6 @@ namespace BestLot.WebAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            var user = new ApplicationUser() { UserName = model.Email, Email = model.Email };
-
-
-            IdentityResult result = await UserManager.CreateAsync(user, model.Password);
-
-            if (!result.Succeeded)
-            {
-                return GetErrorResult(result);
-            }
-
             using (var context = new ApplicationDbContext())
             {
                 var roleStore = new RoleStore<IdentityRole>(context);
@@ -345,9 +336,17 @@ namespace BestLot.WebAPI.Controllers
 
                 if (roleManager.FindByName(model.Role) == null)
                 {
-                    await UserManager.DeleteAsync(user);
                     return BadRequest("Incorrect role");
                 }
+            }
+
+            var user = new ApplicationUser() { UserName = model.Email, Email = model.Email };
+
+            IdentityResult result = await UserManager.CreateAsync(user, model.Password);
+
+            if (!result.Succeeded)
+            {
+                return GetErrorResult(result);
             }
 
             try
@@ -366,7 +365,7 @@ namespace BestLot.WebAPI.Controllers
                 var userAccountOperationsHandler = LogicDependencyResolver.ResolveUserAccountOperationsHandler();
                 await userAccountOperationsHandler.AddUserAccountAsync(new BusinessLogicLayer.Models.UserAccountInfo { Email = model.Email, Name = model.Name, Surname = model.Surname, TelephoneNumber = model.TelephoneNumber });
             }
-            catch (ArgumentException ex)
+            catch (WrongModelException ex)
             {
                 await UserManager.DeleteAsync(user);
                 return BadRequest(ex.Message);
@@ -395,9 +394,13 @@ namespace BestLot.WebAPI.Controllers
                 userAccountOperationsHandler.DeleteUserAccount(userToDelete.Email, System.Web.Hosting.HostingEnvironment.MapPath(@"~"), Request.RequestUri.GetLeftPart(UriPartial.Authority));
                 UserManager.Delete(userToDelete);
             }
-            catch (ArgumentException ex)
+            catch (WrongIdException ex)
             {
                 return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
             }
             return Ok();
         }

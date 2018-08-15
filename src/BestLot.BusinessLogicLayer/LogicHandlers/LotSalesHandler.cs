@@ -40,13 +40,13 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
 
 
         private ILotOperationsHandler lotOperationsHandler;
-        private IUserAccountOperationsHandler userAccountOperationsHandler;
+        private readonly IUserAccountOperationsHandler userAccountOperationsHandler;
         private Timer refreshTimer;
         private Timer checkTimer;
         private IUnitOfWork UoW;
         private IMapper mapper;
-        private string hostingEnvironment;
-        private string requestUriLeftPart;
+        private readonly string hostingEnvironment;
+        private readonly string requestUriLeftPart;
         public Dictionary<int, DateTime> LotId_SellDatePairs { get; private set; }
 
         public void StopSalesHandler()
@@ -66,6 +66,8 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         //Checks sell dates in dictionary in memory
         private void CheckLots(object sender, ElapsedEventArgs e)
         {
+            if (!LotId_SellDatePairs.Any())
+                return;
             List<int> keys = new List<int>(LotId_SellDatePairs.Keys);
             foreach(int key in keys)
             {

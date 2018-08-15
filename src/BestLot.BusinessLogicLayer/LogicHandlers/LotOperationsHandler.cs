@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using BestLot.DataAccessLayer.UnitOfWork;
 using BestLot.DataAccessLayer.Entities;
 using BestLot.BusinessLogicLayer.Models;
+using BestLot.BusinessLogicLayer.Exceptions;
 using AutoMapper;
 using System.Linq.Expressions;
 using AutoMapper.QueryableExtensions;
@@ -21,7 +22,8 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             {
                 cfg.CreateMap<LotEntity, Lot>()
                 .ForMember(dest => dest.LotComments, opt => opt.Ignore())
-                .ForMember(dest => dest.LotPhotos, opt => opt.Ignore());
+                .ForMember(dest => dest.LotPhotos, opt => opt.Ignore())
+                .ForMember(dest => dest.SellerUser, opt => opt.Ignore());
                 cfg.CreateMap<UserAccountInfoEntity, UserAccountInfo>()
                 .ForAllMembers(opt => opt.Ignore());
                 cfg.CreateMap<LotPhotoEntity, LotPhoto>()
@@ -57,13 +59,12 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
 
         public void AddLot(Lot lot, string hostingEnvironmentPath, string requestUriLeftPart)
         {
-            if (lot.StartDate == null || lot.StartDate.Year < DateTime.Now.Year)
+            if (lot.StartDate == null || lot.StartDate.CompareTo(DateTime.Now) < 0)
                 lot.StartDate = DateTime.Now;
             if (lot.StartDate.CompareTo(lot.SellDate) >= 0)
-                throw new ArgumentException("Wrong sell date");
+                throw new WrongModelException("Wrong sell date");
             if (UoW.UserAccounts.Get(lot.SellerUserId) == null)
-                throw new ArgumentException("Seller user id is incorrect");
-
+                throw new WrongIdException("Seller user");
             lot.BuyerUserId = null;
             if (lot.LotPhotos != null && lot.LotPhotos.Any())
                 lotPhotoOperationsHandler.AddPhotosToNewLot(lot, hostingEnvironmentPath, requestUriLeftPart);
@@ -76,9 +77,13 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             if (lot.StartDate == null || lot.StartDate.Year < 2018)
                 lot.StartDate = DateTime.Now;
             if (lot.StartDate.CompareTo(lot.SellDate) >= 0)
-                throw new ArgumentException("Wrong sell date");
+                throw new WrongModelException("Wrong sell date");
             if (await UoW.UserAccounts.GetAsync(lot.SellerUserId) == null)
-                throw new ArgumentException("Seller user id is incorrect");
+                throw new WrongIdException("Seller user");
+            if (lot.BidPlacer == "Relative")
+            {
+                lot.SellDate = lot.StartDate.Add(lot.SellDate.Subtract(lot.StartDate));
+            }
             lot.BuyerUserId = null;
             if (lot.LotPhotos != null && lot.LotPhotos.Any())
                 lotPhotoOperationsHandler.AddPhotosToNewLot(lot, hostingEnvironmentPath, requestUriLeftPart);
@@ -86,23 +91,24 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             await UoW.SaveChangesAsync();
         }
 
-        public void ChangeLot(int id, Lot newLot, string hostingEnvironmentPath, string requestUriLeftPart)
+        public void ChangeLot(int lotId, Lot newLot, string hostingEnvironmentPath, string requestUriLeftPart)
         {
-            if (UoW.Lots.Get(id) == null)
+            //Do not use GetLot, because it will throw exception
+            if (UoW.Lots.Get(lotId) == null)
                 AddLot(newLot, hostingEnvironmentPath, requestUriLeftPart);
             else
             {
-                Lot currentLot = mapper.Map<Lot>(UoW.Lots.Get(id));
-                if (currentLot.Id != newLot.Id
-                    || currentLot.SellerUserId != newLot.SellerUserId
-                    || currentLot.BuyerUserId != newLot.BuyerUserId
-                    || (currentLot.BuyerUserId != null && 
-                    (currentLot.Price != newLot.Price
-                    || currentLot.StartDate != newLot.StartDate
-                    || currentLot.SellDate != newLot.SellDate
-                    || currentLot.MinStep != newLot.MinStep))
-                    || (currentLot.StartDate.CompareTo(DateTime.Now) >= 0 && currentLot.StartDate != newLot.StartDate))
-                    throw new ArgumentException("No permission to change these properties");
+                Lot currentLot = GetLot(lotId);
+                if (currentLot.Id != newLot.Id //Changed id
+                    || currentLot.SellerUserId != newLot.SellerUserId//Changed seller user
+                    || currentLot.BuyerUserId != newLot.BuyerUserId//Changed buyer user
+                    || (currentLot.BuyerUserId != null &&
+                    (currentLot.Price != newLot.Price //Lot has buyer (at least 1 bid was placed) and Price changed
+                    || currentLot.StartDate != newLot.StartDate //Lot has buyer (at least 1 bid was placed) and start date changed
+                    || currentLot.SellDate != newLot.SellDate //Lot has buyer (at least 1 bid was placed) and sell date changed
+                    || currentLot.MinStep != newLot.MinStep)) //Lot has buyer (at least 1 bid was placed) and step bid changed
+                    || (newLot.StartDate.CompareTo(DateTime.Now) <= 0)) //Start date before now
+                    throw new WrongModelException("No permission to change these properties");
                 UoW.Lots.Modify(newLot.Id, mapper.Map<LotEntity>(newLot));
                 UoW.SaveChanges();
             }
@@ -115,24 +121,29 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             else
             {
                 Lot currentLot = mapper.Map<Lot>(await UoW.Lots.GetAsync(id));
-                if (currentLot.Id != newLot.Id
-                    || (currentLot.BuyerUserId != null && currentLot.Price != newLot.Price)
-                    || currentLot.SellerUserId != newLot.SellerUserId
-                    || currentLot.BuyerUserId != newLot.BuyerUserId)
-                    throw new ArgumentException("No permission to change these properties");
+                if (currentLot.Id != newLot.Id //Changed id
+                    || currentLot.SellerUserId != newLot.SellerUserId//Changed seller user
+                    || currentLot.BuyerUserId != newLot.BuyerUserId//Changed buyer user
+                    || (currentLot.BuyerUserId != null &&
+                    (currentLot.Price != newLot.Price //Lot has buyer (at least 1 bid was placed) and Price changed
+                    || currentLot.StartDate != newLot.StartDate //Lot has buyer (at least 1 bid was placed) and start date changed
+                    || currentLot.SellDate != newLot.SellDate //Lot has buyer (at least 1 bid was placed) and sell date changed
+                    || currentLot.MinStep != newLot.MinStep)) //Lot has buyer (at least 1 bid was placed) and step bid changed
+                    || (newLot.StartDate.CompareTo(DateTime.Now) <= 0)) //Start date before now
+                    throw new WrongModelException("No permission to change these properties");
                 UoW.Lots.Modify(newLot.Id, mapper.Map<LotEntity>(newLot));
                 await UoW.SaveChangesAsync();
             }
         }
 
-        //=Lot is correct, don`t check it again
+        //Lot is correct, don`t check it again
         public void ChangeLotUnsafe(Lot newLot)
         {
             UoW.Lots.Modify(newLot.Id, mapper.Map<LotEntity>(newLot));
             UoW.SaveChanges();
         }
 
-        //=Lot is correct, don`t check it again
+        //Lot is correct, don`t check it again
         public async Task ChangeLotUnsafeAsync(Lot newLot)
         {
             UoW.Lots.Modify(newLot.Id, mapper.Map<LotEntity>(newLot));
@@ -141,42 +152,32 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
 
         public void DeleteLot(int lotId, string hostingEnvironmentPath, string requestUriLeftPart)
         {
-            Lot lot;
-            if ((lot = mapper.Map<Lot>(UoW.Lots.Get(lotId))) == null)
-                throw new ArgumentException("Lot id is incorrect");
+            Lot lot = GetLot(lotId);
+            //Don`t use cascade deleting, because photos must be deleted also
             lotPhotoOperationsHandler.DeleteAllLotPhotos(lot.Id, hostingEnvironmentPath, requestUriLeftPart);
-            //foreach (LotComment lotComment in lot.LotComments)
-            //    UoW.LotComments.Delete(lotComment.Id);
             UoW.Lots.Delete(lotId);
             UoW.SaveChanges();
         }
 
         public async Task DeleteLotAsync(int lotId, string hostingEnvironmentPath, string requestUriLeftPart)
         {
-            Lot lot;
-            if ((lot = mapper.Map<Lot>(await UoW.Lots.GetAsync(lotId))) == null)
-                throw new ArgumentException("Lot id is incorrect");
+            Lot lot = await GetLotAsync(lotId);
+            //Don`t use cascade deleting, because photos must be deleted also
             await lotPhotoOperationsHandler.DeleteAllLotPhotosAsync(lot.Id, hostingEnvironmentPath, requestUriLeftPart);
-            //foreach (LotComment lotComment in lot.LotComments)
-            //    UoW.LotComments.Delete(lotComment.Id);
             UoW.Lots.Delete(lotId);
             await UoW.SaveChangesAsync();
         }
 
         public Lot GetLot(int lotId)
         {
-            Lot lot;
-            if ((lot = mapper.Map<Lot>(UoW.Lots.Get(lotId))) == null)
-                throw new ArgumentException("Lot id is incorrect");
-            return lot;
+            LotEntity lot = UoW.Lots.Get(lotId) ?? throw new WrongIdException("Lot");
+            return mapper.Map<Lot>(lot);
         }
 
         public async Task<Lot> GetLotAsync(int lotId)
         {
-            Lot lot;
-            if ((lot = mapper.Map<Lot>(await UoW.Lots.GetAsync(lotId))) == null)
-                throw new ArgumentException("Lot id is incorrect");
-            return lot;
+            LotEntity lot = await UoW.Lots.GetAsync(lotId) ?? throw new WrongIdException("Lot");
+            return mapper.Map<Lot>(lot);
         }
 
         public IQueryable<Lot> GetAllLots()
@@ -208,13 +209,11 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
 
         public void PlaceBid(int lotId, string buyerUserId, double price)
         {
-            Lot lot;
-            if ((lot = GetLot(lotId)) == null)
-                throw new ArgumentException("Lot id is incorrect");
+            Lot lot = GetLot(lotId);
             if (lot.SellerUserId == buyerUserId)
-                throw new ArgumentException("Placing bids for own lots is not allowed");
+                throw new WrongModelException("Placing bids for own lots is not allowed");
             if (UoW.UserAccounts.Get(buyerUserId) == null)
-                throw new ArgumentException("User id is incorrect");
+                throw new WrongIdException("User");
             lot.PlaceBid(buyerUserId, price);
 
             //private ChangeLot, without checking Lot
@@ -223,13 +222,11 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
 
         public async Task PlaceBidAsync(int lotId, string buyerUserId, double price)
         {
-            Lot lot;
-            if ((lot = await GetLotAsync(lotId)) == null)
-                throw new ArgumentException("Lot id is incorrect");
+            Lot lot = await GetLotAsync(lotId);
             if (lot.SellerUserId == buyerUserId)
-                throw new ArgumentException("Placing bids for own lots is not allowed");
+                throw new WrongModelException("Placing bids for own lots is not allowed");
             if (await UoW.UserAccounts.GetAsync(buyerUserId) == null)
-                throw new ArgumentException("User id is incorrect");
+                throw new WrongIdException("User");
 
             lot.PlaceBid(buyerUserId, price);
 
@@ -237,34 +234,34 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             await ChangeLotUnsafeAsync(lot);
         }
 
-        public double GetLotPrice(int lotId)
-        {
-            return GetLot(lotId).Price;
-        }
-
-        public async Task<double> GetLotPriceAsync(int lotId)
-        {
-            return (await GetLotAsync(lotId)).Price;
-        }
-
-        public DateTime GetLotSellDate(int lotId)
-        {
-            return GetLot(lotId).SellDate;
-        }
-
-        public async Task<DateTime> GetLotSellDateAsync(int lotId)
-        {
-            return (await GetLotAsync(lotId)).SellDate;
-        }
-
-        public DateTime GetLotStartDate(int lotId)
-        {
-            return GetLot(lotId).StartDate;
-        }
-
-        public async Task<DateTime> GetLotStartDateAsync(int lotId)
-        {
-            return (await GetLotAsync(lotId)).StartDate;
-        }
+        //public double GetLotPrice(int lotId)
+        //{
+        //    return GetLot(lotId).Price;
+        //}
+        //
+        //public async Task<double> GetLotPriceAsync(int lotId)
+        //{
+        //    return (await GetLotAsync(lotId)).Price;
+        //}
+        //
+        //public DateTime GetLotSellDate(int lotId)
+        //{
+        //    return GetLot(lotId).SellDate;
+        //}
+        //
+        //public async Task<DateTime> GetLotSellDateAsync(int lotId)
+        //{
+        //    return (await GetLotAsync(lotId)).SellDate;
+        //}
+        //
+        //public DateTime GetLotStartDate(int lotId)
+        //{
+        //    return GetLot(lotId).StartDate;
+        //}
+        //
+        //public async Task<DateTime> GetLotStartDateAsync(int lotId)
+        //{
+        //    return (await GetLotAsync(lotId)).StartDate;
+        //}
     }
 }
