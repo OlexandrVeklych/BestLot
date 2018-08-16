@@ -120,14 +120,7 @@ namespace BestLot.WebAPI.Controllers
             }
         }
 
-        // POST api/<controller>
-        [Route("api/users")]
-        public IHttpActionResult PostUser([FromBody]UserAccountInfoModel value)
-        {
-            return BadRequest("Use registration to add user");
-        }
-
-        // PUT api/<controller>/5
+        // PUT api/<controller>/?email={email}
         [Route("api/users")]
         public async System.Threading.Tasks.Task<IHttpActionResult> PutUserAsync(string email, [FromBody]UserAccountInfoModel value)
         {

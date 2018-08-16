@@ -71,6 +71,11 @@ namespace BestLot.DataAccessLayer.UnitOfWork
             }
         }
 
+        public async Task SaveArchiveChangesAsync()
+        {
+            await LotArchiveContext.SaveChangesAsync();
+        }
+
         private bool disposed = false;
 
         protected virtual void Dispose(bool disposing)

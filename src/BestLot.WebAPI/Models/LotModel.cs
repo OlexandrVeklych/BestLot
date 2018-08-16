@@ -30,6 +30,9 @@ namespace BestLot.WebAPI.Models
         public double Price { get; set; }
 
         [Required]
+        public string Currency { get; set; }
+
+        [Required]
         public double MinStep { get; set; }
 
         public DateTime StartDate { get; set; }

@@ -49,9 +49,11 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         {
             if (!disposed)
             {
+                UoW.Dispose();
                 if (disposing)
                 {
-                    UoW.Dispose();
+                    mapper = null;
+                    UoW = null;
                 }
             }
             disposed = true;

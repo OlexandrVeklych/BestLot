@@ -45,10 +45,6 @@ namespace BestLot.WebAPI.Controllers
             {
                 return Content(HttpStatusCode.NotFound, ex.Message);
             }
-            catch (WrongModelException ex)
-            {
-                return BadRequest(ex.Message);
-            }
             catch (Exception ex)
             {
                 return InternalServerError(ex);
@@ -71,10 +67,6 @@ namespace BestLot.WebAPI.Controllers
             {
                 return Content(HttpStatusCode.NotFound, ex.Message);
             }
-            catch (WrongModelException ex)
-            {
-                return BadRequest(ex.Message);
-            }
             catch (Exception ex)
             {
                 return InternalServerError(ex);
@@ -83,13 +75,11 @@ namespace BestLot.WebAPI.Controllers
 
         // GET api/<controller>/5
         [Route("api/lots/{lotId}/comments/{commentNumber}")]
-        public async System.Threading.Tasks.Task<IHttpActionResult> GetLotCommentByNumberAsync(int lotId, int commentNumber)
+        public async System.Threading.Tasks.Task<IHttpActionResult> GetLotCommentByNumberAsync(int lotId, int lotCommentPosition)
         {
             try
             {
-                return Ok(mapper.Map<LotCommentModel>((await lotCommentsOperationsHandler
-                    .GetLotCommentsAsync(lotId))
-                    .ToList()[commentNumber]));
+                return Ok(await lotCommentsOperationsHandler.GetLotCommentByPositionAsync(lotId, lotCommentPosition));
             }
             catch (WrongIdException ex)
             {
@@ -97,7 +87,7 @@ namespace BestLot.WebAPI.Controllers
             }
             catch (WrongModelException ex)
             {
-                return BadRequest(ex.Message);
+                return Content(HttpStatusCode.NotFound, ex.Message);
             }
             catch (Exception ex)
             {
@@ -121,10 +111,6 @@ namespace BestLot.WebAPI.Controllers
             catch (WrongIdException ex)
             {
                 return Content(HttpStatusCode.NotFound, ex.Message);
-            }
-            catch (WrongModelException ex)
-            {
-                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {

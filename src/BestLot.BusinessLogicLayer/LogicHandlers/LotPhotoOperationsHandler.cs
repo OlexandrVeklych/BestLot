@@ -11,6 +11,7 @@ using BestLot.BusinessLogicLayer.Models;
 using BestLot.DataAccessLayer.Entities;
 using BestLot.DataAccessLayer.UnitOfWork;
 using BestLot.BusinessLogicLayer.Interfaces;
+using BestLot.BusinessLogicLayer.Exceptions;
 
 namespace BestLot.BusinessLogicLayer.LogicHandlers
 {
@@ -213,22 +214,22 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
                 });
         }
 
-        public LotPhoto GetLotPhotoByNumber(int lotId, int photoNumber)
+        public LotPhoto GetLotPhotoByPosition(int lotId, int photoPosition)
         {
             //This will throw exception if lotId is wrong
-            IQueryable<LotPhoto> lotPhotos = GetLotPhotos(lotId);
-            if (photoNumber >= lotPhotos.Count())
-                return null;
-            return lotPhotos.ToList()[photoNumber];
+            List<LotPhoto> lotPhotos = GetLotPhotos(lotId).ToList();
+            if (lotPhotos.Count() <= photoPosition)
+                throw new WrongModelException("No photo on that position");
+            return lotPhotos[photoPosition];
         }
 
-        public async Task<LotPhoto> GetLotPhotoByNumberAsync(int lotId, int photoNumber)
+        public async Task<LotPhoto> GetLotPhotoByPositionAsync(int lotId, int photoPosition)
         {
             //This will throw exception if lotId is wrong
-            IQueryable<LotPhoto> lotPhotos = await GetLotPhotosAsync(lotId);
-            if (photoNumber >= lotPhotos.Count())
-                return null;
-            return lotPhotos.ToList()[photoNumber];
+            List<LotPhoto> lotPhotos = (await GetLotPhotosAsync(lotId)).ToList();
+            if (lotPhotos.Count() <= photoPosition)
+                throw new WrongModelException("No photo on that position");
+            return lotPhotos[photoPosition];
         }
 
         public IQueryable<LotPhoto> GetLotPhotos(int lotId)
@@ -257,9 +258,12 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         {
             if (!disposed)
             {
+                UoW.Dispose();
                 if (disposing)
                 {
-                    UoW.Dispose();
+                    lotOperationsHandler = null;
+                    mapper = null;
+                    UoW = null;
                 }
             }
             disposed = true;

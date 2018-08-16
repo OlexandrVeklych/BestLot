@@ -19,6 +19,7 @@ namespace BestLot.DataAccessLayer.UnitOfWork
         void SaveChanges();
         Task SaveChangesAsync();
         void SaveArchiveChanges();
+        Task SaveArchiveChangesAsync();
 
         void RecreateDB();
         Task RecreateDBAsync();

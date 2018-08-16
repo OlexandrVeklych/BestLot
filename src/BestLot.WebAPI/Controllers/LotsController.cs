@@ -140,27 +140,13 @@ namespace BestLot.WebAPI.Controllers
         {
             try
             {
-                LotModel lot =  mapper.Map<LotModel>(await lotOperationsHandler.GetLotAsync(lotId));
-                UserAccountInfoModel buyerUser = null;
-                if (lot.BuyerUserId != null)
-                    buyerUser = mapper.Map<UserAccountInfoModel>(await userAccountOperationsHandler.GetUserAccountAsync(lot.BuyerUserId));
-                if (lot.BidPlacer == "Determined")
-                    return Ok(new { lot.Price, BuyerUser = buyerUser });
-                return Ok(new { lot.Price, lot.StartDate, lot.SellDate, BuyerUser = buyerUser });
-                //return Ok(new {
-                //    Price = lotOperationsHandler.GetLotPrice(lotId),
-                //    StartDate = lotOperationsHandler.GetLotStartDate(lotId),
-                //    SellDate = lotOperationsHandler.GetLotSellDate(lotId),
-                //    BuyerUser = userAccountOperationsHandler.GetBuyerUser(lotId)
-                //});
+                var (Price, StartDate, SellDate) = await lotOperationsHandler.GetBidInfoAsync(lotId);
+                UserAccountInfoModel BuyerUser = mapper.Map<UserAccountInfoModel>(await userAccountOperationsHandler.GetBuyerUserAsync(lotId));
+                return Ok(new { Price, StartDate, SellDate, BuyerUser });
             }
             catch (WrongIdException ex)
             {
                 return Content(HttpStatusCode.NotFound, ex.Message);
-            }
-            catch (WrongModelException ex)
-            {
-                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {

@@ -21,9 +21,7 @@ namespace BestLot.WebAPI.Controllers
         {
             mapper = new MapperConfiguration(cfg =>
             {
-                cfg.CreateMap<LotModel, Lot>();
                 cfg.CreateMap<Lot, LotModel>();
-                cfg.CreateMap<LotPhotoModel, LotPhoto>();
             }).CreateMapper();
             lotArchiveOperationsHandler = LogicDependencyResolver.ResolveLotArchiveOperationsHandler();
         }
@@ -40,6 +38,10 @@ namespace BestLot.WebAPI.Controllers
                     .OrderBy(lot => lot.Id)
                     .Skip((page - 1) * amount)
                     .Take(amount).AsEnumerable()));
+            }
+            catch (WrongIdException ex)
+            {
+                return Content(HttpStatusCode.NotFound, ex.Message);
             }
             catch (Exception ex)
             {

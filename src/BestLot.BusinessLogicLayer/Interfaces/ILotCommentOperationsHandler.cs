@@ -12,6 +12,8 @@ namespace BestLot.BusinessLogicLayer.Interfaces
     {
         void AddComment(LotComment lotComment);
         Task AddCommentAsync(LotComment lotComment);
+        LotComment GetLotCommentByPosition(int lotId, int lotCommentPosition);
+        Task<LotComment> GetLotCommentByPositionAsync(int lotId, int lotCommentPosition);
         IQueryable<LotComment> GetLotComments(int lotId);
         Task<IQueryable<LotComment>> GetLotCommentsAsync(int lotId);
         IQueryable<LotComment> GetUserComments(string userEmail);

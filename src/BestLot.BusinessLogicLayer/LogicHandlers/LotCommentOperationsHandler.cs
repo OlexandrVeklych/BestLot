@@ -75,6 +75,22 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             await lotOperationsHandler.ChangeLotUnsafeAsync(lot);
         }
 
+        public LotComment GetLotCommentByPosition(int lotId, int lotCommentPosition)
+        {
+            List<LotComment> lotComments = GetLotComments(lotId).ToList();
+            if (lotComments.Count() <= lotCommentPosition)
+                throw new WrongModelException("No comment on that position");
+            return lotComments[lotCommentPosition];
+        }
+
+        public async Task<LotComment> GetLotCommentByPositionAsync(int lotId, int lotCommentPosition)
+        {
+            List<LotComment> lotComments = (await GetLotCommentsAsync(lotId)).ToList();
+            if (lotComments.Count() <= lotCommentPosition)
+                throw new WrongModelException("No comment on that position");
+            return lotComments[lotCommentPosition];
+        }
+
         public IQueryable<LotComment> GetLotComments(int lotId)
         {
             Expression<Func<LotCommentEntity, bool>> predicate = null;
@@ -105,9 +121,15 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         {
             if (!disposed)
             {
+                UoW.Dispose();
+                lotOperationsHandler.Dispose();
+                userAccountOperationsHandler.Dispose();
                 if (disposing)
                 {
-                    UoW.Dispose();
+                    lotOperationsHandler = null;
+                    userAccountOperationsHandler = null;
+                    mapper = null;
+                    UoW = null;
                 }
             }
             disposed = true;

@@ -82,7 +82,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             {
                 if (LotId_SellDatePairs[key].CompareTo(DateTime.Now) <= 0)
                 {
-                    SellLot(key);
+                    SellLotAsync(key);
                     LotId_SellDatePairs.Remove(key);
                 }
             }
@@ -98,16 +98,16 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             }
         }
 
-        private void SellLot(int lotId)
+        private async Task SellLotAsync(int lotId)
         {
-            //Lot lotForSale = lotOperationsHandler.GetLot(lotId);
-            //lotForSale.SellerUser = userAccountOperationsHandler.GetSellerUser(lotId);
-            //UserAccountInfo buyerUser = mapper.Map<UserAccountInfo>(UoW.UserAccounts.Get(lotForSale.BuyerUserId));
+            //Lot lotForSale = await lotOperationsHandler.GetLotAsync(lotId);
+            //lotForSale.SellerUser = await userAccountOperationsHandler.GetSellerUserAsync(lotId);
+            //UserAccountInfo buyerUser = await userAccountOperationsHandler.GetBuyerUserAsync(lotId);
             //lotForSale.Sell(buyerUser);
 
-            UoW.LotArchive.Add(mapper.Map<LotArchiveEntity>(UoW.Lots.Get(lotId)));
-            lotOperationsHandler.DeleteLot(lotId, hostingEnvironment, requestUriLeftPart);
-            UoW.SaveArchiveChanges();
+            UoW.LotArchive.Add(mapper.Map<LotArchiveEntity>(await UoW.Lots.GetAsync(lotId)));
+            await lotOperationsHandler.DeleteLotAsync(lotId, hostingEnvironment, requestUriLeftPart);
+            await UoW.SaveArchiveChangesAsync();
         }
 
         private bool disposed = false;
@@ -116,9 +116,12 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         {
             if (!disposed)
             {
+                StopSalesHandler();
+                UoW.Dispose();
                 if (disposing)
                 {
-                    StopSalesHandler();
+                    mapper = null;
+                    UoW = null;
                 }
             }
             disposed = true;

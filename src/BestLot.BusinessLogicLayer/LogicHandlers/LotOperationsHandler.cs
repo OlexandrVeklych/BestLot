@@ -61,7 +61,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         //requestUriLeftPart - URL
         public void AddLot(Lot lot, string hostingEnvironmentPath, string requestUriLeftPart)
         {
-            if (lot.StartDate == null || lot.StartDate.CompareTo(DateTime.Now.AddSeconds(-1)) < 0)
+            if (lot.StartDate == null || lot.StartDate.CompareTo(DateTime.Now.AddSeconds(-10)) < 0)
                 throw new WrongModelException("Wrong start date");
             if (lot.StartDate.CompareTo(lot.SellDate) >= 0)
                 throw new WrongModelException("Wrong sell date");
@@ -78,7 +78,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         //requestUriLeftPart - URL
         public async Task AddLotAsync(Lot lot, string hostingEnvironmentPath, string requestUriLeftPart)
         {
-            if (lot.StartDate == null || lot.StartDate.CompareTo(DateTime.Now.AddSeconds(-1)) < 0)
+            if (lot.StartDate == null || lot.StartDate.CompareTo(DateTime.Now.AddSeconds(-10)) < 0)
                 throw new WrongModelException("Wrong start date");
             if (lot.StartDate.CompareTo(lot.SellDate) >= 0)
                 throw new WrongModelException("Wrong sell date");
@@ -101,12 +101,13 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             if (currentLot.Id != newLot.Id //Changed id
                 || currentLot.SellerUserId != newLot.SellerUserId//Changed seller user
                 || currentLot.BuyerUserId != newLot.BuyerUserId//Changed buyer user
+                || (newLot.StartDate.CompareTo(DateTime.Now.AddSeconds(-10)) < 0) //Start date before now
                 || (currentLot.BuyerUserId != null &&
                 (currentLot.Price != newLot.Price //Lot has buyer (at least 1 bid was placed) and Price changed
                 || currentLot.StartDate != newLot.StartDate //Lot has buyer (at least 1 bid was placed) and start date changed
                 || currentLot.SellDate != newLot.SellDate //Lot has buyer (at least 1 bid was placed) and sell date changed
-                || currentLot.MinStep != newLot.MinStep)) //Lot has buyer (at least 1 bid was placed) and step bid changed
-                || (newLot.StartDate.CompareTo(DateTime.Now.AddSeconds(-1)) < 0)) //Start date before now
+                || currentLot.Currency != newLot.Currency //Lot has buyer (at least 1 bid was placed) and currency changed
+                || currentLot.MinStep != newLot.MinStep))) //Lot has buyer (at least 1 bid was placed) and step bid changed
                 throw new WrongModelException("No permission to change these properties");
             UoW.Lots.Modify(newLot.Id, mapper.Map<LotEntity>(newLot));
             UoW.SaveChanges();
@@ -119,12 +120,13 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             if (currentLot.Id != newLot.Id //Changed id
                 || currentLot.SellerUserId != newLot.SellerUserId//Changed seller user
                 || currentLot.BuyerUserId != newLot.BuyerUserId//Changed buyer user
+                || (newLot.StartDate.CompareTo(DateTime.Now.AddSeconds(-10)) < 0) //Start date before now
                 || (currentLot.BuyerUserId != null &&
                 (currentLot.Price != newLot.Price //Lot has buyer (at least 1 bid was placed) and Price changed
                 || currentLot.StartDate != newLot.StartDate //Lot has buyer (at least 1 bid was placed) and start date changed
                 || currentLot.SellDate != newLot.SellDate //Lot has buyer (at least 1 bid was placed) and sell date changed
-                || currentLot.MinStep != newLot.MinStep)) //Lot has buyer (at least 1 bid was placed) and step bid changed
-                || (newLot.StartDate.CompareTo(DateTime.Now.AddSeconds(-1)) < 0)) //Start date before now
+                || currentLot.Currency != newLot.Currency //Lot has buyer (at least 1 bid was placed) and currency changed
+                || currentLot.MinStep != newLot.MinStep))) //Lot has buyer (at least 1 bid was placed) and step bid changed
                 throw new WrongModelException("No permission to change these properties");
             UoW.Lots.Modify(newLot.Id, mapper.Map<LotEntity>(newLot));
             await UoW.SaveChangesAsync();
@@ -232,54 +234,39 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             await ChangeLotUnsafeAsync(lot);
         }
 
-        private bool disposed = false;
-
-        protected virtual void Dispose(bool disposing)
+        public async Task<(double Price, DateTime StartDate, DateTime SellDate)> GetBidInfoAsync(int lotId)
         {
-            if (!disposed)
-            {
-                if (disposing)
-                {
-                    UoW.Dispose();
-                }
-            }
-            disposed = true;
+            Lot lot = await GetLotAsync(lotId);
+            return (lot.Price, lot.StartDate, lot.SellDate);
         }
+
+        public (double Price, DateTime StartDate, DateTime SellDate) GetBidInfo(int lotId)
+        {
+            Lot lot = GetLot(lotId);
+            return (lot.Price, lot.StartDate, lot.SellDate);
+        }
+
+        private bool disposed = false;
 
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
-
-        //public double GetLotPrice(int lotId)
-        //{
-        //    return GetLot(lotId).Price;
-        //}
-        //
-        //public async Task<double> GetLotPriceAsync(int lotId)
-        //{
-        //    return (await GetLotAsync(lotId)).Price;
-        //}
-        //
-        //public DateTime GetLotSellDate(int lotId)
-        //{
-        //    return GetLot(lotId).SellDate;
-        //}
-        //
-        //public async Task<DateTime> GetLotSellDateAsync(int lotId)
-        //{
-        //    return (await GetLotAsync(lotId)).SellDate;
-        //}
-        //
-        //public DateTime GetLotStartDate(int lotId)
-        //{
-        //    return GetLot(lotId).StartDate;
-        //}
-        //
-        //public async Task<DateTime> GetLotStartDateAsync(int lotId)
-        //{
-        //    return (await GetLotAsync(lotId)).StartDate;
-        //}
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                UoW.Dispose();
+                lotPhotoOperationsHandler.Dispose();
+                if (disposing)
+                {
+                    lotPhotoOperationsHandler = null;
+                    mapper = null;
+                    UoW = null;
+                }
+            }
+            disposed = true;
+        }
     }
 }

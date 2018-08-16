@@ -44,10 +44,6 @@ namespace BestLot.WebAPI.Controllers
             {
                 return Content(HttpStatusCode.NotFound, ex.Message);
             }
-            catch (WrongModelException ex)
-            {
-                return BadRequest(ex.Message);
-            }
             catch (Exception ex)
             {
                 return InternalServerError(ex);
@@ -61,7 +57,7 @@ namespace BestLot.WebAPI.Controllers
             try
             {
                 return Ok(mapper.Map<LotPhotoModel>(await lotPhotosOperationsHandler
-                    .GetLotPhotoByNumberAsync(lotId, photoNumber)));
+                    .GetLotPhotoByPositionAsync(lotId, photoNumber)));
             }
             catch (WrongIdException ex)
             {
@@ -69,7 +65,7 @@ namespace BestLot.WebAPI.Controllers
             }
             catch (WrongModelException ex)
             {
-                return BadRequest(ex.Message);
+                return Content(HttpStatusCode.NotFound, ex.Message);
             }
             catch (Exception ex)
             {
@@ -89,10 +85,6 @@ namespace BestLot.WebAPI.Controllers
             {
                 return Content(HttpStatusCode.NotFound, ex.Message);
             }
-            catch (WrongModelException ex)
-            {
-                return BadRequest(ex.Message);
-            }
             catch (Exception ex)
             {
                 return InternalServerError(ex);
@@ -110,10 +102,6 @@ namespace BestLot.WebAPI.Controllers
             catch (WrongIdException ex)
             {
                 return Content(HttpStatusCode.NotFound, ex.Message);
-            }
-            catch (WrongModelException ex)
-            {
-                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {

@@ -28,11 +28,7 @@ namespace BestLot.BusinessLogicLayer.Interfaces
         Task<IQueryable<Lot>> GetUserLotsAsync(string userEmail);
         void PlaceBid(int lotId, string buyerUserEmail, double price);
         Task PlaceBidAsync(int lotId, string buyerUserEmail, double price);
-        //double GetLotPrice(int lotId);
-        //Task<double> GetLotPriceAsync(int lotId);
-        //DateTime GetLotSellDate(int lotId);
-        //Task<DateTime> GetLotSellDateAsync(int lotId);
-        //DateTime GetLotStartDate(int lotId);
-        //Task<DateTime> GetLotStartDateAsync(int lotId);
+        Task<(double Price, DateTime StartDate, DateTime SellDate)> GetBidInfoAsync(int lotId);
+        (double Price, DateTime StartDate, DateTime SellDate) GetBidInfo(int lotId);
     }
 }

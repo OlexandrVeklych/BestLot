@@ -228,9 +228,15 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         {
             if (!disposed)
             {
+                UoW.Dispose();
+                lotOperationsHandler.Dispose();
+                lotPhotoOperationsHandler.Dispose();
                 if (disposing)
                 {
-                    UoW.Dispose();
+                    lotOperationsHandler = null;
+                    lotPhotoOperationsHandler = null;
+                    mapper = null;
+                    UoW = null;
                 }
             }
             disposed = true;

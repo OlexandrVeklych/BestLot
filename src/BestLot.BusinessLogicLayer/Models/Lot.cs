@@ -20,6 +20,7 @@ namespace BestLot.BusinessLogicLayer.Models
         public UserAccountInfo SellerUser { get; set; }
         public string BuyerUserId { get; set; }
         public double Price { get; set; }
+        public string Currency { get; set; }
         public double MinStep { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime SellDate { get; set; }

@@ -22,8 +22,8 @@ namespace BestLot.BusinessLogicLayer.Interfaces
         Task DeleteAllLotPhotosAsync(int lotId, string hostingEnvironmentPath, string requestUriLeftPart);
         void DeleteAllUserPhotos(string userAccountId, string hostingEnvironmentPath);
         Task DeleteAllUserPhotosAsync(string userAccountId, string hostingEnvironmentPath);
-        LotPhoto GetLotPhotoByNumber(int lotId, int photoNumber);
-        Task<LotPhoto> GetLotPhotoByNumberAsync(int lotId, int photoNumber);
+        LotPhoto GetLotPhotoByPosition(int lotId, int photoPosition);
+        Task<LotPhoto> GetLotPhotoByPositionAsync(int lotId, int photoPosition);
         IQueryable<LotPhoto> GetLotPhotos(int lotId);
         Task<IQueryable<LotPhoto>> GetLotPhotosAsync(int lotId);
     }
