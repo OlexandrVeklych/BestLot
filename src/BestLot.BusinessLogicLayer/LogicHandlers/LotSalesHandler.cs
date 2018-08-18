@@ -75,15 +75,18 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         //Checks sell dates in dictionary in memory
         private void CheckLots(object sender, ElapsedEventArgs e)
         {
-            if (!LotId_SellDatePairs.Any())
-                return;
-            List<int> keys = new List<int>(LotId_SellDatePairs.Keys);
-            foreach (int key in keys)
+            lock (LotId_SellDatePairs)
             {
-                if (LotId_SellDatePairs[key].CompareTo(DateTime.Now) <= 0)
+                List<int> keys = new List<int>(LotId_SellDatePairs.Keys);
+                if (!keys.Any())
+                    return;
+                foreach (int key in keys)
                 {
-                    SellLotAsync(key);
-                    LotId_SellDatePairs.Remove(key);
+                    if (LotId_SellDatePairs[key].CompareTo(DateTime.Now) <= 0)
+                    {
+                        SellLotAsync(key);
+                        LotId_SellDatePairs.Remove(key);
+                    }
                 }
             }
         }
@@ -91,10 +94,13 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         //Loads lots sell dates into dictionary
         private void RefreshLots(object sender, ElapsedEventArgs e)
         {
-            LotId_SellDatePairs.Clear();
-            foreach (Lot lot in lotOperationsHandler.GetAllLots())
+            lock (LotId_SellDatePairs)
             {
-                LotId_SellDatePairs.Add(lot.Id, lot.SellDate);
+                LotId_SellDatePairs.Clear();
+                foreach (Lot lot in lotOperationsHandler.GetAllLots())
+                {
+                    LotId_SellDatePairs.Add(lot.Id, lot.SellDate);
+                }
             }
         }
 
