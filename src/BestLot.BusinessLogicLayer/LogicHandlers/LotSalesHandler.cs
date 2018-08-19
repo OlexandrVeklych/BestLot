@@ -16,7 +16,14 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
     {
         //hostingEnvironmentPath - physical path to WebAPI folder
         //requestUriLeftPart - URL
-        private LotSalesHandler(double refreshTimeMillisecs, double checkTimeMillisecs, string hostingEnvironment, string requestUriLeftPart)
+        public LotSalesHandler(IUnitOfWork unitOfWork,
+            ILotOperationsHandler lotOperationsHandler,
+            IUserAccountOperationsHandler userAccountOperationsHandler,
+            double refreshTimeMillisecs,
+            double checkTimeMillisecs,
+            string hostingEnvironment,
+            string requestUriLeftPart,
+            bool sendEmail = true)
         {
             mapper = new MapperConfiguration(cfg =>
             {
@@ -31,20 +38,10 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             checkTimer.Elapsed += CheckLots;
             this.hostingEnvironment = hostingEnvironment;
             this.requestUriLeftPart = requestUriLeftPart;
-        }
-
-        public LotSalesHandler(IUnitOfWork unitOfWork,
-            ILotOperationsHandler lotOperationsHandler,
-            IUserAccountOperationsHandler userAccountOperationsHandler,
-            double refreshTimeMillisecs,
-            double checkTimeMillisecs,
-            string hostingEnvironment,
-            string requestUriLeftPart)
-            : this(refreshTimeMillisecs, checkTimeMillisecs, hostingEnvironment, requestUriLeftPart)
-        {
             this.UoW = unitOfWork;
             this.lotOperationsHandler = lotOperationsHandler;
             this.userAccountOperationsHandler = userAccountOperationsHandler;
+            this.sendEmail = sendEmail;
         }
 
 
@@ -57,6 +54,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         private readonly string hostingEnvironment;
         private readonly string requestUriLeftPart;
         public Dictionary<int, DateTime> LotId_SellDatePairs { get; private set; }
+        private bool sendEmail;
 
         public void StopSalesHandler()
         {
@@ -106,14 +104,17 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
 
         private async Task SellLotAsync(int lotId)
         {
-            //Lot lotForSale = await lotOperationsHandler.GetLotAsync(lotId);
-            //lotForSale.SellerUser = await userAccountOperationsHandler.GetSellerUserAsync(lotId);
-            //UserAccountInfo buyerUser = await userAccountOperationsHandler.GetBuyerUserAsync(lotId);
-            //lotForSale.Sell(buyerUser);
+            if (sendEmail)
+            {
+                Lot lotForSale = await lotOperationsHandler.GetLotAsync(lotId);
+                lotForSale.SellerUser = await userAccountOperationsHandler.GetSellerUserAsync(lotId);
+                UserAccountInfo buyerUser = await userAccountOperationsHandler.GetBuyerUserAsync(lotId);
+                lotForSale.Sell(buyerUser);
+            }
 
             UoW.LotArchive.Add(mapper.Map<LotArchiveEntity>(await UoW.Lots.GetAsync(lotId)));
-            await lotOperationsHandler.DeleteLotAsync(lotId, hostingEnvironment, requestUriLeftPart);
             await UoW.SaveArchiveChangesAsync();
+            await lotOperationsHandler.DeleteLotAsync(lotId, hostingEnvironment, requestUriLeftPart);
         }
 
         private bool disposed = false;

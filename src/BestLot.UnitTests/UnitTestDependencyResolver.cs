@@ -18,7 +18,8 @@ namespace BestLot.UnitTests
 
         public static ILotSalesHandler ResolveLotSalesHandler(IUnitOfWork unitOfWork, double refreshTimeMillisecs, double checkTimeMillisecs, string hostingEnvironment, string requestUriLeftPart)
         {
-            return new LotSalesHandler(unitOfWork, ResolveLotOperationsHandler(unitOfWork), ResolveUserAccountOperationsHandler(unitOfWork), refreshTimeMillisecs, checkTimeMillisecs, hostingEnvironment, requestUriLeftPart);
+            //false - don to sell emails when lot is sold
+            return new LotSalesHandler(unitOfWork, ResolveLotOperationsHandler(unitOfWork), ResolveUserAccountOperationsHandler(unitOfWork), refreshTimeMillisecs, checkTimeMillisecs, hostingEnvironment, requestUriLeftPart, false);
         }
 
         public static ILotOperationsHandler ResolveLotOperationsHandler(IUnitOfWork unitOfWork)

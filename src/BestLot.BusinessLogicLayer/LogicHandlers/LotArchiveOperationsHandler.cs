@@ -15,16 +15,12 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
 {
     public class LotArchiveOperationsHandler : ILotArchiveOperationsHandler
     {
-        private LotArchiveOperationsHandler()
+        public LotArchiveOperationsHandler(IUnitOfWork unitOfWork)
         {
             mapper = new MapperConfiguration(cfg =>
             {
                 cfg.CreateMap<LotArchiveEntity, Lot>();
             }).CreateMapper();
-        }
-
-        public LotArchiveOperationsHandler(IUnitOfWork unitOfWork) : this()
-        {
             this.UoW = unitOfWork;
         }
 

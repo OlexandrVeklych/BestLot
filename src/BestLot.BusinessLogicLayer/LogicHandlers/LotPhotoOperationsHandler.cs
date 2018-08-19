@@ -17,7 +17,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
 {
     public class LotPhotoOperationsHandler : ILotPhotoOperationsHandler
     {
-        private LotPhotoOperationsHandler()
+        public LotPhotoOperationsHandler(IUnitOfWork unitOfWork, ILotOperationsHandler lotOperationsHandler)
         {
             mapper = new MapperConfiguration(cfg =>
             {
@@ -32,10 +32,6 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
 
                 cfg.CreateMap<LotPhoto, LotPhotoEntity>();
             }).CreateMapper();
-        }
-
-        public LotPhotoOperationsHandler(IUnitOfWork unitOfWork, ILotOperationsHandler lotOperationsHandler) : this()
-        {
             this.UoW = unitOfWork;
             this.lotOperationsHandler = lotOperationsHandler;
         }

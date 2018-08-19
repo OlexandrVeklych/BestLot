@@ -15,6 +15,8 @@ namespace BestLot.BusinessLogicLayer.BidLogic
         {
             if (price < lot.Price + lot.MinStep)
                 throw new WrongModelException("Min. availible bid is " + (lot.Price + lot.MinStep));
+            if (lot.SellDate.CompareTo(DateTime.Now) < 0)
+                throw new WrongModelException("Lot is already sold");
             lot.Price = price;
             lot.BuyerUserId = buyerUserId;
         }
