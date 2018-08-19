@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BestLot.BusinessLogicLayer.BidLogic
 {
-    public interface IBidPlacer
+    internal interface IBidPlacer
     {
         void PlaceBid(Lot lot, string buyerUserId, double price);
     }

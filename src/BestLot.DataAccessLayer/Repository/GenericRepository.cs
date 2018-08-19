@@ -8,7 +8,7 @@ using System.Linq.Expressions;
 
 namespace BestLot.DataAccessLayer.Repository
 {
-    public class GenericRepository<T> : IRepository<T> where T : class
+    internal class GenericRepository<T> : IRepository<T> where T : class
     {
         private DbContext Context;
         private DbSet<T> DbSet;

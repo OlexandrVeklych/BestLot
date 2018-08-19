@@ -13,13 +13,16 @@ namespace BestLot.WebAPI.Models
 
         [Required]
         [DataType(DataType.Text)]
+        [MaxLength(30)]
         public string Name { get; set; }
 
         [DataType(DataType.Text)]
+        [MaxLength(150)]
         public string Description { get; set; }
 
         [Required]
         [DataType(DataType.Text)]
+        [MaxLength(30)]
         public string Category { get; set; }
 
         public string SellerUserId { get; set; }
@@ -27,14 +30,19 @@ namespace BestLot.WebAPI.Models
         public string BuyerUserId { get; set; }
 
         [Required]
+        [Range(0, Int32.MaxValue)]
         public double Price { get; set; }
 
         [Required]
+        [DataType(DataType.Currency)]
         public string Currency { get; set; }
 
         [Required]
+        [Range(0, Int32.MaxValue)]
         public double MinStep { get; set; }
 
+        [Required]
+        [DataType(DataType.DateTime)]
         public DateTime StartDate { get; set; }
 
         [Required]
@@ -45,6 +53,7 @@ namespace BestLot.WebAPI.Models
         public List<LotCommentModel> LotComments { get; set; }
 
         [Required]
+        [BidPlacer("Relative", "Determined", "Wrong bidplacer")]
         public string BidPlacer { get; set; }
     }
 }

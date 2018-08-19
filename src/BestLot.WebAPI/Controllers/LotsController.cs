@@ -60,6 +60,7 @@ namespace BestLot.WebAPI.Controllers
             }
         }
 
+        // GET
         [AllowAnonymous]
         [Route("api/users/{email}/lots")]
         public async System.Threading.Tasks.Task<IHttpActionResult> GetUserLotsAsync(string email, int page, int amount, string name = null, string category = null, double minPrice = 0, double maxPrice = 0)
@@ -110,11 +111,11 @@ namespace BestLot.WebAPI.Controllers
             }
         }
 
+        // POST
+        [Authorize(Roles = "User")]
         [Route("api/lots/{lotId}/bid")]
         public async System.Threading.Tasks.Task<IHttpActionResult> PostBidAsync([FromUri]int lotId, [FromBody]double value)
         {
-            if (!User.IsInRole("User"))
-                return BadRequest("Sorry, admins and moderators can`t place bids");
             try
             {
                 await lotOperationsHandler.PlaceBidAsync(lotId, User.Identity.Name, value);
@@ -134,6 +135,7 @@ namespace BestLot.WebAPI.Controllers
             }
         }
 
+        // GET
         [AllowAnonymous]
         [Route("api/lots/{lotId}/bid")]
         public async System.Threading.Tasks.Task<IHttpActionResult> GetBidInfoAsync([FromUri]int lotId)
@@ -179,7 +181,7 @@ namespace BestLot.WebAPI.Controllers
             return Ok();
         }
 
-        // PUT api/<controller>/5
+        // PUT api/<controller>/{id}
         public async System.Threading.Tasks.Task<IHttpActionResult> PutLotAsync(int id, [FromBody]LotModel value)
         {
             if (!ModelState.IsValid)
@@ -205,7 +207,7 @@ namespace BestLot.WebAPI.Controllers
             return Ok();
         }
 
-        // DELETE api/<controller>/5
+        // DELETE api/<controller>/{id}
         public async System.Threading.Tasks.Task<IHttpActionResult> DeleteLotAsync(int id)
         {
             if (lotOperationsHandler.GetLot(id).SellerUserId != User.Identity.Name && !User.IsInRole("Admin"))

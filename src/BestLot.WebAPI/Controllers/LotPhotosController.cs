@@ -30,7 +30,7 @@ namespace BestLot.WebAPI.Controllers
         private ILotPhotoOperationsHandler lotPhotosOperationsHandler;
         private readonly IMapper mapper;
 
-        // GET api/<controller>
+        // GET
         [Route("api/lots/{lotId}/photos")]
         public async System.Threading.Tasks.Task<IHttpActionResult> GetLotPhotosAsync(int lotId)
         {
@@ -50,7 +50,7 @@ namespace BestLot.WebAPI.Controllers
             }
         }
 
-        // GET api/<controller>/5
+        // GET
         [Route("api/lots/{lotId}/photos/{photoNumber}")]
         public async System.Threading.Tasks.Task<IHttpActionResult> GetLotPhotoByNumberAsync(int lotId, int photoNumber)
         {
@@ -73,10 +73,12 @@ namespace BestLot.WebAPI.Controllers
             }
         }
 
-        // POST api/<controller>
+        // POST
         [Route("api/lots/{lotId}/photos")]
         public async System.Threading.Tasks.Task<IHttpActionResult> PostLotPhotoAsync([FromUri] int lotId, [FromBody]LotPhotoModel[] value)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
             try
             {
                 await lotPhotosOperationsHandler.AddPhotosToExistingLotAsync(lotId, mapper.Map<LotPhoto[]>(value), System.Web.Hosting.HostingEnvironment.MapPath(@"~"), Request.RequestUri.GetLeftPart(UriPartial.Authority));
@@ -84,6 +86,10 @@ namespace BestLot.WebAPI.Controllers
             catch (WrongIdException ex)
             {
                 return Content(HttpStatusCode.NotFound, ex.Message);
+            }
+            catch (WrongModelException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {

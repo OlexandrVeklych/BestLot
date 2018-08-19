@@ -29,7 +29,7 @@ namespace BestLot.WebAPI.Controllers
         private readonly ILotCommentOperationsHandler lotCommentsOperationsHandler;
         private readonly IMapper mapper;
 
-        // GET api/<controller>
+        // GET
         [Route("api/lots/{lotId}/comments")]
         public async System.Threading.Tasks.Task<IHttpActionResult> GetLotCommentsAsync(int lotId, int page, int amount)
         {
@@ -51,6 +51,7 @@ namespace BestLot.WebAPI.Controllers
             }
         }
 
+        // GET
         [Authorize(Roles = "Admin")]
         [Route("api/users/{email}/comments")]
         public async System.Threading.Tasks.Task<IHttpActionResult> GetUserCommentsAsync(string email, int page, int amount)
@@ -73,7 +74,7 @@ namespace BestLot.WebAPI.Controllers
             }
         }
 
-        // GET api/<controller>/5
+        // GET
         [Route("api/lots/{lotId}/comments/{commentNumber}")]
         public async System.Threading.Tasks.Task<IHttpActionResult> GetLotCommentByNumberAsync(int lotId, int lotCommentPosition)
         {
@@ -95,8 +96,8 @@ namespace BestLot.WebAPI.Controllers
             }
         }
 
+        // POST
         [Authorize]
-        // POST api/<controller>
         [Route("api/lots/{lotId}/comments")]
         public async System.Threading.Tasks.Task<IHttpActionResult> PostLotCommentAsync([FromUri]int lotId, [FromBody]LotCommentModel value)
         {

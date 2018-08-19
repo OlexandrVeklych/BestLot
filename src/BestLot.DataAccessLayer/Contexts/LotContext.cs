@@ -8,7 +8,7 @@ using BestLot.DataAccessLayer.Entities;
 
 namespace BestLot.DataAccessLayer.Contexts
 {
-    public class LotContext : DbContext
+    internal class LotContext : DbContext
     {
         public LotContext(string connectionString) : base(connectionString)
         {
@@ -54,7 +54,7 @@ namespace BestLot.DataAccessLayer.Contexts
         }
     }
 
-    public class LotContextInitializer : CreateDatabaseIfNotExists<LotContext>
+    internal class LotContextInitializer : CreateDatabaseIfNotExists<LotContext>
     {
         protected override void Seed(LotContext context)
         {

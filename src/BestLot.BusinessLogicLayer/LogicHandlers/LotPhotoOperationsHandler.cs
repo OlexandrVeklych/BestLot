@@ -62,6 +62,8 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         {
             Lot lot = lotOperationsHandler.GetLot(lotId);
             lot.LotPhotos = GetLotPhotos(lotId).ToList();
+            if (lot.LotPhotos.Count() + lotPhotos.Count() > 10)
+                throw new WrongModelException("Maximum 10 photos per lot, currently this lot has " + lot.LotPhotos.Count());
             string currentDirectory = hostingEnvironmentPath + "\\Photos\\" + lot.SellerUserId;
             if (!Directory.Exists(currentDirectory))
                 Directory.CreateDirectory(currentDirectory);
@@ -85,6 +87,8 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
         {
             Lot lot = LotOperationsHandler.GetLot(lotId);
             lot.LotPhotos = (await GetLotPhotosAsync(lotId)).ToList();
+            if (lot.LotPhotos.Count() + lotPhotos.Count() > 10)
+                throw new WrongModelException("Maximum 10 photos per lot, currently this lot has " + lot.LotPhotos.Count());
             string currentDirectory = hostingEnvironmentPath + "\\Photos\\" + lot.SellerUserId;
             if (!Directory.Exists(currentDirectory))
                 Directory.CreateDirectory(currentDirectory);

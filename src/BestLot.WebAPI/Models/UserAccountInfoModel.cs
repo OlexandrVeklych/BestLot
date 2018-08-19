@@ -15,9 +15,11 @@ namespace BestLot.WebAPI.Models
 
         [Required]
         [DataType(DataType.Text)]
+        [MaxLength(20)]
         public string Name { get; set; }
 
         [DataType(DataType.Text)]
+        [MaxLength(20)]
         public string Surname { get; set; }
 
         [Required]

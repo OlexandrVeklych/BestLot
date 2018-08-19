@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace BestLot.BusinessLogicLayer.BidLogic
 {
     //For lots that need to be sold at certain time, not depending on bids
-    class DeterminedSellDateBidPlacer : IBidPlacer
+    internal class DeterminedSellDateBidPlacer : IBidPlacer
     {
         public void PlaceBid(Lot lot, string buyerUserId, double price)
         {

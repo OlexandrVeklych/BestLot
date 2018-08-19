@@ -13,10 +13,11 @@ namespace BestLot.WebAPI.Models
 
         [Required]
         [DataType(DataType.MultilineText)]
+        [MaxLength(250)]
         public string Message { get; set; }
-
         public string UserId { get; set; }
         public UserAccountInfoModel User { get; set; }
+        [Range(1, 10)]
         public int Rating { get; set; }
         public int LotId { get; set; }
         public LotModel Lot { get; set; }

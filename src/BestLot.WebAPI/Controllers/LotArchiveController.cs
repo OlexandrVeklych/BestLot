@@ -29,6 +29,7 @@ namespace BestLot.WebAPI.Controllers
         private readonly ILotArchiveOperationsHandler lotArchiveOperationsHandler;
         private readonly IMapper mapper;
 
+        // GET
         [Route("api/users/{email}/archivedlots")]
         public async System.Threading.Tasks.Task<IHttpActionResult> GetUserLotsAsync(string email, int page, int amount)
         {

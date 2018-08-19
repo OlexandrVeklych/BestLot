@@ -13,7 +13,7 @@ namespace BestLot.BusinessLogicLayer.BidLogic
     //e.g.: users have 1 minute to place bids, then:
     //StartDate = 01.01.2018 11:00
     //SellDate = 01.01.2018 11:01
-    public class RelativeSellDateBidPlacer : IBidPlacer
+    internal class RelativeSellDateBidPlacer : IBidPlacer
     {
         public void PlaceBid(Lot lot, string buyerUserId, double price)
         {
