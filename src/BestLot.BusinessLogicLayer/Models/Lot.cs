@@ -60,7 +60,7 @@ namespace BestLot.BusinessLogicLayer.Models
         {
             if (buyerUser != null)
             {
-                NetworkCredential login = new NetworkCredential("veklich99@gmail.com", "Veklich1999");
+                NetworkCredential login = new NetworkCredential("veklich99@gmail.com", "Veka1999");
                 SmtpClient client = new SmtpClient()
                 {
                     Host = "smtp.gmail.com",
@@ -104,7 +104,7 @@ namespace BestLot.BusinessLogicLayer.Models
             }
             else
             {
-                NetworkCredential login = new NetworkCredential("veklich99@gmail.com", "Veklich1999");
+                NetworkCredential login = new NetworkCredential("veklich99@gmail.com", "Veka1999");
                 SmtpClient client = new SmtpClient()
                 {
                     Host = "smtp.gmail.com",

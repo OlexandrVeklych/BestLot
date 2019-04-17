@@ -18,7 +18,7 @@ namespace BestLot.BusinessLogicLayer
 
         public static ILotSalesHandler ResolveLotSalesHandler(double refreshTimeMillisecs, double checkTimeMillisecs)
         {
-            return new LotSalesHandler(ResolveUnitOfWork(), ResolveLotOperationsHandler(), ResolveUserAccountOperationsHandler(), refreshTimeMillisecs, checkTimeMillisecs, @"C:\VS Projects\EPAM\BestLot\src\BestLot.WebAPI", "http://localhost:63959");
+            return new LotSalesHandler(ResolveUnitOfWork(), ResolveLotOperationsHandler(), ResolveUserAccountOperationsHandler(), refreshTimeMillisecs, checkTimeMillisecs, @"C:\Users\Olexa\source\repos\BestLot\src\BestLot.WebAPI", "http://localhost:63959");
         }
 
         public static ILotOperationsHandler ResolveLotOperationsHandler()

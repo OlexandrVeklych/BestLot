@@ -112,7 +112,7 @@ namespace BestLot.WebAPI.Controllers
         }
 
         // POST
-        [Authorize(Roles = "User")]
+        [Authorize]
         [Route("api/lots/{lotId}/bid")]
         public async System.Threading.Tasks.Task<IHttpActionResult> PostBidAsync([FromUri]int lotId, [FromBody]double value)
         {
@@ -224,6 +224,15 @@ namespace BestLot.WebAPI.Controllers
             {
                 return InternalServerError(ex);
             }
+            return Ok();
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("api/RefreshDBs")]
+        public IHttpActionResult RefreshDBs()
+        {
+            lotOperationsHandler.RefreshDBs();
             return Ok();
         }
 

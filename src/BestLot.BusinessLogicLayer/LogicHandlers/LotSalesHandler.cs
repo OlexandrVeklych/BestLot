@@ -82,7 +82,7 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
                 {
                     if (LotId_SellDatePairs[key].CompareTo(DateTime.Now) <= 0)
                     {
-                        SellLotAsync(key);
+                        SellLotAsync(key).Wait();
                         LotId_SellDatePairs.Remove(key);
                     }
                 }

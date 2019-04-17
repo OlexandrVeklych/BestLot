@@ -242,6 +242,12 @@ namespace BestLot.BusinessLogicLayer.LogicHandlers
             return (lot.Price, lot.StartDate, lot.SellDate);
         }
 
+        public void RefreshDBs()
+        {
+            UoW.RecreateDB();
+            UoW.RecreateArchive();
+        }
+
         private bool disposed = false;
 
         public void Dispose()

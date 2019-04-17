@@ -30,5 +30,6 @@ namespace BestLot.BusinessLogicLayer.Interfaces
         Task PlaceBidAsync(int lotId, string buyerUserEmail, double price);
         Task<(double Price, DateTime StartDate, DateTime SellDate)> GetBidInfoAsync(int lotId);
         (double Price, DateTime StartDate, DateTime SellDate) GetBidInfo(int lotId);
+        void RefreshDBs();
     }
 }
